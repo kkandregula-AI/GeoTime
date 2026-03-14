@@ -148,6 +148,35 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 }
 .yr-stamp.cyan-border { border-left-color:var(--cyan); }
 
+/* proxy button in bottom bar */
+#settingsBtn {
+  background: transparent;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+}
+#settingsBtn:hover { background: rgba(240,165,0,.12); }
+#settingsBtn.active { border-color: var(--green); color: var(--green); }
+
+/* proxy status strip between controls and timeline */
+#proxyStrip {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--dim);
+  padding: 4px 0 2px;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  cursor: pointer;
+}
+#proxyStrip:hover { color: var(--text); }
+#proxyStrip.ok { color: var(--green); }
+
 /* proxy setup panel */
 #proxyPanel {
   display:none;position:fixed;inset:0;z-index:9999;
@@ -216,7 +245,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <button class="mb on" data-m="split">SPLIT</button>
         <button class="mb" data-m="swipe">SWIPE</button>
         <button class="mb" data-m="anim">ANIM</button>
-        <button class="mb" id="settingsBtn" title="Configure proxy for real historical tiles">⚙ PROXY</button>
       </div>
     </div>
     <div class="hr2">
@@ -228,35 +256,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 
   <div id="toast">No proxy configured — click ⚙ PROXY to unlock real historical imagery.</div>
-
-  <!-- PROXY SETUP PANEL -->
-  <div id="proxyPanel">
-    <div class="proxy-box">
-      <div class="proxy-title">⚙ HISTORICAL TILE PROXY</div>
-      <div class="proxy-sub">
-        Paste your <strong>Cloudflare Worker URL</strong> to unlock real ESRI Wayback<br>
-        historical satellite imagery (2014–2024).<br>
-        Without it, both maps show current Google imagery.
-      </div>
-      <div class="proxy-input-row">
-        <input id="proxyInput" type="url" placeholder="https://geotime-tiles.yourname.workers.dev"/>
-        <button id="proxySave">SAVE</button>
-      </div>
-      <div id="proxyStatus"></div>
-      <div class="proxy-note">
-        <strong>Deploy worker in 2 minutes:</strong><br>
-        1. Download <strong>wayback-worker.js</strong> (provided alongside this file)<br>
-        2. Go to <strong>dash.cloudflare.com → Workers &amp; Pages → Create</strong><br>
-        3. Paste the worker code → Deploy<br>
-        4. Copy the <strong>.workers.dev</strong> URL and paste above<br>
-        Free tier: <strong>100,000 requests/day</strong> — sufficient for personal use
-      </div>
-      <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
-        <span class="proxy-close" id="proxyClose">Close</span>
-        <span id="proxyCurrentStatus" style="font-family:var(--mono);font-size:10px;color:var(--dim)"></span>
-      </div>
-    </div>
-  </div>
 
   <!-- VIEWS -->
   <div id="views">
@@ -321,7 +320,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <option value="600">2×</option>
           <option value="300">4×</option>
         </select>
+        <button id="settingsBtn">⚙ PROXY</button>
       </div>
+    </div>
+    <div id="proxyStrip">
+      <span id="proxyStripTxt">⚠ No proxy — click ⚙ PROXY to enable real historical imagery</span>
     </div>
     <div class="tl">
       <div class="tks" id="tks"></div>
@@ -331,7 +334,32 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
 </div><!-- #app -->
 
-<script>
+<!-- PROXY PANEL — outside #app so fixed positioning works correctly -->
+<div id="proxyPanel">
+  <div class="proxy-box">
+    <div class="proxy-title">⚙ HISTORICAL TILE PROXY</div>
+    <div class="proxy-sub">
+      Paste your <strong>Cloudflare Worker URL</strong> to unlock real ESRI Wayback
+      historical satellite imagery (2014–2024).
+    </div>
+    <div class="proxy-input-row">
+      <input id="proxyInput" type="url" placeholder="https://geotime-tiles.yourname.workers.dev"/>
+      <button id="proxySave">SAVE</button>
+    </div>
+    <div id="proxyStatus"></div>
+    <div class="proxy-note">
+      <strong>Deploy worker in 2 min:</strong><br>
+      1. dash.cloudflare.com → Workers &amp; Pages → Create Worker<br>
+      2. Click <strong>Edit code</strong> → paste <strong>wayback-worker.js</strong> → Deploy<br>
+      3. Copy the <strong>.workers.dev</strong> URL → paste above → Save<br>
+      Free tier: <strong>100,000 requests/day</strong>
+    </div>
+    <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
+      <span class="proxy-close" id="proxyClose">✕ Close</span>
+      <span id="proxyCurrentStatus" style="font-family:var(--mono);font-size:10px;color:var(--dim)"></span>
+    </div>
+  </div>
+</div>
 // ════════════════════════════════════════════════════════════════════
 //  TILE STRATEGY
 //
@@ -473,29 +501,37 @@ setTimeout(() => {
 
 // ── Proxy panel ───────────────────────────────────────────────────────────────
 
-function updateProxyStatus() {
-  const btn = document.getElementById('settingsBtn');
-  const cur = document.getElementById('proxyCurrentStatus');
-  if (PROXY_BASE) {
-    btn.style.borderColor = 'var(--green)';
-    btn.style.color = 'var(--green)';
-    if (cur) cur.textContent = '✓ Proxy active: ' + PROXY_BASE.replace('https://','').split('/')[0];
-  } else {
-    btn.style.borderColor = '';
-    btn.style.color = '';
-    if (cur) cur.textContent = 'No proxy — showing current imagery only';
-  }
-}
-
-document.getElementById('settingsBtn').onclick = () => {
+function openProxyPanel() {
   document.getElementById('proxyInput').value = PROXY_BASE || '';
   document.getElementById('proxyStatus').textContent = '';
   document.getElementById('proxyPanel').classList.add('show');
-  updateProxyStatus();
-};
-document.getElementById('proxyClose').onclick = () => {
-  document.getElementById('proxyPanel').classList.remove('show');
-};
+}
+
+function updateProxyStatus() {
+  const btn   = document.getElementById('settingsBtn');
+  const strip = document.getElementById('proxyStrip');
+  const txt   = document.getElementById('proxyStripTxt');
+  const cur   = document.getElementById('proxyCurrentStatus');
+
+  if (PROXY_BASE) {
+    const domain = PROXY_BASE.replace('https://','').split('/')[0];
+    btn.classList.add('active');
+    btn.textContent = '✓ PROXY';
+    strip.classList.add('ok');
+    if (txt) txt.textContent = `✓ Proxy active: ${domain} — real historical imagery enabled`;
+    if (cur) cur.textContent = `Connected: ${domain}`;
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '⚙ PROXY';
+    strip.classList.remove('ok');
+    if (txt) txt.textContent = '⚠ No proxy — click ⚙ PROXY above to enable real historical imagery';
+    if (cur) cur.textContent = 'No proxy configured';
+  }
+}
+
+document.getElementById('settingsBtn').onclick = openProxyPanel;
+document.getElementById('proxyStrip').onclick   = openProxyPanel;
+document.getElementById('proxyClose').onclick   = () => document.getElementById('proxyPanel').classList.remove('show');
 
 document.getElementById('proxySave').onclick = async () => {
   const val = document.getElementById('proxyInput').value.trim().replace(/\/$/, '');
