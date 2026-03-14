@@ -16,10 +16,10 @@
   --mono:'Share Tech Mono',monospace;--sans:'Barlow Condensed',sans-serif;
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
-#app{display:flex;flex-direction:column;height:100vh}
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 
 /* HEADER */
-#hdr{background:var(--panel);border-bottom:2px solid var(--border);flex-shrink:0;z-index:100;position:relative}
+#hdr{background:var(--panel);border-bottom:2px solid var(--border);flex-shrink:0;z-index:10;position:relative}
 .hr1{display:flex;align-items:center;gap:8px;padding:8px 10px}
 .logo-ring{width:26px;height:26px;flex-shrink:0;border:2px solid var(--amber);border-radius:50%;
   display:flex;align-items:center;justify-content:center;animation:pulse 3s infinite}
@@ -184,22 +184,19 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <button id="sb">LOCATE</button>
     </div>
   </div>
-  <!-- search dropdown OUTSIDE header so z-index isn't clipped by parent stacking context -->
-  <div id="sd"></div>
-
   <!-- VIEWS -->
   <div id="views">
     <!-- SPLIT -->
     <div class="vp on" id="vSplit">
       <div class="half">
         <div class="hlabel L" id="lblL">BEFORE · 2014</div>
-        <div id="mL" class="mbox"></div>
+        <div id="mL" style="position:absolute;inset:0;"></div>
         <div class="yr-stamp cy" id="stL">2014</div>
       </div>
       <div class="divbar"></div>
       <div class="half">
         <div class="hlabel R" id="lblR">AFTER · 2024</div>
-        <div id="mR" class="mbox"></div>
+        <div id="mR" style="position:absolute;inset:0;"></div>
         <div class="yr-stamp" id="stR">2024</div>
       </div>
     </div>
@@ -252,7 +249,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
-<!-- PROXY MODAL — outside #app, never clipped -->
+<!-- SEARCH DROPDOWN — direct body child, never clipped -->
+<div id="sd"></div>
+
+<!-- PROXY MODAL — direct body child, never clipped -->
 <div id="proxyModal">
   <div class="pbox">
     <div class="ptitle">⚙ CONNECT HISTORICAL TILE PROXY</div>
@@ -356,14 +356,14 @@ ALL.forEach((src,si) => {
 
 window.addEventListener('resize', () => ALL.forEach(m => m.invalidateSize()));
 
-// Force full re-render after DOM settles — fixes blank right map on split view
-setTimeout(() => {
+function fullInit() {
   ALL.forEach(m => { m.invalidateSize(); m.setView(center, zoom); });
   initSwipe();
-}, 100);
-setTimeout(() => {
-  ALL.forEach(m => { m.invalidateSize(); m.setView(center, zoom); });
-}, 600);
+}
+// Three passes: rAF, 300ms, 800ms — guarantees flex layout is measured
+requestAnimationFrame(() => { fullInit(); });
+setTimeout(fullInit, 300);
+setTimeout(fullInit, 800);
 
 // ─── YEAR SELECTS ─────────────────────────────────────────────────────────────
 const selB = document.getElementById('selB');
