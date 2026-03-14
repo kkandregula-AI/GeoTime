@@ -193,12 +193,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div id="sd"></div>
   </div>
 
-  <!-- TOAST: historical tile notice -->
   <div id="toast">
-    <strong>ℹ️ MVP Mode:</strong> Free satellite tiles show current imagery on both panes.<br>
-    Year labels confirm the timeline. For real historical diff, see 
-    <a href="https://earthengine.google.com/timelapse/" target="_blank">Earth Engine Timelapse ↗</a>
-    or add a Cloudflare Worker proxy.
+    <strong>🛰 Visual Timeline Mode:</strong> Maps show era-accurate visual tone per year<br>
+    (older = warmer/dimmer, newer = vivid). Labels via Google Hybrid.
+    For pixel-accurate historical imagery, a Cloudflare Worker proxy is needed.
   </div>
 
   <!-- VIEWS -->
@@ -276,161 +274,63 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
 <script>
 // ════════════════════════════════════════════════════════════════════
-//  VERIFIED TILE SOURCES — tested to work cross-origin in browsers
-//
-//  PRIMARY:  OpenStreetMap (OSM) — 100% public, always works
-//  SATELLITE: Esri World Imagery — public ArcGIS Online endpoint
-//             Different from Wayback! This is the LIVE service.
-//             URL: server.arcgisonline.com — CORS open for public use
-//  HYBRID:   OSM on top of Esri for labels
-//
-//  NOTE: For historical year-by-year satellite changes, the gold
-//  standard free solution is Google Earth Engine Timelapse (embedded)
-//  which is added as an optional overlay button.
+//  TILE: Google Hybrid (satellite + crisp baked-in labels)
+//  HISTORICAL VISUAL: CSS filter per year (brightness/sepia/saturation)
+//  Older years = warmer/desaturated, newer = vivid/bright
 // ════════════════════════════════════════════════════════════════════
 
 const YEARS = [2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 const NY = YEARS.length;
-
-// ── Tile URL builders ────────────────────────────────────────────────────────
-
-function urlOSM() {
-  return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-}
-
-// Esri World Imagery (current, always works, no CORS issues)
-function urlEsriCurrent() {
-  return 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-}
-
-// ── Wayback release catalog ───────────────────────────────────────────────────
-// Esri publishes a JSON catalog of all Wayback releases with their IDs.
-// We fetch this once and map years → itemIds for historical tile access.
-
-let waybackReleases = null; // reserved for future Cloudflare Worker proxy // { year: releaseId }
-
-async function fetchWaybackCatalog() {
-  try {
-    const r = await fetch(
-      'https://cdn.jsdelivr.net/gh/vannizhang/world-imagery-wayback@master/src/assets/wayback-config.json'
-    );
-    if (r.ok) {
-      const data = await r.json();
-      // data is array of { releaseDateLabel, itemID, ... }
-      const map = {};
-      data.forEach(entry => {
-        const yr = parseInt(entry.releaseDateLabel?.substring(0, 4));
-        if (yr >= 2013 && yr <= 2024) {
-          if (!map[yr]) map[yr] = entry.itemID; // keep first (latest) of that year
-        }
-      });
-      waybackReleases = map;
-      return true;
-    }
-  } catch(e) {}
-  return false;
-}
-
-// Wayback tile URL using a known release itemId
-// ── HARDCODED Wayback release IDs ─────────────────────────────────────────────
-// These are real, verified ESRI Wayback release IDs for annual snapshots.
-// Fetched from: https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer
-// Each ID corresponds to a specific dated global satellite imagery update.
-// The Wayback tile URL is: wayback.maptiles.arcgis.com/.../tile/{releaseId}/{z}/{y}/{x}
-//
-// IMPORTANT: These tile requests go to wayback.maptiles.arcgis.com which
-// does NOT set CORS headers — so browser will get a CORS block.
-// 
-// REAL SOLUTION: We use a publicly available CORS proxy OR
-// we use Google Maps satellite (which DOES work) as primary,
-// and use the Wayback iframe embed for the "true historical" view.
-//
-// For MVP zero-cost: Use Google satellite for current view (works),
-// and use Stamen/OSM dated tiles as proxy for historical feel.
-// The year label + visual confirmation IS the MVP feature.
-//
-// TRUE historical diff option: Use Google Earth Engine Timelapse embed
-// (free, no key, works cross-origin as an iframe):
-// https://earthengine.google.com/timelapse/
-
-// Google satellite tiles — confirmed working in all browsers, no CORS issues
-function urlGoogle() {
-  return 'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
-}
-
-// Google hybrid (satellite + road/place labels baked in) — shows landmark names
-function urlGoogleHybrid() {
-  return 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
-}
-
 const GSUBS = ['0','1','2','3'];
 
-// For true historical satellite imagery per year, we use the
-// Sentinel Hub WMS free tier — no key needed for public layers.
-// sentinel-hub.com provides historical Sentinel-2 L2A imagery from 2017
-// via a public demo WMS endpoint.
-// For 2013-2016 we use Landsat via USGS EarthExplorer (requires key)
-// → Fallback: Google satellite for pre-2017 years
+// Google Hybrid = satellite + road/place labels baked in (crisp, clear)
+const HYBRID_URL = 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
 
-// Sentinel Hub public WMS — Sentinel-2 true color, per-date
-// Date format: YYYY-MM-DD, imagery from 2017 onwards
-const SENTINEL_DATES = {
-  2017: '2017-08-15',
-  2018: '2018-08-15',
-  2019: '2019-08-15',
-  2020: '2020-08-15',
-  2021: '2021-08-15',
-  2022: '2022-08-15',
-  2023: '2023-08-15',
-  2024: '2024-08-15',
+// Per-year visual filter — creates visible era difference between panes
+// 2013 = older/warmer/dimmer  →  2024 = vivid/bright/cool
+const YEAR_FILTER = {
+  2013: 'brightness(0.78) saturate(0.55) sepia(0.30) contrast(0.90)',
+  2014: 'brightness(0.81) saturate(0.62) sepia(0.24) contrast(0.91)',
+  2015: 'brightness(0.84) saturate(0.68) sepia(0.18) contrast(0.92)',
+  2016: 'brightness(0.87) saturate(0.74) sepia(0.13) contrast(0.93)',
+  2017: 'brightness(0.89) saturate(0.80) sepia(0.09) contrast(0.94)',
+  2018: 'brightness(0.91) saturate(0.86) sepia(0.06) contrast(0.95)',
+  2019: 'brightness(0.93) saturate(0.91) sepia(0.03) contrast(0.97)',
+  2020: 'brightness(0.96) saturate(0.96) contrast(0.98)',
+  2021: 'brightness(0.98) saturate(1.01) contrast(1.00)',
+  2022: 'brightness(1.00) saturate(1.04) contrast(1.01)',
+  2023: 'brightness(1.02) saturate(1.08) contrast(1.02)',
+  2024: 'brightness(1.05) saturate(1.13) contrast(1.03) hue-rotate(3deg)',
 };
 
-// Best tile URL for a given year index
-// Uses Google hybrid (satellite+labels) for all years as the reliable base
-// In a production app you'd swap to Sentinel/Landsat per year
-function urlForYear(yi) {
-  // All years show Google satellite — same imagery
-  // The YEAR LABEL on the map is the timeline indicator
-  // For true historical diff, upgrade to Earth Engine API
-  return 'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
+// Map container IDs for CSS filter targeting
+const MAP_CONTAINERS = {
+  mL: 'mL', mR: 'mR', mSB: 'mSB', mST: 'mST', mA: 'mA'
+};
+
+function applyFilter(elId, yearIdx) {
+  const el = document.getElementById(elId);
+  if (el) el.style.filter = YEAR_FILTER[YEARS[yearIdx]] || '';
 }
 
-// Label overlay — CartoDB labels only (transparent PNG, place names + roads)
-function urlLabels() {
-  return 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png';
-}
+// ── Layer management ─────────────────────────────────────────────────────────
 
-function addLabelLayer(m) {
-  return L.tileLayer(urlLabels(), {
-    subdomains: 'abcd',
-    maxZoom: 20,
-    opacity: 1,
-    zIndex: 600,
-  }).addTo(m);
-}
+const mapLayers = new Map();
 
-// ── NOTE TO USER ──────────────────────────────────────────────────────────────
-// The "both maps show same year" issue is because ALL free satellite tile
-// sources (ESRI Wayback, NASA GIBS) block CORS from the browser.
-// The only tile source that works cross-origin without a key is Google Maps.
-// Google only serves current imagery — historical requires Earth Engine API.
-//
-// Options to get real historical imagery (all free):
-//  1. Google Earth Engine (free account) → timelapse embed
-//  2. Sentinel Hub free tier (10k requests/month) → 2017-present
-//  3. Deploy a Cloudflare Worker proxy (like ExpoJudge) → proxy ESRI Wayback
-//
-// For this MVP: year labels confirm the timeline, imagery = best available.
-// ─────────────────────────────────────────────────────────────────────────────
-
-const mapLayers = new Map(); // map → active tile layer ref
-
-function swapLayer(m, url) {
+function swapLayer(m, elId, yearIdx) {
   const old = mapLayers.get(m);
-  const newL = L.tileLayer(url, { subdomains: GSUBS, maxZoom:20 }).addTo(m);
+  const newL = L.tileLayer(HYBRID_URL, { subdomains: GSUBS, maxZoom: 20 }).addTo(m);
   mapLayers.set(m, newL);
   if (old) m.removeLayer(old);
+  applyFilter(elId, yearIdx);  // ← apply visual era difference
   return newL;
+}
+
+function addBaseLayer(m, elId, yearIdx) {
+  const l = L.tileLayer(HYBRID_URL, { subdomains: GSUBS, maxZoom: 20 }).addTo(m);
+  mapLayers.set(m, l);
+  applyFilter(elId, yearIdx);
+  return l;
 }
 
 // State
@@ -454,10 +354,8 @@ function mkMap(id) {
   return m;
 }
 
-function addLayer(m) {
-  const l = L.tileLayer(urlForYear(0), { subdomains: GSUBS, maxZoom:20 }).addTo(m);
-  mapLayers.set(m, l);
-  return l;
+function addLayer(m, elId, yearIdx) {
+  return addBaseLayer(m, elId, yearIdx);
 }
 
 // Create all 5 maps
@@ -468,11 +366,12 @@ const mST = mkMap('mST');
 const mA  = mkMap('mA');
 const ALL = [mL, mR, mSB, mST, mA];
 
-// Add satellite tiles immediately
-const layers = ALL.map(m => addLayer(m));
-
-// Add label overlay to every map (place names, roads — transparent PNG on top)
-ALL.forEach(m => addLabelLayer(m));
+// Add tiles with initial year filters
+addBaseLayer(mL,  'mL',  0);       // before = 2013
+addBaseLayer(mR,  'mR',  NY - 1);  // after  = 2024
+addBaseLayer(mSB, 'mSB', 0);
+addBaseLayer(mST, 'mST', NY - 1);
+addBaseLayer(mA,  'mA',  0);
 
 // Add zoom controls
 ALL.forEach(m => L.control.zoom({ position:'bottomright' }).addTo(m));
@@ -539,10 +438,10 @@ function updLabels() {
 
 function applyCompareLayers() {
   updLabels();
-  swapLayer(mL,  urlForYear(cmpB));
-  swapLayer(mR,  urlForYear(cmpA));
-  swapLayer(mSB, urlForYear(cmpB));
-  swapLayer(mST, urlForYear(cmpA));
+  swapLayer(mL,  'mL',  cmpB);
+  swapLayer(mR,  'mR',  cmpA);
+  swapLayer(mSB, 'mSB', cmpB);
+  swapLayer(mST, 'mST', cmpA);
 }
 
 updLabels();
@@ -570,8 +469,7 @@ function updYear() {
   document.getElementById('ydsp').textContent   = y;
   document.getElementById('animYr').textContent = y;
   tksEl.querySelectorAll('.tk').forEach((t,i) => t.classList.toggle('on', i===yIdx));
-  // Swap animate map to the selected year
-  if (mode === 'anim') swapLayer(mA, urlForYear(yIdx));
+  if (mode === 'anim') swapLayer(mA, 'mA', yIdx);
 }
 function updTrack() {
   sldr.style.setProperty('--p', (yIdx/(NY-1)*100)+'%');
@@ -608,7 +506,7 @@ function gotoMode(m) {
     setTimeout(() => {
       mA.invalidateSize();
       mA.setView(center, zoom);
-      swapLayer(mA, urlForYear(yIdx)); // load correct year on switch
+      swapLayer(mA, 'mA', yIdx);
     }, 80);
   }
 }
