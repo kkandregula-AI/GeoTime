@@ -557,17 +557,21 @@ document.getElementById('psave').onclick = async () => {
   if (!val) { pstatEl.style.color='var(--red)'; pstatEl.textContent='Please enter a URL.'; return; }
   pstatEl.style.color='var(--dim)'; pstatEl.textContent='Testing connection…';
   try {
-    const testUrl = `${val}/tile/${WBIDS[2019]}/4/6/11`;
-    const r = await fetch(testUrl, {signal: AbortSignal.timeout(8000)});
-    if (r.ok) {
+    // Test root — worker returns JSON health check if reachable
+    const r = await fetch(val + '/tile/196/4/6/11', {signal: AbortSignal.timeout(10000)});
+    // 200 = tile found, 404 from ESRI = worker works but tile missing (still good!), anything else = error
+    if (r.status === 200 || r.status === 404) {
       PROXY = val; localStorage.setItem('gt_proxy', val);
-      pstatEl.style.color='var(--green)'; pstatEl.textContent='✓ Connected! Real historical imagery active. Close to continue.';
+      pstatEl.style.color='var(--green)'; pstatEl.textContent='✓ Worker connected! Real historical imagery active.';
       updProxyUI(); applyCmp();
+    } else if (r.status === 0 || r.type === 'opaque') {
+      // CORS blocked — worker URL wrong or not deployed
+      pstatEl.style.color='var(--red)'; pstatEl.textContent='CORS error — make sure worker URL is correct and deployed.';
     } else {
-      pstatEl.style.color='var(--red)'; pstatEl.textContent=`Worker returned ${r.status}. Check the URL.`;
+      pstatEl.style.color='var(--red)'; pstatEl.textContent=`Unexpected response ${r.status}. Check worker URL.`;
     }
   } catch(e) {
-    pstatEl.style.color='var(--red)'; pstatEl.textContent='Could not connect — check URL and try again.';
+    pstatEl.style.color='var(--red)'; pstatEl.textContent='Could not reach worker — check URL and try again.';
   }
 };
 
