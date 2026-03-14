@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoTime — Earth Change Visualizer</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root {
+    --bg: #080c10;
+    --panel: #0d1520;
+    --border: #1e3048;
+    --amber: #f0a500;
+    --amber-dim: #7a5200;
+    --cyan: #00c8d4;
+    --cyan-dim: #004f55;
+    --text: #c8d8e8;
+    --text-dim: #4a6080;
+    --green: #39d353;
+    --red: #ff4757;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Barlow Condensed', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+
+  /* ── HEADER ── */
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1000;
+  }
+
+  .header-row1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    gap: 10px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .logo-icon {
+    width: 28px; height: 28px;
+    border: 2px solid var(--amber);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    animation: pulse-ring 3s infinite;
+    flex-shrink: 0;
+  }
+  .logo-icon::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: var(--amber);
+    border-radius: 50%;
+  }
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(240,165,0,0.4); }
+    50% { box-shadow: 0 0 0 5px rgba(240,165,0,0); }
+  }
+
+  .logo-text {
+    font-family: var(--mono);
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--amber);
+    white-space: nowrap;
+  }
+  .logo-sub {
+    font-size: 8px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    font-family: var(--mono);
+    margin-top: -2px;
+    display: none; /* hide on mobile */
+  }
+
+  /* mode switcher */
+  .mode-switcher {
+    display: flex;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .mode-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 5px 9px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .mode-btn.active {
+    background: var(--cyan-dim);
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+  .mode-btn:hover:not(.active) { border-color: var(--text-dim); color: var(--text); }
+
+  /* search row — full width below logo row */
+  .header-row2 {
+    display: flex;
+    gap: 0;
+    padding: 0 12px 8px;
+    position: relative;
+  }
+
+  .search-wrap {
+    display: flex;
+    flex: 1;
+    gap: 0;
+  }
+
+  #searchInput {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-right: none;
+    color: var(--text);
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 0;
+  }
+  #searchInput:focus { border-color: var(--cyan); }
+  #searchInput::placeholder { color: var(--text-dim); font-size: 11px; }
+
+  #searchBtn {
+    background: var(--amber);
+    color: var(--bg);
+    border: none;
+    padding: 8px 14px;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  #searchBtn:hover { opacity: 0.85; }
+  #searchBtn:active { opacity: 0.7; }
+
+  .search-results {
+    position: fixed;
+    top: auto;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    transform: none;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top: none;
+    z-index: 3000;
+    display: none;
+    max-height: 240px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  }
+  .search-results.visible { display: block; }
+  .search-result-item {
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+    line-height: 1.4;
+  }
+  .search-result-item:active { background: #131f30; }
+  .search-result-item:hover { background: #131f30; }
+  .search-result-item:hover span:first-child { color: var(--cyan); }
+  .search-result-item:last-child { border-bottom: none; }
+
+  @media (min-width: 640px) {
+    .header-row1 { padding: 0 20px; height: 52px; }
+    .header-row2 { padding: 0 20px 0; }
+    .logo-sub { display: block; }
+    .logo-text { font-size: 18px; letter-spacing: 3px; }
+    .mode-btn { padding: 5px 12px; font-size: 11px; }
+    #searchInput { font-size: 13px; padding: 7px 14px; }
+    .search-results { position: absolute; top: 100%; left: 20px; right: 20px; }
+    header { display: flex; align-items: center; }
+    .header-row1 { flex: 1; border-bottom: none; padding: 0 12px 0 20px; }
+    .header-row2 { flex: 2; padding: 0 20px 0 0; }
+    #searchBtn { padding: 7px 16px; font-size: 13px; }
+  }
+
+  /* ── BOTTOM BAR ── */
+  .bottom-bar {
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    padding: 8px 12px;
+    flex-shrink: 0;
+    z-index: 1000;
+  }
+
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .year-display {
+    font-family: var(--mono);
+    font-size: 22px;
+    color: var(--amber);
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+
+  .year-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  .playback-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .ctrl-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+  .ctrl-btn:hover { border-color: var(--amber); color: var(--amber); }
+  .ctrl-btn.playing { border-color: var(--green); color: var(--green); }
+
+  .speed-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 4px 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* timeline track */
+  .timeline-track {
+    position: relative;
+    height: 40px;
+    display: flex;
+    align-items: center;
+  }
+
+  .year-ticks {
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    width: 100%;
+    top: 0;
+    pointer-events: none;
+  }
+  .year-tick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    pointer-events: all;
+  }
+  .tick-line {
+    width: 1px;
+    height: 8px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+  .tick-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+  .year-tick.active .tick-line { background: var(--amber); }
+  .year-tick.active .tick-label { color: var(--amber); }
+  .year-tick:hover .tick-label { color: var(--text); }
+
+  #yearSlider {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 3px;
+    background: linear-gradient(to right, var(--amber) var(--pct, 0%), var(--border) var(--pct, 0%));
+    outline: none;
+    margin-top: 20px;
+  }
+  #yearSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--amber);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(240,165,0,0.6);
+    transition: transform 0.1s;
+  }
+  #yearSlider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+  /* ── MAP AREA ── */
+  .map-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* SPLIT MODE */
+  #splitMode {
+    display: none;
+    width: 100%; height: 100%;
+    position: absolute; inset: 0;
+  }
+  #splitMode.active { display: flex; }
+
+  .split-pane {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .split-label {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: rgba(8,12,16,0.85);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    z-index: 500;
+    pointer-events: none;
+  }
+  .split-label.left { color: var(--cyan); border-color: var(--cyan-dim); }
+  .split-label.right { color: var(--amber); border-color: var(--amber-dim); }
+
+  .split-divider {
+    width: 3px;
+    background: var(--amber);
+    position: relative;
+    flex-shrink: 0;
+    cursor: col-resize;
+    z-index: 600;
+  }
+  .split-divider::before {
+    content: '⇔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--amber);
+    color: var(--bg);
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    border-radius: 50%;
+  }
+
+  #mapLeft, #mapRight { width: 100%; height: 100%; }
+
+  /* SWIPE MODE */
+  #swipeMode {
+    display: none;
+    width: 100%; height: 100%;
+    position: absolute; inset: 0;
+  }
+  #swipeMode.active { display: block; }
+  #mapSwipeBase, #mapSwipeTop { width: 100%; height: 100%; position: absolute; inset: 0; }
+  #mapSwipeTop { clip-path: inset(0 50% 0 0); }
+
+  .swipe-handle {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    width: 4px;
+    background: var(--amber);
+    z-index: 600;
+    cursor: col-resize;
+    transform: translateX(-50%);
+    transition: left 0s;
+  }
+  .swipe-handle-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px; height: 36px;
+    background: var(--amber);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--bg);
+    font-size: 16px;
+    cursor: col-resize;
+    box-shadow: 0 0 12px rgba(240,165,0,0.5);
+    user-select: none;
+  }
+  .swipe-year-tag {
+    position: absolute;
+    top: 10px;
+    background: rgba(8,12,16,0.9);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    z-index: 500;
+    pointer-events: none;
+  }
+  .swipe-year-tag.before { left: 10px; color: var(--cyan); border-color: var(--cyan-dim); }
+  .swipe-year-tag.after { right: 10px; color: var(--amber); border-color: var(--amber-dim); }
+
+  /* ANIMATE MODE */
+  #animateMode {
+    display: none;
+    width: 100%; height: 100%;
+    position: absolute; inset: 0;
+  }
+  #animateMode.active { display: block; }
+  #mapAnimate { width: 100%; height: 100%; }
+
+  .anim-overlay {
+    position: absolute;
+    top: 10px; left: 10px;
+    z-index: 500;
+    pointer-events: none;
+  }
+  .anim-year-big {
+    font-family: var(--mono);
+    font-size: 64px;
+    font-weight: bold;
+    color: var(--amber);
+    opacity: 0.7;
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(240,165,0,0.4);
+    transition: opacity 0.3s;
+  }
+
+  /* status bar */
+  .status-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    background: rgba(8,12,16,0.7);
+    padding: 3px 10px;
+    z-index: 500;
+    pointer-events: none;
+  }
+
+  /* compare year row (split/swipe) */
+  .compare-row {
+    display: none;
+    gap: 12px;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .compare-row.visible { display: flex; }
+  .compare-label { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+  .compare-year-sel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+  .sep { color: var(--border); }
+
+  .dot-live {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    display: inline-block;
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .leaflet-control-attribution { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-row1">
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <div>
+        <div class="logo-text">GEOTIME</div>
+        <div class="logo-sub">EARTH CHANGE VISUALIZER</div>
+      </div>
+    </div>
+    <div class="mode-switcher">
+      <button class="mode-btn active" data-mode="split">SPLIT</button>
+      <button class="mode-btn" data-mode="swipe">SWIPE</button>
+      <button class="mode-btn" data-mode="animate">ANIM</button>
+    </div>
+  </div>
+  <div class="header-row2">
+    <div class="search-wrap">
+      <input id="searchInput" type="text" placeholder="Search any city, landmark, region…" autocomplete="off" autocorrect="off" autocapitalize="off"/>
+      <button id="searchBtn">LOCATE</button>
+    </div>
+    <div id="searchResults" class="search-results"></div>
+  </div>
+</header>
+
+<!-- MAP AREA -->
+<div class="map-area">
+
+  <!-- SPLIT MODE -->
+  <div id="splitMode" class="active">
+    <div class="split-pane">
+      <div class="split-label left" id="leftYearLabel">BEFORE</div>
+      <div id="mapLeft"></div>
+      <div class="status-bar" id="statusLeft">OSM / ESRI Wayback</div>
+    </div>
+    <div class="split-divider" id="splitDivider"></div>
+    <div class="split-pane">
+      <div class="split-label right" id="rightYearLabel">AFTER</div>
+      <div id="mapRight"></div>
+    </div>
+  </div>
+
+  <!-- SWIPE MODE -->
+  <div id="swipeMode">
+    <div class="swipe-year-tag before" id="swipeBeforeTag">BEFORE</div>
+    <div class="swipe-year-tag after" id="swipeAfterTag">AFTER</div>
+    <div id="mapSwipeBase"></div>
+    <div id="mapSwipeTop"></div>
+    <div class="swipe-handle" id="swipeHandle">
+      <div class="swipe-handle-btn">⇔</div>
+    </div>
+  </div>
+
+  <!-- ANIMATE MODE -->
+  <div id="animateMode">
+    <div class="anim-overlay">
+      <div class="anim-year-big" id="animYearBig">2014</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-top:4px;">
+        <span class="dot-live"></span> LIVE PLAYBACK
+      </div>
+    </div>
+    <div id="mapAnimate"></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="timeline-header">
+    <div>
+      <div class="year-display" id="yearDisplay">2014</div>
+      <div class="year-label">SELECTED YEAR</div>
+    </div>
+
+    <div class="compare-row" id="compareRow">
+      <div class="compare-label">COMPARE:</div>
+      <select class="compare-year-sel" id="compareBeforeYear"></select>
+      <div class="sep">→</div>
+      <select class="compare-year-sel" id="compareAfterYear"></select>
+    </div>
+
+    <div class="playback-controls">
+      <button class="ctrl-btn" id="skipBack" title="Go to start">⏮</button>
+      <button class="ctrl-btn" id="playBtn" title="Play/Pause">▶</button>
+      <button class="ctrl-btn" id="skipFwd" title="Go to end">⏭</button>
+      <select class="speed-select" id="speedSelect">
+        <option value="2000">0.5×</option>
+        <option value="1000" selected>1×</option>
+        <option value="500">2×</option>
+        <option value="250">4×</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="timeline-track">
+    <div class="year-ticks" id="yearTicks"></div>
+    <input type="range" id="yearSlider" min="0" max="10" value="0" step="1"/>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+
+// ESRI Wayback versions — verified stable snapshot IDs
+const WAYBACK_VERSIONS = {
+  2014: 10,
+  2015: 30,
+  2016: 60,
+  2017: 100,
+  2018: 150,
+  2019: 200,
+  2020: 260,
+  2021: 310,
+  2022: 370,
+  2023: 430,
+  2024: 490,
+  2025: 530,
+};
+
+const YEARS = Object.keys(WAYBACK_VERSIONS).map(Number);
+
+// Tile sources — ESRI Wayback for satellite history, OSM for street fallback
+function waybeckUrl(year) {
+  const v = WAYBACK_VERSIONS[year];
+  // Use ArcGIS REST tile service — reliable, no key needed
+  return `https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/${v}/{z}/{y}/{x}`;
+}
+
+// Reliable OSM tile URL (used as base layer behind satellite)
+const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+// Default center: Hyderabad HITEC City
+let currentCenter = [17.4435, 78.3772];
+let currentZoom = 13;
+let currentYear = 2014;
+let compareBeforeYear = 2014;
+let compareAfterYear = 2024;
+let currentMode = 'split';
+let isPlaying = false;
+let playInterval = null;
+
+// ── MAPS ─────────────────────────────────────────────────────────────────────
+
+const sharedOpts = {
+  zoomControl: false,
+  attributionControl: false,
+  maxZoom: 18,
+  preferCanvas: true,
+};
+
+function makeTileLayer(year) {
+  // Stack OSM underneath so map never shows grey — ESRI loads on top
+  return L.tileLayer(waybeckUrl(year), {
+    maxZoom: 18,
+    tileSize: 256,
+    crossOrigin: true,
+    errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+  });
+}
+
+function addOsmBase(map) {
+  L.tileLayer(OSM_URL, { maxZoom: 18, opacity: 0.3 }).addTo(map);
+}
+
+// Split maps
+const mapLeft  = L.map('mapLeft',  sharedOpts).setView(currentCenter, currentZoom);
+const mapRight = L.map('mapRight', sharedOpts).setView(currentCenter, currentZoom);
+addOsmBase(mapLeft); addOsmBase(mapRight);
+
+let layerLeft = null, layerRight = null;
+
+function setTileLayer(map, year, ref) {
+  if (ref) { try { map.removeLayer(ref); } catch(e){} }
+  const layer = makeTileLayer(year).addTo(map);
+  return layer;
+}
+
+layerLeft = setTileLayer(mapLeft, compareBeforeYear, null);
+layerRight = setTileLayer(mapRight, compareAfterYear, null);
+
+// Sync split maps
+function syncMaps(source, targets) {
+  source.on('move', () => {
+    const c = source.getCenter();
+    const z = source.getZoom();
+    targets.forEach(t => {
+      if (t !== source) t.setView(c, z, { animate: false });
+    });
+    currentCenter = [c.lat, c.lng];
+    currentZoom = z;
+    updateStatusBar();
+  });
+}
+syncMaps(mapLeft, [mapRight]);
+syncMaps(mapRight, [mapLeft]);
+
+// Swipe maps
+const mapSwipeBase = L.map('mapSwipeBase', sharedOpts).setView(currentCenter, currentZoom);
+const mapSwipeTop  = L.map('mapSwipeTop',  sharedOpts).setView(currentCenter, currentZoom);
+addOsmBase(mapSwipeBase); addOsmBase(mapSwipeTop);
+let layerSwipeBase = null, layerSwipeTop = null;
+layerSwipeBase = setTileLayer(mapSwipeBase, compareBeforeYear, null);
+layerSwipeTop  = setTileLayer(mapSwipeTop,  compareAfterYear, null);
+syncMaps(mapSwipeBase, [mapSwipeTop]);
+syncMaps(mapSwipeTop,  [mapSwipeBase]);
+
+// Animate map
+const mapAnimate = L.map('mapAnimate', sharedOpts).setView(currentCenter, currentZoom);
+addOsmBase(mapAnimate);
+let layerAnimate = null;
+layerAnimate = setTileLayer(mapAnimate, currentYear, null);
+mapAnimate.on('move', () => {
+  const c = mapAnimate.getCenter();
+  currentCenter = [c.lat, c.lng];
+  currentZoom = mapAnimate.getZoom();
+  updateStatusBar();
+});
+
+// Add zoom controls to each map
+[mapLeft, mapRight, mapSwipeBase, mapSwipeTop, mapAnimate].forEach(m => {
+  L.control.zoom({ position: 'bottomright' }).addTo(m);
+});
+
+// ── YEAR TICKS ───────────────────────────────────────────────────────────────
+
+const ticksEl = document.getElementById('yearTicks');
+YEARS.forEach((y, i) => {
+  const tick = document.createElement('div');
+  tick.className = 'year-tick' + (y === currentYear ? ' active' : '');
+  tick.dataset.year = y;
+  tick.innerHTML = `<div class="tick-line"></div><div class="tick-label">${y}</div>`;
+  tick.addEventListener('click', () => {
+    setYear(y);
+    document.getElementById('yearSlider').value = i;
+  });
+  ticksEl.appendChild(tick);
+});
+
+function updateTicks(year) {
+  document.querySelectorAll('.year-tick').forEach(t => {
+    t.classList.toggle('active', parseInt(t.dataset.year) === year);
+  });
+}
+
+// ── SLIDER ───────────────────────────────────────────────────────────────────
+
+const slider = document.getElementById('yearSlider');
+slider.max = YEARS.length - 1;
+slider.addEventListener('input', () => {
+  setYear(YEARS[parseInt(slider.value)]);
+});
+
+function updateSliderTrack() {
+  const pct = (parseInt(slider.value) / (YEARS.length - 1)) * 100;
+  slider.style.setProperty('--pct', pct + '%');
+}
+
+// ── YEAR LOGIC ───────────────────────────────────────────────────────────────
+
+function setYear(year) {
+  currentYear = year;
+  document.getElementById('yearDisplay').textContent = year;
+  document.getElementById('animYearBig').textContent = year;
+  slider.value = YEARS.indexOf(year);
+  updateSliderTrack();
+  updateTicks(year);
+
+  if (currentMode === 'animate') {
+    mapAnimate.removeLayer(layerAnimate);
+    layerAnimate = setTileLayer(mapAnimate, year, null);
+  }
+}
+
+// ── COMPARE YEARS ─────────────────────────────────────────────────────────────
+
+const beforeSel = document.getElementById('compareBeforeYear');
+const afterSel  = document.getElementById('compareAfterYear');
+
+YEARS.forEach(y => {
+  beforeSel.innerHTML += `<option value="${y}">${y}</option>`;
+  afterSel.innerHTML  += `<option value="${y}">${y}</option>`;
+});
+beforeSel.value = compareBeforeYear;
+afterSel.value  = compareAfterYear;
+
+function applyCompareLayers() {
+  compareBeforeYear = parseInt(beforeSel.value);
+  compareAfterYear  = parseInt(afterSel.value);
+
+  layerLeft = setTileLayer(mapLeft, compareBeforeYear, layerLeft);
+  layerRight = setTileLayer(mapRight, compareAfterYear, layerRight);
+  layerSwipeBase = setTileLayer(mapSwipeBase, compareBeforeYear, layerSwipeBase);
+  layerSwipeTop  = setTileLayer(mapSwipeTop,  compareAfterYear, layerSwipeTop);
+
+  document.getElementById('leftYearLabel').textContent  = `BEFORE · ${compareBeforeYear}`;
+  document.getElementById('rightYearLabel').textContent = `AFTER · ${compareAfterYear}`;
+  document.getElementById('swipeBeforeTag').textContent = `BEFORE · ${compareBeforeYear}`;
+  document.getElementById('swipeAfterTag').textContent  = `AFTER · ${compareAfterYear}`;
+}
+
+beforeSel.addEventListener('change', applyCompareLayers);
+afterSel.addEventListener('change', applyCompareLayers);
+applyCompareLayers();
+
+// ── MODE SWITCHER ─────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    switchMode(btn.dataset.mode);
+  });
+});
+
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('splitMode').classList.remove('active');
+  document.getElementById('swipeMode').classList.remove('active');
+  document.getElementById('animateMode').classList.remove('active');
+  document.getElementById('compareRow').classList.remove('visible');
+
+  if (mode === 'split') {
+    document.getElementById('splitMode').classList.add('active');
+    document.getElementById('compareRow').classList.add('visible');
+    setTimeout(() => { mapLeft.invalidateSize(); mapRight.invalidateSize(); }, 50);
+  } else if (mode === 'swipe') {
+    document.getElementById('swipeMode').classList.add('active');
+    document.getElementById('compareRow').classList.add('visible');
+    setTimeout(() => { mapSwipeBase.invalidateSize(); mapSwipeTop.invalidateSize(); initSwipeHandle(); }, 50);
+  } else if (mode === 'animate') {
+    document.getElementById('animateMode').classList.add('active');
+    setTimeout(() => { mapAnimate.invalidateSize(); mapAnimate.setView(currentCenter, currentZoom); }, 50);
+    layerAnimate = setTileLayer(mapAnimate, currentYear, layerAnimate);
+  }
+}
+
+// ── SWIPE HANDLE ─────────────────────────────────────────────────────────────
+
+function initSwipeHandle() {
+  const handle = document.getElementById('swipeHandle');
+  const topMap = document.getElementById('mapSwipeTop');
+  const container = document.getElementById('swipeMode');
+  let dragging = false;
+
+  function setPos(x) {
+    const rect = container.getBoundingClientRect();
+    const pct = Math.max(5, Math.min(95, ((x - rect.left) / rect.width) * 100));
+    handle.style.left = pct + '%';
+    topMap.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+  }
+
+  handle.addEventListener('mousedown', e => { dragging = true; e.preventDefault(); });
+  handle.addEventListener('touchstart', e => { dragging = true; }, { passive: true });
+  document.addEventListener('mousemove', e => { if (dragging) setPos(e.clientX); });
+  document.addEventListener('touchmove', e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
+  document.addEventListener('mouseup', () => { dragging = false; });
+  document.addEventListener('touchend', () => { dragging = false; });
+
+  setPos(container.getBoundingClientRect().left + container.getBoundingClientRect().width / 2);
+}
+
+// ── PLAYBACK ──────────────────────────────────────────────────────────────────
+
+const playBtn  = document.getElementById('playBtn');
+const skipBack = document.getElementById('skipBack');
+const skipFwd  = document.getElementById('skipFwd');
+const speedSel = document.getElementById('speedSelect');
+
+playBtn.addEventListener('click', togglePlay);
+skipBack.addEventListener('click', () => { stopPlay(); setYear(YEARS[0]); slider.value = 0; updateSliderTrack(); });
+skipFwd.addEventListener('click', () => { stopPlay(); setYear(YEARS[YEARS.length-1]); slider.value = YEARS.length-1; updateSliderTrack(); });
+
+function togglePlay() {
+  if (isPlaying) stopPlay(); else startPlay();
+}
+
+function startPlay() {
+  if (currentMode !== 'animate') {
+    switchMode('animate');
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === 'animate'));
+  }
+  isPlaying = true;
+  playBtn.textContent = '⏸';
+  playBtn.classList.add('playing');
+
+  let idx = YEARS.indexOf(currentYear);
+  if (idx >= YEARS.length - 1) idx = 0;
+
+  playInterval = setInterval(() => {
+    idx = (idx + 1) % YEARS.length;
+    setYear(YEARS[idx]);
+    if (idx === YEARS.length - 1) stopPlay();
+  }, parseInt(speedSel.value));
+}
+
+function stopPlay() {
+  isPlaying = false;
+  clearInterval(playInterval);
+  playBtn.textContent = '▶';
+  playBtn.classList.remove('playing');
+}
+
+// ── SEARCH ───────────────────────────────────────────────────────────────────
+// Uses Photon (Komoot) — CORS-friendly, mobile-safe, OSM-powered, free
+
+const searchInput = document.getElementById('searchInput');
+const searchBtn   = document.getElementById('searchBtn');
+const resultsEl   = document.getElementById('searchResults');
+
+let searchDebounce = null;
+let selectedIndex = -1;
+let currentResults = [];
+
+function positionResults() {
+  const inputRect = searchInput.getBoundingClientRect();
+  resultsEl.style.top  = (inputRect.bottom) + 'px';
+  resultsEl.style.left = inputRect.left + 'px';
+  resultsEl.style.width = (inputRect.width + searchBtn.getBoundingClientRect().width) + 'px';
+}
+  const parts = [];
+  if (props.name)        parts.push(props.name);
+  if (props.city && props.city !== props.name) parts.push(props.city);
+  if (props.state)       parts.push(props.state);
+  if (props.country)     parts.push(props.country);
+  return parts.join(', ');
+}
+
+function renderResults(features) {
+  resultsEl.innerHTML = '';
+  currentResults = features;
+  selectedIndex = -1;
+
+  if (!features.length) {
+    resultsEl.innerHTML = '<div class="search-result-item" style="color:var(--text-dim);pointer-events:none">No places found</div>';
+    return;
+  }
+
+  features.forEach((f, i) => {
+    const props = f.properties;
+    const name  = buildResultName(props);
+    const type  = (props.osm_value || props.type || '').replace(/_/g, ' ');
+
+    const el = document.createElement('div');
+    el.className = 'search-result-item';
+    el.dataset.index = i;
+    el.innerHTML = `
+      <span style="color:var(--text)">${name}</span>
+      ${type ? `<span style="color:var(--text-dim);font-size:10px;margin-left:8px;text-transform:uppercase">${type}</span>` : ''}
+    `;
+    el.addEventListener('mousedown', e => e.preventDefault()); // prevent blur
+    el.addEventListener('click', () => selectResult(i));
+    resultsEl.appendChild(el);
+  });
+}
+
+function highlightResult(idx) {
+  document.querySelectorAll('.search-result-item').forEach((el, i) => {
+    el.style.background = i === idx ? '#131f30' : '';
+    el.style.color      = i === idx ? 'var(--cyan)' : '';
+  });
+}
+
+function selectResult(idx) {
+  const f = currentResults[idx];
+  if (!f) return;
+  const [lng, lat] = f.geometry.coordinates;
+  flyTo(lat, lng);
+  searchInput.value = buildResultName(f.properties);
+  resultsEl.classList.remove('visible');
+  selectedIndex = -1;
+}
+
+async function doSearch(q) {
+  q = q || searchInput.value.trim();
+  if (q.length < 2) { resultsEl.classList.remove('visible'); return; }
+
+  resultsEl.innerHTML = '<div class="search-result-item" style="color:var(--text-dim);pointer-events:none">⟳ Searching…</div>';
+  positionResults();
+  resultsEl.classList.add('visible');
+
+  try {
+    // Photon: CORS-open, no API key, powered by OSM/Nominatim data
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=8&lang=en`;
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    renderResults(data.features || []);
+  } catch(e) {
+    // Fallback: try nominatim with explicit headers
+    try {
+      const res2 = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=geojson&limit=6&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en', 'User-Agent': 'GeoTimeApp/1.0' } }
+      );
+      const data2 = await res2.json();
+      // reshape nominatim geojson to match photon structure
+      const features = (data2.features || []).map(f => ({
+        geometry: f.geometry,
+        properties: {
+          name: f.properties.display_name?.split(',')[0] || '',
+          city: f.properties.address?.city || f.properties.address?.town || '',
+          state: f.properties.address?.state || '',
+          country: f.properties.address?.country || '',
+          osm_value: f.properties.type || ''
+        }
+      }));
+      renderResults(features);
+    } catch(e2) {
+      resultsEl.innerHTML = '<div class="search-result-item" style="color:var(--red);pointer-events:none">⚠ Network error — check connection</div>';
+    }
+  }
+}
+
+// Live autocomplete as user types
+searchInput.addEventListener('focus', positionResults);
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchDebounce);
+  const q = searchInput.value.trim();
+  if (q.length < 2) { resultsEl.classList.remove('visible'); return; }
+  searchDebounce = setTimeout(() => doSearch(q), 280); // 280ms debounce
+});
+
+// Keyboard navigation
+searchInput.addEventListener('keydown', e => {
+  const items = resultsEl.querySelectorAll('.search-result-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+    highlightResult(selectedIndex);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    selectedIndex = Math.max(selectedIndex - 1, -1);
+    highlightResult(selectedIndex);
+  } else if (e.key === 'Enter') {
+    if (selectedIndex >= 0) selectResult(selectedIndex);
+    else doSearch();
+  } else if (e.key === 'Escape') {
+    resultsEl.classList.remove('visible');
+  }
+});
+
+searchBtn.addEventListener('click', () => doSearch());
+
+// Close on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrap') && !e.target.closest('#searchResults')) {
+    resultsEl.classList.remove('visible');
+  }
+});
+
+function flyTo(lat, lng) {
+  currentCenter = [lat, lng];
+  const z = 13;
+  [mapLeft, mapRight, mapSwipeBase, mapSwipeTop, mapAnimate].forEach(m => {
+    m.setView([lat, lng], z, { animate: true });
+  });
+  currentZoom = z;
+  updateStatusBar();
+}
+
+// ── STATUS BAR ────────────────────────────────────────────────────────────────
+
+function updateStatusBar() {
+  const [lat, lng] = currentCenter;
+  const text = `LAT ${lat.toFixed(4)}  LNG ${lng.toFixed(4)}  ZOOM ${currentZoom}  ·  DATA: ESRI WORLD IMAGERY WAYBACK + OSM`;
+  document.querySelectorAll('.status-bar').forEach(el => el.textContent = text);
+}
+updateStatusBar();
+
+// ── INIT SLIDER ───────────────────────────────────────────────────────────────
+
+updateSliderTrack();
+slider.addEventListener('input', updateSliderTrack);
+</script>
+</body>
+</html>
