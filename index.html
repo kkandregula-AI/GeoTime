@@ -39,9 +39,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #sb{background:var(--amber);color:var(--bg);border:none;padding:8px 14px;
   font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0}
 
-/* search dropdown */
+/* search dropdown — fixed position, outside all stacking contexts */
 #sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--border);
-  border-top:none;z-index:9999;max-height:220px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.9)}
+  border-top:none;z-index:99998;max-height:260px;overflow-y:auto;
+  box-shadow:0 12px 32px rgba(0,0,0,.95);min-width:200px;}
 #sd.on{display:block}
 .sitem{padding:9px 12px;font-family:var(--mono);font-size:11px;border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5}
 .sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
@@ -182,8 +183,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <input id="si" type="text" placeholder="Search city, landmark, region…" autocomplete="off" autocorrect="off" spellcheck="false"/>
       <button id="sb">LOCATE</button>
     </div>
-    <div id="sd"></div>
   </div>
+  <!-- search dropdown OUTSIDE header so z-index isn't clipped by parent stacking context -->
+  <div id="sd"></div>
 
   <!-- VIEWS -->
   <div id="views">
@@ -353,7 +355,15 @@ ALL.forEach((src,si) => {
 });
 
 window.addEventListener('resize', () => ALL.forEach(m => m.invalidateSize()));
-setTimeout(() => { ALL.forEach(m => { m.invalidateSize(); m.setView(center,zoom); }); initSwipe(); }, 400);
+
+// Force full re-render after DOM settles — fixes blank right map on split view
+setTimeout(() => {
+  ALL.forEach(m => { m.invalidateSize(); m.setView(center, zoom); });
+  initSwipe();
+}, 100);
+setTimeout(() => {
+  ALL.forEach(m => { m.invalidateSize(); m.setView(center, zoom); });
+}, 600);
 
 // ─── YEAR SELECTS ─────────────────────────────────────────────────────────────
 const selB = document.getElementById('selB');
