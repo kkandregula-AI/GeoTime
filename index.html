@@ -18,111 +18,103 @@
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
 #app{display:flex;flex-direction:column;height:100vh}
 
-/* ── HEADER ── */
-#hdr{background:var(--panel);border-bottom:2px solid var(--border);flex-shrink:0;z-index:1000;position:relative}
+/* HEADER */
+#hdr{background:var(--panel);border-bottom:2px solid var(--border);flex-shrink:0;z-index:100;position:relative}
 .hr1{display:flex;align-items:center;gap:8px;padding:8px 10px}
-.logo-ring{width:28px;height:28px;flex-shrink:0;border:2px solid var(--amber);border-radius:50%;
+.logo-ring{width:26px;height:26px;flex-shrink:0;border:2px solid var(--amber);border-radius:50%;
   display:flex;align-items:center;justify-content:center;animation:pulse 3s infinite}
-.logo-ring::after{content:'';width:8px;height:8px;background:var(--amber);border-radius:50%}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,165,0,.5)}50%{box-shadow:0 0 0 6px rgba(240,165,0,0)}}
-.logo-name{font-family:var(--mono);font-size:16px;letter-spacing:3px;color:var(--amber)}
-.logo-sub{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:2px;margin-top:-2px}
-.modes{display:flex;gap:3px;margin-left:auto}
-.mb{font-family:var(--mono);font-size:10px;letter-spacing:.5px;background:transparent;
-  border:1px solid var(--border);color:var(--dim);padding:5px 8px;cursor:pointer;
-  text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.logo-ring::after{content:'';width:7px;height:7px;background:var(--amber);border-radius:50%}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,165,0,.5)}50%{box-shadow:0 0 0 5px rgba(240,165,0,0)}}
+.logo-name{font-family:var(--mono);font-size:15px;letter-spacing:3px;color:var(--amber);white-space:nowrap}
+.logo-sub{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:2px}
+.modes{display:flex;gap:3px;margin-left:auto;flex-shrink:0}
+.mb{font-family:var(--mono);font-size:10px;background:transparent;border:1px solid var(--border);
+  color:var(--dim);padding:5px 8px;cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap}
 .mb.on{background:rgba(0,200,212,.12);border-color:var(--cyan);color:var(--cyan)}
-.mb:active{opacity:.6}
-
-.hr2{display:flex;padding:0 10px 8px}
+.hr2{display:flex;padding:0 10px 8px;gap:0}
 #si{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-right:none;
   color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:12px;outline:none}
 #si:focus{border-color:var(--cyan)}
 #si::placeholder{color:var(--dim);font-size:11px}
 #sb{background:var(--amber);color:var(--bg);border:none;padding:8px 14px;
-  font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0;letter-spacing:1px}
-#sb:active{opacity:.8}
+  font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0}
 
 /* search dropdown */
 #sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--border);
-  border-top:none;z-index:9999;max-height:240px;overflow-y:auto;
-  box-shadow:0 16px 40px rgba(0,0,0,.9)}
+  border-top:none;z-index:9999;max-height:220px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.9)}
 #sd.on{display:block}
-.sitem{padding:10px 12px;font-family:var(--mono);font-size:11px;
-  border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5}
+.sitem{padding:9px 12px;font-family:var(--mono);font-size:11px;border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5}
 .sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
-.stype{font-size:9px;color:var(--dim);margin-left:6px;text-transform:uppercase}
 
-/* ── VIEW MODE PANELS ── */
+/* VIEWS */
 #views{flex:1;position:relative;overflow:hidden}
 .vp{position:absolute;inset:0;display:none}
 .vp.on{display:flex}
-
-/* SPLIT */
 #vSplit{flex-direction:row}
 .half{flex:1;position:relative;overflow:hidden}
 .hlabel{position:absolute;top:8px;left:8px;z-index:400;background:rgba(7,9,13,.9);
   border:1px solid;font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none}
 .hlabel.L{color:var(--cyan);border-color:rgba(0,200,212,.3)}
 .hlabel.R{color:var(--amber);border-color:rgba(240,165,0,.3)}
+.yr-stamp{position:absolute;bottom:40px;left:10px;z-index:400;pointer-events:none;
+  font-family:var(--mono);font-size:20px;font-weight:bold;color:#fff;letter-spacing:2px;
+  text-shadow:0 0 8px rgba(0,0,0,1),0 2px 4px rgba(0,0,0,1);
+  background:rgba(0,0,0,.5);padding:3px 10px;border-left:3px solid var(--amber)}
+.yr-stamp.cy{border-left-color:var(--cyan)}
 .divbar{width:3px;background:var(--amber);flex-shrink:0;z-index:500;position:relative;cursor:col-resize}
-.divbar::after{content:'⇔';position:absolute;top:50%;left:50%;
-  transform:translate(-50%,-50%);background:var(--amber);color:var(--bg);
-  width:28px;height:28px;border-radius:50%;
+.divbar::after{content:'⇔';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:var(--amber);color:var(--bg);width:26px;height:26px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:12px}
-
-/* SWIPE */
 #vSwipe{position:relative}
 #mSB,#mST{position:absolute;inset:0}
 #mST{clip-path:inset(0 50% 0 0)}
 .swhandle{position:absolute;top:0;bottom:0;left:50%;width:3px;background:var(--amber);
   z-index:600;transform:translateX(-50%);cursor:col-resize}
 .swbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:36px;height:36px;background:var(--amber);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--bg);font-size:14px;user-select:none;touch-action:none;
-  box-shadow:0 0 12px rgba(240,165,0,.5)}
+  width:34px;height:34px;background:var(--amber);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:14px;
+  user-select:none;box-shadow:0 0 10px rgba(240,165,0,.5)}
 .swtag{position:absolute;top:8px;z-index:500;background:rgba(7,9,13,.9);
-  border:1px solid var(--border);font-family:var(--mono);font-size:11px;
-  padding:3px 9px;pointer-events:none}
-.swtag.B{left:8px;color:var(--cyan)}
-.swtag.A{right:8px;color:var(--amber)}
-
-/* ANIMATE */
+  border:1px solid var(--border);font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none}
+.swtag.B{left:8px;color:var(--cyan)}.swtag.A{right:8px;color:var(--amber)}
 #vAnim{position:relative}
 .animyr{position:absolute;top:8px;left:10px;z-index:500;pointer-events:none;
-  font-family:var(--mono);font-size:56px;color:var(--amber);opacity:.7;
-  text-shadow:0 0 24px rgba(240,165,0,.4);line-height:1}
-.animdot{position:absolute;top:72px;left:13px;z-index:500;pointer-events:none;
-  font-family:var(--mono);font-size:10px;color:var(--dim);
-  display:flex;align-items:center;gap:5px}
+  font-family:var(--mono);font-size:54px;color:var(--amber);opacity:.7;
+  text-shadow:0 0 20px rgba(240,165,0,.4);line-height:1}
+.animdot{position:absolute;top:68px;left:13px;z-index:500;pointer-events:none;
+  font-family:var(--mono);font-size:10px;color:var(--dim);display:flex;align-items:center;gap:5px}
 .dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
-
-/* map divs */
 .mbox{width:100%;height:100%}
 
-/* ── BOTTOM ── */
-#bot{background:var(--panel);border-top:2px solid var(--border);
-  padding:8px 10px 6px;flex-shrink:0;z-index:900}
-.btop{display:flex;align-items:center;justify-content:space-between;
-  gap:8px;margin-bottom:6px;flex-wrap:wrap}
+/* BOTTOM */
+#bot{background:var(--panel);border-top:2px solid var(--border);padding:8px 10px 6px;flex-shrink:0;z-index:100}
+.btop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap}
 .ybig{font-family:var(--mono);font-size:22px;color:var(--amber);letter-spacing:2px;line-height:1}
 .ylab{font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:1px}
-.cmprow{display:none;align-items:center;gap:6px;flex-wrap:wrap}
+.cmprow{display:none;align-items:center;gap:5px;flex-wrap:wrap}
 .cmprow.on{display:flex}
 .cmplbl{font-family:var(--mono);font-size:10px;color:var(--dim)}
 .ysel{background:var(--bg);border:1px solid var(--border);color:var(--cyan);
-  font-family:var(--mono);font-size:12px;padding:3px 8px;outline:none;cursor:pointer}
+  font-family:var(--mono);font-size:12px;padding:3px 6px;outline:none;cursor:pointer}
 .sep{color:var(--dim)}
-.ctrls{display:flex;gap:4px;align-items:center}
+.ctrls{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .cbtn{width:30px;height:30px;background:transparent;border:1px solid var(--border);
-  color:var(--dim);font-size:13px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;transition:all .15s}
+  color:var(--dim);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .cbtn:hover{border-color:var(--amber);color:var(--amber)}
 .cbtn.pl{border-color:var(--green);color:var(--green)}
 .spsel{background:var(--bg);border:1px solid var(--border);color:var(--dim);
-  font-family:var(--mono);font-size:10px;padding:3px 6px;outline:none;cursor:pointer}
+  font-family:var(--mono);font-size:10px;padding:3px 5px;outline:none;cursor:pointer}
+#proxyBtn{font-family:var(--mono);font-size:10px;letter-spacing:.5px;background:transparent;
+  border:1px solid var(--amber);color:var(--amber);padding:5px 10px;cursor:pointer;white-space:nowrap;transition:all .15s}
+#proxyBtn:hover{background:rgba(240,165,0,.1)}
+#proxyBtn.ok{border-color:var(--green);color:var(--green)}
+
+/* proxy status strip */
+#proxyStrip{font-family:var(--mono);font-size:10px;color:var(--dim);
+  padding:3px 0 1px;cursor:pointer;border-top:1px solid var(--border);margin-top:4px}
+#proxyStrip:hover{color:var(--text)}
+#proxyStrip.ok{color:var(--green)}
 
 /* timeline */
 .tl{position:relative;height:34px;margin-top:2px}
@@ -130,117 +122,56 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .tk{display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:all;cursor:pointer}
 .tkl{width:1px;height:6px;background:var(--border);transition:background .2s}
 .tkn{font-family:var(--mono);font-size:9px;color:var(--dim);transition:color .2s}
-.tk.on .tkl{background:var(--amber)}
-.tk.on .tkn{color:var(--amber)}
+.tk.on .tkl{background:var(--amber)}.tk.on .tkn{color:var(--amber)}
 #sldr{position:absolute;bottom:0;left:0;width:100%;-webkit-appearance:none;height:3px;
   background:linear-gradient(to right,var(--amber) var(--p,0%),var(--border) var(--p,0%));outline:none}
 #sldr::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
-  border-radius:50%;background:var(--amber);cursor:pointer;
-  box-shadow:0 0 8px rgba(240,165,0,.7)}
+  border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 8px rgba(240,165,0,.7)}
 
-/* year stamp overlays on each map pane */
-.yr-stamp {
-  position:absolute;bottom:36px;left:10px;z-index:450;pointer-events:none;
-  font-family:var(--mono);font-size:22px;font-weight:bold;
-  color:#fff;letter-spacing:2px;line-height:1;
-  text-shadow:0 0 8px rgba(0,0,0,.9),0 2px 4px rgba(0,0,0,.9),1px 1px 0 rgba(0,0,0,.8);
-  background:rgba(0,0,0,.42);padding:4px 10px;border-left:3px solid var(--amber);
+/* PROXY MODAL */
+#proxyModal{
+  display:none;position:fixed;inset:0;z-index:99999;
+  background:rgba(7,9,13,.95);
+  align-items:center;justify-content:center;
+  padding:20px;
 }
-.yr-stamp.cyan-border { border-left-color:var(--cyan); }
+#proxyModal.on{display:flex}
+.pbox{background:var(--panel);border:2px solid var(--amber);padding:24px;width:100%;max-width:460px}
+.ptitle{font-family:var(--mono);font-size:13px;color:var(--amber);letter-spacing:2px;margin-bottom:12px}
+.psub{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.8;margin-bottom:16px}
+.psub strong{color:var(--text)}
+.pinput-row{display:flex;margin-bottom:8px}
+#purl{flex:1;background:var(--bg);border:2px solid var(--cyan);color:var(--text);
+  padding:10px 12px;font-family:var(--mono);font-size:12px;outline:none;min-width:0}
+#purl::placeholder{color:var(--dim)}
+#psave{background:var(--amber);color:var(--bg);border:none;padding:10px 16px;
+  font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0;letter-spacing:1px}
+#psave:active{opacity:.8}
+#pstatus{font-family:var(--mono);font-size:11px;min-height:18px;margin-bottom:12px}
+.pnote{background:rgba(0,200,212,.06);border:1px solid rgba(0,200,212,.2);
+  padding:10px 12px;font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.9;margin-bottom:14px}
+.pnote strong{color:var(--cyan)}
+.pfoot{display:flex;justify-content:space-between;align-items:center}
+#pclose{font-family:var(--mono);font-size:11px;color:var(--dim);cursor:pointer;
+  background:transparent;border:1px solid var(--border);padding:6px 14px}
+#pclose:hover{color:var(--text);border-color:var(--text)}
+#pclear{font-family:var(--mono);font-size:10px;color:var(--red);cursor:pointer;
+  background:transparent;border:none;text-decoration:underline}
 
-/* proxy button in bottom bar */
-#settingsBtn {
-  background: transparent;
-  border: 1px solid var(--amber);
-  color: var(--amber);
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 1px;
-  padding: 5px 10px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all .15s;
-}
-#settingsBtn:hover { background: rgba(240,165,0,.12); }
-#settingsBtn.active { border-color: var(--green); color: var(--green); }
-
-/* proxy status strip between controls and timeline */
-#proxyStrip {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--dim);
-  padding: 4px 0 2px;
-  border-top: 1px solid var(--border);
-  margin-top: 6px;
-  cursor: pointer;
-}
-#proxyStrip:hover { color: var(--text); }
-#proxyStrip.ok { color: var(--green); }
-
-/* proxy setup panel */
-#proxyPanel {
-  display:none;position:fixed;inset:0;z-index:9999;
-  background:rgba(7,9,13,.92);align-items:center;justify-content:center;
-}
-#proxyPanel.show { display:flex; }
-.proxy-box {
-  background:var(--panel);border:1px solid var(--border);
-  padding:24px;max-width:480px;width:90%;
-}
-.proxy-title { font-family:var(--mono);font-size:14px;color:var(--amber);letter-spacing:2px;margin-bottom:6px; }
-.proxy-sub { font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:16px;line-height:1.7; }
-.proxy-sub a { color:var(--cyan); }
-.proxy-sub strong { color:var(--text); }
-.proxy-input-row { display:flex;gap:0;margin-bottom:10px; }
-#proxyInput {
-  flex:1;background:var(--bg);border:1px solid var(--border);border-right:none;
-  color:var(--text);padding:9px 12px;font-family:var(--mono);font-size:12px;outline:none;
-}
-#proxyInput:focus { border-color:var(--cyan); }
-#proxySave {
-  background:var(--amber);color:var(--bg);border:none;padding:9px 16px;
-  font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer;letter-spacing:1px;
-}
-#proxyStatus { font-family:var(--mono);font-size:11px;min-height:16px;margin-bottom:14px; }
-.proxy-close { font-family:var(--mono);font-size:10px;color:var(--dim);cursor:pointer;text-decoration:underline; }
-.proxy-note {
-  margin-top:14px;padding:10px 12px;background:rgba(0,200,212,.06);
-  border:1px solid rgba(0,200,212,.2);font-family:var(--mono);font-size:10px;
-  color:var(--dim);line-height:1.8;
-}
-.proxy-note strong { color:var(--cyan); }
-
-/* toast notice */
-#toast {
-  position:fixed;bottom:110px;left:50%;transform:translateX(-50%);
-  background:#0d1f35;border:1px solid var(--amber);color:var(--text);
-  font-family:var(--mono);font-size:11px;padding:10px 16px;
-  z-index:9000;max-width:90vw;line-height:1.6;
-  box-shadow:0 4px 20px rgba(0,0,0,.8);
-  opacity:0;transition:opacity .4s;pointer-events:none;text-align:center;
-}
-#toast.show { opacity:1; }
-#toast strong { color:var(--amber); }
-#toast a { color:var(--cyan); text-decoration:underline; }
-
-/* Leaflet overrides */
+/* leaflet */
 .leaflet-control-attribution{display:none!important}
 .leaflet-control-zoom{border:1px solid var(--border)!important}
-.leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;
-  border-color:var(--border)!important}
+.leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important}
 </style>
 </head>
 <body>
-<div id="app">
 
+<div id="app">
   <!-- HEADER -->
   <div id="hdr">
     <div class="hr1">
       <div class="logo-ring"></div>
-      <div>
-        <div class="logo-name">GEOTIME</div>
-        <div class="logo-sub">EARTH CHANGE VISUALIZER</div>
-      </div>
+      <div><div class="logo-name">GEOTIME</div><div class="logo-sub">EARTH CHANGE VISUALIZER</div></div>
       <div class="modes">
         <button class="mb on" data-m="split">SPLIT</button>
         <button class="mb" data-m="swipe">SWIPE</button>
@@ -248,62 +179,50 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       </div>
     </div>
     <div class="hr2">
-      <input id="si" type="text" placeholder="Search city, landmark, region…"
-        autocomplete="off" autocorrect="off" spellcheck="false"/>
+      <input id="si" type="text" placeholder="Search city, landmark, region…" autocomplete="off" autocorrect="off" spellcheck="false"/>
       <button id="sb">LOCATE</button>
     </div>
     <div id="sd"></div>
   </div>
 
-  <div id="toast">No proxy configured — click ⚙ PROXY to unlock real historical imagery.</div>
-
   <!-- VIEWS -->
   <div id="views">
-
     <!-- SPLIT -->
     <div class="vp on" id="vSplit">
       <div class="half">
-        <div class="hlabel L" id="lblL">BEFORE · 2013</div>
+        <div class="hlabel L" id="lblL">BEFORE · 2014</div>
         <div id="mL" class="mbox"></div>
-        <div class="yr-stamp cyan-border" id="stampL">2013</div>
+        <div class="yr-stamp cy" id="stL">2014</div>
       </div>
       <div class="divbar"></div>
       <div class="half">
         <div class="hlabel R" id="lblR">AFTER · 2024</div>
         <div id="mR" class="mbox"></div>
-        <div class="yr-stamp" id="stampR">2024</div>
+        <div class="yr-stamp" id="stR">2024</div>
       </div>
     </div>
-
     <!-- SWIPE -->
     <div class="vp" id="vSwipe">
-      <div class="swtag B" id="swB">BEFORE · 2013</div>
+      <div class="swtag B" id="swB">BEFORE · 2014</div>
       <div class="swtag A" id="swA">AFTER · 2024</div>
       <div id="mSB" class="mbox"></div>
       <div id="mST" class="mbox"></div>
-      <div class="swhandle" id="swH">
-        <div class="swbtn">⇔</div>
-      </div>
-      <div class="yr-stamp cyan-border" id="stampSB" style="left:10px">2013</div>
-      <div class="yr-stamp" id="stampST" style="right:10px;left:auto;border-left:none;border-right:3px solid var(--amber)">2024</div>
+      <div class="swhandle" id="swH"><div class="swbtn">⇔</div></div>
+      <div class="yr-stamp cy" id="stSB" style="bottom:40px;left:10px">2014</div>
+      <div class="yr-stamp" id="stST" style="bottom:40px;right:10px;left:auto;border-left:none;border-right:3px solid var(--amber)">2024</div>
     </div>
-
     <!-- ANIMATE -->
     <div class="vp" id="vAnim">
-      <div class="animyr" id="animYr">2013</div>
+      <div class="animyr" id="animYr">2014</div>
       <div class="animdot"><div class="dot"></div><span>PLAYING</span></div>
       <div id="mA" class="mbox"></div>
     </div>
-
   </div>
 
   <!-- BOTTOM -->
   <div id="bot">
     <div class="btop">
-      <div>
-        <div class="ybig" id="ydsp">2013</div>
-        <div class="ylab">SELECTED YEAR</div>
-      </div>
+      <div><div class="ybig" id="ydsp">2014</div><div class="ylab">SELECTED YEAR</div></div>
       <div class="cmprow on" id="cmprow">
         <span class="cmplbl">COMPARE</span>
         <select class="ysel" id="selB"></select>
@@ -320,339 +239,181 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <option value="600">2×</option>
           <option value="300">4×</option>
         </select>
-        <button id="settingsBtn">⚙ PROXY</button>
+        <button id="proxyBtn">⚙ PROXY</button>
       </div>
     </div>
-    <div id="proxyStrip">
-      <span id="proxyStripTxt">⚠ No proxy — click ⚙ PROXY to enable real historical imagery</span>
-    </div>
+    <div id="proxyStrip">⚠ No proxy — both maps show current imagery. Click ⚙ PROXY to fix.</div>
     <div class="tl">
       <div class="tks" id="tks"></div>
       <input type="range" id="sldr" min="0" step="1" value="0"/>
     </div>
   </div>
+</div>
 
-</div><!-- #app -->
-
-<!-- PROXY PANEL — outside #app so fixed positioning works correctly -->
-<div id="proxyPanel">
-  <div class="proxy-box">
-    <div class="proxy-title">⚙ HISTORICAL TILE PROXY</div>
-    <div class="proxy-sub">
-      Paste your <strong>Cloudflare Worker URL</strong> to unlock real ESRI Wayback
-      historical satellite imagery (2014–2024).
+<!-- PROXY MODAL — outside #app, never clipped -->
+<div id="proxyModal">
+  <div class="pbox">
+    <div class="ptitle">⚙ CONNECT HISTORICAL TILE PROXY</div>
+    <div class="psub">
+      Paste your <strong>Cloudflare Worker URL</strong> below.<br>
+      This unlocks real ESRI Wayback satellite imagery per year (2014–2024).<br>
+      Without it, both maps show current Google imagery.
     </div>
-    <div class="proxy-input-row">
-      <input id="proxyInput" type="url" placeholder="https://geotime-tiles.yourname.workers.dev"/>
-      <button id="proxySave">SAVE</button>
+    <div class="pinput-row">
+      <input id="purl" type="url" placeholder="https://geotime-tiles.yourname.workers.dev"/>
+      <button id="psave">SAVE</button>
     </div>
-    <div id="proxyStatus"></div>
-    <div class="proxy-note">
-      <strong>Deploy worker in 2 min:</strong><br>
-      1. dash.cloudflare.com → Workers &amp; Pages → Create Worker<br>
-      2. Click <strong>Edit code</strong> → paste <strong>wayback-worker.js</strong> → Deploy<br>
-      3. Copy the <strong>.workers.dev</strong> URL → paste above → Save<br>
+    <div id="pstatus"></div>
+    <div class="pnote">
+      <strong>Deploy your worker (2 min):</strong><br>
+      1. Go to <strong>dash.cloudflare.com → Workers &amp; Pages → Create Worker</strong><br>
+      2. Click <strong>"Edit code"</strong> in the editor (not the 512-char preview box)<br>
+      3. Select all → delete → paste <strong>wayback-worker.js</strong> → click Deploy<br>
+      4. Copy the <strong>https://xxx.workers.dev</strong> URL → paste above → Save<br>
       Free tier: <strong>100,000 requests/day</strong>
     </div>
-    <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
-      <span class="proxy-close" id="proxyClose">✕ Close</span>
-      <span id="proxyCurrentStatus" style="font-family:var(--mono);font-size:10px;color:var(--dim)"></span>
+    <div class="pfoot">
+      <button id="pclose">✕ Close</button>
+      <button id="pclear">Clear saved proxy</button>
     </div>
   </div>
 </div>
-// ════════════════════════════════════════════════════════════════════
-//  TILE STRATEGY
-//
-//  WITHOUT PROXY: Google Hybrid (satellite + labels). Same imagery
-//                 for all years — year label shown, no real historical diff.
-//
-//  WITH PROXY:    ESRI Wayback tiles via your Cloudflare Worker.
-//                 Real historical satellite imagery per year, 2014–2024.
-//                 Set PROXY_BASE below or enter it in the settings panel.
-//
-//  To deploy your proxy: use the wayback-worker.js file.
-// ════════════════════════════════════════════════════════════════════
 
-const YEARS = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
-const NY = YEARS.length;
-const GSUBS = ['0','1','2','3'];
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const YEARS   = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+const NY      = YEARS.length;
+const GSUBS   = ['0','1','2','3'];
+const HYBRID  = 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'; // satellite + labels
+const WBIDS   = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
 
-// ── PASTE YOUR WORKER URL HERE (e.g. https://geotime-tiles.myname.workers.dev) ──
-let PROXY_BASE = localStorage.getItem('geotime_proxy') || '';
+let PROXY = localStorage.getItem('gt_proxy') || '';
 
-// ESRI Wayback release IDs per year (from their public catalog)
-const WAYBACK_IDS = {
-  2014: 10, 2015: 34, 2016: 54, 2017: 91, 2018: 140,
-  2019: 196, 2020: 254, 2021: 305, 2022: 368, 2023: 420, 2024: 478,
-};
-
-// Google Hybrid = satellite + crisp baked-in labels. Always works.
-const HYBRID_URL = 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
-
-function tileUrl(yearIdx) {
-  const year = YEARS[yearIdx];
-  if (PROXY_BASE) {
-    const base = PROXY_BASE.replace(/\/$/, '');
-    const id = WAYBACK_IDS[year];
-    // Proxy route: /tile/{releaseId}/{z}/{y}/{x}
-    return `${base}/tile/${id}/{z}/{y}/{x}`;
+function tileUrl(yi) {
+  if (PROXY) {
+    const id = WBIDS[YEARS[yi]];
+    return `${PROXY.replace(/\/$/,'')}/tile/${id}/{z}/{y}/{x}`;
   }
-  return HYBRID_URL; // fallback — no historical diff
+  return HYBRID;
 }
 
-function hasProxy() { return !!PROXY_BASE; }
+// ─── LAYER MANAGEMENT ─────────────────────────────────────────────────────────
+const ML = new Map(); // map → current tile layer
 
-// ── Layer management ─────────────────────────────────────────────────────────
-
-const mapLayers = new Map();
-
-function swapLayer(m, yearIdx) {
-  const old = mapLayers.get(m);
-  const url = tileUrl(yearIdx);
-  const opts = PROXY_BASE
-    ? { maxZoom: 20 }
-    : { subdomains: GSUBS, maxZoom: 20 };
-  const newL = L.tileLayer(url, opts).addTo(m);
-  mapLayers.set(m, newL);
-  if (old) setTimeout(() => { try { m.removeLayer(old); } catch(e){} }, 500);
-  return newL;
+function swapLayer(map, yi) {
+  const old = ML.get(map);
+  const url = tileUrl(yi);
+  const opts = PROXY ? {maxZoom:20} : {subdomains:GSUBS,maxZoom:20};
+  const lay  = L.tileLayer(url, opts).addTo(map);
+  ML.set(map, lay);
+  if (old) setTimeout(() => { try { map.removeLayer(old); } catch(e){} }, 600);
 }
 
-function addBaseLayer(m, yearIdx) {
-  const url = tileUrl(yearIdx);
-  const opts = PROXY_BASE
-    ? { maxZoom: 20 }
-    : { subdomains: GSUBS, maxZoom: 20 };
-  const l = L.tileLayer(url, opts).addTo(m);
-  mapLayers.set(m, l);
-  return l;
-}
-
-// State
-let center = [17.4435, 78.3772]; // HITEC City, Hyderabad
-let zoom   = 13;
-let yIdx   = 0;
-let cmpB   = 0;
-let cmpA   = NY - 1;
-let mode   = 'split';
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let center  = [17.4435, 78.3772];
+let zoom    = 13;
+let yIdx    = 0;
+let cmpB    = 0;
+let cmpA    = NY - 1;
+let mode    = 'split';
 let playing = false;
 let ptimer  = null;
 
-// ── Create maps ───────────────────────────────────────────────────────────────
-
-const LOPTS = { zoomControl:false, attributionControl:false, maxZoom:20, minZoom:2 };
+// ─── MAPS ─────────────────────────────────────────────────────────────────────
+const MOPTS = {zoomControl:false, attributionControl:false, maxZoom:20, minZoom:2};
 
 function mkMap(id) {
-  const el = document.getElementById(id);
-  const m  = L.map(el, LOPTS);
+  const m = L.map(document.getElementById(id), MOPTS);
   m.setView(center, zoom);
   return m;
 }
 
-function addLayer(m, yearIdx) {
-  return addBaseLayer(m, yearIdx);
-}
+const mL=mkMap('mL'), mR=mkMap('mR'), mSB=mkMap('mSB'), mST=mkMap('mST'), mA=mkMap('mA');
+const ALL = [mL,mR,mSB,mST,mA];
 
-// Create all 5 maps
-const mL  = mkMap('mL');
-const mR  = mkMap('mR');
-const mSB = mkMap('mSB');
-const mST = mkMap('mST');
-const mA  = mkMap('mA');
-const ALL = [mL, mR, mSB, mST, mA];
+swapLayer(mL,  0);
+swapLayer(mR,  NY-1);
+swapLayer(mSB, 0);
+swapLayer(mST, NY-1);
+swapLayer(mA,  0);
 
-// Add tiles with correct starting years
-addBaseLayer(mL,  0);
-addBaseLayer(mR,  NY - 1);
-addBaseLayer(mSB, 0);
-addBaseLayer(mST, NY - 1);
-addBaseLayer(mA,  0);
+ALL.forEach(m => L.control.zoom({position:'bottomright'}).addTo(m));
 
-// Add zoom controls
-ALL.forEach(m => L.control.zoom({ position:'bottomright' }).addTo(m));
-
-// ── Sync movement ─────────────────────────────────────────────────────────────
-
+// ─── SYNC ─────────────────────────────────────────────────────────────────────
 let syncing = false;
-ALL.forEach((src, si) => {
+ALL.forEach((src,si) => {
   src.on('moveend', () => {
     if (syncing) return;
     syncing = true;
     center = [src.getCenter().lat, src.getCenter().lng];
     zoom   = src.getZoom();
-    ALL.forEach((t, ti) => {
-      if (ti !== si) t.setView(center, zoom, { animate:false });
-    });
+    ALL.forEach((t,ti) => { if (ti!==si) t.setView(center, zoom, {animate:false}); });
     syncing = false;
   });
 });
 
-// ── Invalidate on container resize ───────────────────────────────────────────
+window.addEventListener('resize', () => ALL.forEach(m => m.invalidateSize()));
+setTimeout(() => { ALL.forEach(m => { m.invalidateSize(); m.setView(center,zoom); }); initSwipe(); }, 400);
 
-function invAll() { ALL.forEach(m => m.invalidateSize()); }
-window.addEventListener('resize', invAll);
-
-// Force invalidate after first render
-setTimeout(() => {
-  invAll();
-  ALL.forEach(m => m.setView(center, zoom));
-  initSwipe();
-}, 400);
-
-// ── Proxy panel ───────────────────────────────────────────────────────────────
-
-function openProxyPanel() {
-  document.getElementById('proxyInput').value = PROXY_BASE || '';
-  document.getElementById('proxyStatus').textContent = '';
-  document.getElementById('proxyPanel').classList.add('show');
-}
-
-function updateProxyStatus() {
-  const btn   = document.getElementById('settingsBtn');
-  const strip = document.getElementById('proxyStrip');
-  const txt   = document.getElementById('proxyStripTxt');
-  const cur   = document.getElementById('proxyCurrentStatus');
-
-  if (PROXY_BASE) {
-    const domain = PROXY_BASE.replace('https://','').split('/')[0];
-    btn.classList.add('active');
-    btn.textContent = '✓ PROXY';
-    strip.classList.add('ok');
-    if (txt) txt.textContent = `✓ Proxy active: ${domain} — real historical imagery enabled`;
-    if (cur) cur.textContent = `Connected: ${domain}`;
-  } else {
-    btn.classList.remove('active');
-    btn.textContent = '⚙ PROXY';
-    strip.classList.remove('ok');
-    if (txt) txt.textContent = '⚠ No proxy — click ⚙ PROXY above to enable real historical imagery';
-    if (cur) cur.textContent = 'No proxy configured';
-  }
-}
-
-document.getElementById('settingsBtn').onclick = openProxyPanel;
-document.getElementById('proxyStrip').onclick   = openProxyPanel;
-document.getElementById('proxyClose').onclick   = () => document.getElementById('proxyPanel').classList.remove('show');
-
-document.getElementById('proxySave').onclick = async () => {
-  const val = document.getElementById('proxyInput').value.trim().replace(/\/$/, '');
-  const statusEl = document.getElementById('proxyStatus');
-
-  if (!val) {
-    // Clear proxy
-    PROXY_BASE = '';
-    localStorage.removeItem('geotime_proxy');
-    statusEl.style.color = 'var(--dim)';
-    statusEl.textContent = 'Proxy cleared. Using Google imagery.';
-    updateProxyStatus();
-    applyCompareLayers();
-    return;
-  }
-
-  statusEl.style.color = 'var(--dim)';
-  statusEl.textContent = 'Testing connection…';
-
-  try {
-    const testUrl = `${val}/tile/year/2019/4/6/11`;
-    const r = await fetch(testUrl, { signal: AbortSignal.timeout(8000) });
-    if (r.ok && r.headers.get('content-type')?.includes('image')) {
-      PROXY_BASE = val;
-      localStorage.setItem('geotime_proxy', val);
-      statusEl.style.color = 'var(--green)';
-      statusEl.textContent = '✓ Connected! Real historical imagery active.';
-      updateProxyStatus();
-      applyCompareLayers(); // reload all maps with real tiles
-    } else {
-      statusEl.style.color = 'var(--red)';
-      statusEl.textContent = `Worker responded but returned ${r.status}. Check the URL.`;
-    }
-  } catch(e) {
-    statusEl.style.color = 'var(--red)';
-    statusEl.textContent = 'Could not connect. Check the URL and try again.';
-  }
-};
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-updateProxyStatus();
-
-// Toast: show status about proxy on load
-setTimeout(() => {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
-  if (PROXY_BASE) {
-    toast.innerHTML = '<strong style="color:var(--green)">✓ Proxy active</strong> — real ESRI Wayback historical imagery loaded.';
-  } else {
-    toast.innerHTML = '<strong>No proxy configured.</strong> Both maps show current Google imagery. Click <strong>⚙ PROXY</strong> to unlock real historical tiles.';
-  }
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 6000);
-}, 1000);
-
-// ── Year selects ──────────────────────────────────────────────────────────────
-
-const selBEl = document.getElementById('selB');
-const selAEl = document.getElementById('selA');
-YEARS.forEach((y, i) => {
-  selBEl.innerHTML += `<option value="${i}">${y}</option>`;
-  selAEl.innerHTML += `<option value="${i}">${y}</option>`;
+// ─── YEAR SELECTS ─────────────────────────────────────────────────────────────
+const selB = document.getElementById('selB');
+const selA = document.getElementById('selA');
+YEARS.forEach((y,i) => {
+  selB.innerHTML += `<option value="${i}">${y}</option>`;
+  selA.innerHTML += `<option value="${i}">${y}</option>`;
 });
-selBEl.value = cmpB;
-selAEl.value = cmpA;
+selB.value = cmpB; selA.value = cmpA;
 
-function updLabels() {
-  const yB = YEARS[cmpB], yA = YEARS[cmpA];
-  document.getElementById('lblL').textContent   = `BEFORE · ${yB}`;
-  document.getElementById('lblR').textContent   = `AFTER · ${yA}`;
-  document.getElementById('swB').textContent    = `BEFORE · ${yB}`;
-  document.getElementById('swA').textContent    = `AFTER · ${yA}`;
-  // year stamps
-  document.getElementById('stampL').textContent  = yB;
-  document.getElementById('stampR').textContent  = yA;
-  document.getElementById('stampSB').textContent = yB;
-  document.getElementById('stampST').textContent = yA;
+function updStamps() {
+  const yb = YEARS[cmpB], ya = YEARS[cmpA];
+  document.getElementById('lblL').textContent = `BEFORE · ${yb}`;
+  document.getElementById('lblR').textContent = `AFTER · ${ya}`;
+  document.getElementById('swB').textContent  = `BEFORE · ${yb}`;
+  document.getElementById('swA').textContent  = `AFTER · ${ya}`;
+  document.getElementById('stL').textContent  = yb;
+  document.getElementById('stR').textContent  = ya;
+  document.getElementById('stSB').textContent = yb;
+  document.getElementById('stST').textContent = ya;
 }
 
-function applyCompareLayers() {
-  updLabels();
-  swapLayer(mL,  cmpB);
-  swapLayer(mR,  cmpA);
-  swapLayer(mSB, cmpB);
-  swapLayer(mST, cmpA);
+function applyCmp() {
+  updStamps();
+  swapLayer(mL,  cmpB); swapLayer(mR,  cmpA);
+  swapLayer(mSB, cmpB); swapLayer(mST, cmpA);
 }
 
-updLabels();
-selBEl.onchange = () => { cmpB = +selBEl.value; applyCompareLayers(); };
-selAEl.onchange = () => { cmpA = +selAEl.value; applyCompareLayers(); };
+updStamps();
+selB.onchange = () => { cmpB = +selB.value; applyCmp(); };
+selA.onchange = () => { cmpA = +selA.value; applyCmp(); };
 
-// ── Timeline ticks + slider ───────────────────────────────────────────────────
-
+// ─── TIMELINE ─────────────────────────────────────────────────────────────────
 const tksEl = document.getElementById('tks');
 const sldr  = document.getElementById('sldr');
 sldr.max = NY - 1;
 
-YEARS.forEach((y, i) => {
+YEARS.forEach((y,i) => {
   const t = document.createElement('div');
-  t.className = 'tk' + (i===0 ? ' on' : '');
+  t.className = 'tk' + (i===0?' on':'');
   t.innerHTML = `<div class="tkl"></div><div class="tkn">${y}</div>`;
   t.onclick = () => { yIdx=i; sldr.value=i; updYear(); updTrack(); };
   tksEl.appendChild(t);
 });
 
-sldr.addEventListener('input', () => { yIdx=+sldr.value; updYear(); updTrack(); });
+sldr.oninput = () => { yIdx=+sldr.value; updYear(); updTrack(); };
 
 function updYear() {
   const y = YEARS[yIdx];
   document.getElementById('ydsp').textContent   = y;
   document.getElementById('animYr').textContent = y;
   tksEl.querySelectorAll('.tk').forEach((t,i) => t.classList.toggle('on', i===yIdx));
-  if (mode === 'anim') swapLayer(mA, yIdx);
+  if (mode==='anim') swapLayer(mA, yIdx);
 }
 function updTrack() {
   sldr.style.setProperty('--p', (yIdx/(NY-1)*100)+'%');
 }
 updTrack();
 
-// ── Mode switching ────────────────────────────────────────────────────────────
-
+// ─── MODES ────────────────────────────────────────────────────────────────────
 document.querySelectorAll('.mb').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.mb').forEach(b => b.classList.remove('on'));
@@ -663,197 +424,167 @@ document.querySelectorAll('.mb').forEach(btn => {
 
 function gotoMode(m) {
   mode = m;
-  document.getElementById('vSplit').classList.remove('on');
-  document.getElementById('vSwipe').classList.remove('on');
-  document.getElementById('vAnim').classList.remove('on');
+  ['vSplit','vSwipe','vAnim'].forEach(id => document.getElementById(id).classList.remove('on'));
   document.getElementById('cmprow').classList.remove('on');
-
-  if (m === 'split') {
+  if (m==='split') {
     document.getElementById('vSplit').classList.add('on');
     document.getElementById('cmprow').classList.add('on');
     setTimeout(() => { mL.invalidateSize(); mR.invalidateSize(); }, 80);
-  } else if (m === 'swipe') {
+  } else if (m==='swipe') {
     document.getElementById('vSwipe').classList.add('on');
     document.getElementById('cmprow').classList.add('on');
     setTimeout(() => { mSB.invalidateSize(); mST.invalidateSize(); initSwipe(); }, 80);
   } else {
     document.getElementById('vAnim').classList.add('on');
-    setTimeout(() => {
-      mA.invalidateSize();
-      mA.setView(center, zoom);
-      swapLayer(mA, yIdx);
-    }, 80);
+    setTimeout(() => { mA.invalidateSize(); mA.setView(center,zoom); swapLayer(mA,yIdx); }, 80);
   }
 }
 
-// ── Swipe handle ──────────────────────────────────────────────────────────────
-
+// ─── SWIPE ────────────────────────────────────────────────────────────────────
 function initSwipe() {
   const H = document.getElementById('swH');
   const T = document.getElementById('mST');
   const W = document.getElementById('vSwipe');
   let drag = false;
-
-  function moveTo(x) {
+  function mv(x) {
     const r = W.getBoundingClientRect();
-    const p = Math.max(5, Math.min(95, (x - r.left) / r.width * 100));
-    H.style.left = p + '%';
-    T.style.clipPath = `inset(0 ${100-p}% 0 0)`;
+    const p = Math.max(5, Math.min(95, (x-r.left)/r.width*100));
+    H.style.left = p+'%'; T.style.clipPath = `inset(0 ${100-p}% 0 0)`;
   }
-
-  // Remove old listeners by cloning
-  const H2 = H.cloneNode(true);
-  H.parentNode.replaceChild(H2, H);
-
+  const H2 = H.cloneNode(true); H.parentNode.replaceChild(H2,H);
   H2.addEventListener('mousedown',  e => { drag=true; e.preventDefault(); });
-  H2.addEventListener('touchstart', e => { drag=true; }, {passive:true});
-  document.addEventListener('mousemove',  e => { if(drag) moveTo(e.clientX); });
-  document.addEventListener('touchmove',  e => { if(drag) moveTo(e.touches[0].clientX); }, {passive:true});
+  H2.addEventListener('touchstart', () => drag=true, {passive:true});
+  document.addEventListener('mousemove',  e => { if(drag) mv(e.clientX); });
+  document.addEventListener('touchmove',  e => { if(drag) mv(e.touches[0].clientX); }, {passive:true});
   document.addEventListener('mouseup',  () => drag=false);
   document.addEventListener('touchend', () => drag=false);
-
   const r = W.getBoundingClientRect();
-  moveTo(r.left + r.width / 2);
+  mv(r.left + r.width/2);
 }
 
-// ── Playback ──────────────────────────────────────────────────────────────────
-
+// ─── PLAYBACK ─────────────────────────────────────────────────────────────────
+document.getElementById('cPl').onclick = () => playing ? stopPlay() : startPlay();
 document.getElementById('cBk').onclick = () => { stopPlay(); yIdx=0; sldr.value=0; updYear(); updTrack(); };
 document.getElementById('cFw').onclick = () => { stopPlay(); yIdx=NY-1; sldr.value=NY-1; updYear(); updTrack(); };
-document.getElementById('cPl').onclick = togglePlay;
-
-function togglePlay() { playing ? stopPlay() : startPlay(); }
 
 function startPlay() {
-  if (mode !== 'anim') {
-    gotoMode('anim');
-    document.querySelectorAll('.mb').forEach(b => b.classList.toggle('on', b.dataset.m==='anim'));
-  }
-  playing = true;
-  document.getElementById('cPl').textContent = '⏸';
-  document.getElementById('cPl').classList.add('pl');
-  if (yIdx >= NY-1) yIdx = 0;
+  if (mode!=='anim') { gotoMode('anim'); document.querySelectorAll('.mb').forEach(b => b.classList.toggle('on',b.dataset.m==='anim')); }
+  playing=true; document.getElementById('cPl').textContent='⏸'; document.getElementById('cPl').classList.add('pl');
+  if (yIdx>=NY-1) yIdx=0;
   const ms = +document.getElementById('spd').value;
-  ptimer = setInterval(() => {
-    yIdx++;
-    if (yIdx >= NY) { yIdx = NY-1; stopPlay(); return; }
-    updYear(); sldr.value=yIdx; updTrack();
-  }, ms);
+  ptimer = setInterval(() => { yIdx++; if(yIdx>=NY){yIdx=NY-1;stopPlay();return;} updYear(); sldr.value=yIdx; updTrack(); }, ms);
 }
-
 function stopPlay() {
-  playing = false;
-  clearInterval(ptimer);
-  document.getElementById('cPl').textContent = '▶';
-  document.getElementById('cPl').classList.remove('pl');
+  playing=false; clearInterval(ptimer);
+  document.getElementById('cPl').textContent='▶'; document.getElementById('cPl').classList.remove('pl');
 }
 
-// ── Search (Photon API — CORS open, no key) ───────────────────────────────────
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
+const siEl=document.getElementById('si'), sbEl=document.getElementById('sb'), sdEl=document.getElementById('sd');
+let sres=[], hiI=-1, sdt=null;
 
-const siEl = document.getElementById('si');
-const sbEl = document.getElementById('sb');
-const sdEl = document.getElementById('sd');
-let sres=[], hiI=-1, sdbt=null;
-
-function posSD() {
-  const r  = siEl.getBoundingClientRect();
-  const r2 = sbEl.getBoundingClientRect();
-  sdEl.style.top   = r.bottom + 'px';
-  sdEl.style.left  = r.left + 'px';
-  sdEl.style.width = (r2.right - r.left) + 'px';
+function sdPos() {
+  const r=siEl.getBoundingClientRect(), r2=sbEl.getBoundingClientRect();
+  sdEl.style.top=r.bottom+'px'; sdEl.style.left=r.left+'px'; sdEl.style.width=(r2.right-r.left)+'px';
 }
-
-function bname(p) {
-  return [p.name, p.city!==p.name&&p.city, p.state, p.country]
-    .filter(Boolean).join(', ');
-}
-
+function bname(p) { return [p.name,p.city!==p.name&&p.city,p.state,p.country].filter(Boolean).join(', '); }
 function renderSD(items) {
   sres=items; hiI=-1; sdEl.innerHTML='';
-  if (!items.length) {
-    sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">No results found</div>';
-    return;
-  }
+  if(!items.length){sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">No results</div>';return;}
   items.forEach((it,i) => {
-    const d = document.createElement('div');
-    d.className = 'sitem';
-    const nm = bname(it.properties);
-    const tp = (it.properties.osm_value||'').replace(/_/g,' ');
-    d.innerHTML = `${nm}<span class="stype">${tp}</span>`;
-    d.onmousedown = e => e.preventDefault();
-    d.onclick = () => pick(i);
+    const d=document.createElement('div'); d.className='sitem';
+    d.innerHTML=bname(it.properties);
+    d.onmousedown=e=>e.preventDefault(); d.onclick=()=>pick(i);
     sdEl.appendChild(d);
   });
 }
-
 function pick(i) {
-  const f = sres[i]; if(!f) return;
-  const [lng,lat] = f.geometry.coordinates;
-  ALL.forEach(m => m.setView([lat,lng], 13, {animate:true}));
+  const f=sres[i]; if(!f) return;
+  const [lng,lat]=f.geometry.coordinates;
+  ALL.forEach(m=>m.setView([lat,lng],13,{animate:true}));
   center=[lat,lng]; zoom=13;
-  siEl.value = bname(f.properties).split(',')[0];
+  siEl.value=bname(f.properties).split(',')[0];
   sdEl.classList.remove('on');
 }
-
 async function doSearch(q) {
-  if (!q || q.length < 2) { sdEl.classList.remove('on'); return; }
-  posSD();
-  sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">⟳ Searching…</div>';
-  sdEl.classList.add('on');
+  if(q.length<2){sdEl.classList.remove('on');return;}
+  sdPos(); sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">Searching…</div>'; sdEl.classList.add('on');
   try {
-    const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=8&lang=en`);
-    if (!res.ok) throw new Error('fetch fail');
-    const data = await res.json();
-    renderSD(data.features || []);
-  } catch(e) {
-    // Fallback to Nominatim
-    try {
-      const res2 = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=geojson&limit=6`,
-        { headers:{ 'Accept':'application/json' } }
-      );
-      const d2 = await res2.json();
-      const feats = (d2.features||[]).map(f => ({
-        geometry: f.geometry,
-        properties: {
-          name: (f.properties.display_name||'').split(',')[0],
-          city:'', state:'', country:'',
-          osm_value: f.properties.type||''
-        }
-      }));
-      renderSD(feats);
-    } catch {
-      sdEl.innerHTML='<div class="sitem" style="color:var(--red);pointer-events:none">Search failed — check connection</div>';
+    const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=7&lang=en`);
+    const d=await r.json(); renderSD(d.features||[]);
+  } catch { sdEl.innerHTML='<div class="sitem" style="color:var(--red);pointer-events:none">Search error</div>'; }
+}
+siEl.addEventListener('input', ()=>{ clearTimeout(sdt); sdt=setTimeout(()=>doSearch(siEl.value.trim()),300); });
+siEl.addEventListener('focus', sdPos);
+siEl.addEventListener('keydown', e => {
+  const its=sdEl.querySelectorAll('.sitem');
+  if(e.key==='ArrowDown'){e.preventDefault();hiI=Math.min(hiI+1,its.length-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
+  else if(e.key==='ArrowUp'){e.preventDefault();hiI=Math.max(hiI-1,-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
+  else if(e.key==='Enter'){hiI>=0?pick(hiI):doSearch(siEl.value.trim());}
+  else if(e.key==='Escape') sdEl.classList.remove('on');
+});
+sbEl.onclick=()=>doSearch(siEl.value.trim());
+document.addEventListener('click', e=>{ if(!e.target.closest('#si')&&!e.target.closest('#sb')&&!e.target.closest('#sd')) sdEl.classList.remove('on'); });
+
+// ─── PROXY MODAL ──────────────────────────────────────────────────────────────
+const modal   = document.getElementById('proxyModal');
+const purlEl  = document.getElementById('purl');
+const pstatEl = document.getElementById('pstatus');
+
+function openProxy() {
+  purlEl.value = PROXY || '';
+  pstatEl.textContent = '';
+  pstatEl.style.color = '';
+  modal.classList.add('on');
+  setTimeout(() => purlEl.focus(), 100);
+}
+function closeProxy() { modal.classList.remove('on'); }
+
+document.getElementById('proxyBtn').onclick   = openProxy;
+document.getElementById('proxyStrip').onclick  = openProxy;
+document.getElementById('pclose').onclick      = closeProxy;
+modal.addEventListener('click', e => { if (e.target===modal) closeProxy(); });
+
+document.getElementById('pclear').onclick = () => {
+  PROXY = ''; localStorage.removeItem('gt_proxy');
+  purlEl.value = '';
+  pstatEl.style.color = 'var(--dim)'; pstatEl.textContent = 'Proxy cleared.';
+  updProxyUI(); applyCmp();
+};
+
+document.getElementById('psave').onclick = async () => {
+  const val = purlEl.value.trim().replace(/\/$/,'');
+  if (!val) { pstatEl.style.color='var(--red)'; pstatEl.textContent='Please enter a URL.'; return; }
+  pstatEl.style.color='var(--dim)'; pstatEl.textContent='Testing connection…';
+  try {
+    const testUrl = `${val}/tile/${WBIDS[2019]}/4/6/11`;
+    const r = await fetch(testUrl, {signal: AbortSignal.timeout(8000)});
+    if (r.ok) {
+      PROXY = val; localStorage.setItem('gt_proxy', val);
+      pstatEl.style.color='var(--green)'; pstatEl.textContent='✓ Connected! Real historical imagery active. Close to continue.';
+      updProxyUI(); applyCmp();
+    } else {
+      pstatEl.style.color='var(--red)'; pstatEl.textContent=`Worker returned ${r.status}. Check the URL.`;
     }
+  } catch(e) {
+    pstatEl.style.color='var(--red)'; pstatEl.textContent='Could not connect — check URL and try again.';
+  }
+};
+
+function updProxyUI() {
+  const btn   = document.getElementById('proxyBtn');
+  const strip = document.getElementById('proxyStrip');
+  if (PROXY) {
+    const d = PROXY.replace('https://','').split('/')[0];
+    btn.classList.add('ok'); btn.textContent='✓ PROXY';
+    strip.classList.add('ok'); strip.textContent=`✓ Proxy active: ${d} — real historical imagery enabled`;
+  } else {
+    btn.classList.remove('ok'); btn.textContent='⚙ PROXY';
+    strip.classList.remove('ok'); strip.textContent='⚠ No proxy — both maps show current imagery. Click ⚙ PROXY to fix.';
   }
 }
 
-siEl.addEventListener('input', () => {
-  clearTimeout(sdbt);
-  sdbt = setTimeout(() => doSearch(siEl.value.trim()), 320);
-});
-siEl.addEventListener('focus', posSD);
-siEl.addEventListener('keydown', e => {
-  const its = sdEl.querySelectorAll('.sitem');
-  if (e.key==='ArrowDown') {
-    e.preventDefault();
-    hiI = Math.min(hiI+1, its.length-1);
-    its.forEach((x,i) => x.classList.toggle('hi', i===hiI));
-  } else if (e.key==='ArrowUp') {
-    e.preventDefault();
-    hiI = Math.max(hiI-1, -1);
-    its.forEach((x,i) => x.classList.toggle('hi', i===hiI));
-  } else if (e.key==='Enter') {
-    hiI >= 0 ? pick(hiI) : doSearch(siEl.value.trim());
-  } else if (e.key==='Escape') {
-    sdEl.classList.remove('on');
-  }
-});
-sbEl.onclick = () => doSearch(siEl.value.trim());
-document.addEventListener('click', e => {
-  if (!e.target.closest('#si') && !e.target.closest('#sb') && !e.target.closest('#sd'))
-    sdEl.classList.remove('on');
-});
+updProxyUI();
 </script>
 </body>
 </html>
