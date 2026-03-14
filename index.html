@@ -148,6 +148,39 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 }
 .yr-stamp.cyan-border { border-left-color:var(--cyan); }
 
+/* proxy setup panel */
+#proxyPanel {
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(7,9,13,.92);align-items:center;justify-content:center;
+}
+#proxyPanel.show { display:flex; }
+.proxy-box {
+  background:var(--panel);border:1px solid var(--border);
+  padding:24px;max-width:480px;width:90%;
+}
+.proxy-title { font-family:var(--mono);font-size:14px;color:var(--amber);letter-spacing:2px;margin-bottom:6px; }
+.proxy-sub { font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:16px;line-height:1.7; }
+.proxy-sub a { color:var(--cyan); }
+.proxy-sub strong { color:var(--text); }
+.proxy-input-row { display:flex;gap:0;margin-bottom:10px; }
+#proxyInput {
+  flex:1;background:var(--bg);border:1px solid var(--border);border-right:none;
+  color:var(--text);padding:9px 12px;font-family:var(--mono);font-size:12px;outline:none;
+}
+#proxyInput:focus { border-color:var(--cyan); }
+#proxySave {
+  background:var(--amber);color:var(--bg);border:none;padding:9px 16px;
+  font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer;letter-spacing:1px;
+}
+#proxyStatus { font-family:var(--mono);font-size:11px;min-height:16px;margin-bottom:14px; }
+.proxy-close { font-family:var(--mono);font-size:10px;color:var(--dim);cursor:pointer;text-decoration:underline; }
+.proxy-note {
+  margin-top:14px;padding:10px 12px;background:rgba(0,200,212,.06);
+  border:1px solid rgba(0,200,212,.2);font-family:var(--mono);font-size:10px;
+  color:var(--dim);line-height:1.8;
+}
+.proxy-note strong { color:var(--cyan); }
+
 /* toast notice */
 #toast {
   position:fixed;bottom:110px;left:50%;transform:translateX(-50%);
@@ -183,6 +216,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <button class="mb on" data-m="split">SPLIT</button>
         <button class="mb" data-m="swipe">SWIPE</button>
         <button class="mb" data-m="anim">ANIM</button>
+        <button class="mb" id="settingsBtn" title="Configure proxy for real historical tiles">⚙ PROXY</button>
       </div>
     </div>
     <div class="hr2">
@@ -193,10 +227,35 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div id="sd"></div>
   </div>
 
-  <div id="toast">
-    <strong>🛰 Visual Timeline Mode:</strong> Maps show era-accurate visual tone per year<br>
-    (older = warmer/dimmer, newer = vivid). Labels via Google Hybrid.
-    For pixel-accurate historical imagery, a Cloudflare Worker proxy is needed.
+  <div id="toast">No proxy configured — click ⚙ PROXY to unlock real historical imagery.</div>
+
+  <!-- PROXY SETUP PANEL -->
+  <div id="proxyPanel">
+    <div class="proxy-box">
+      <div class="proxy-title">⚙ HISTORICAL TILE PROXY</div>
+      <div class="proxy-sub">
+        Paste your <strong>Cloudflare Worker URL</strong> to unlock real ESRI Wayback<br>
+        historical satellite imagery (2014–2024).<br>
+        Without it, both maps show current Google imagery.
+      </div>
+      <div class="proxy-input-row">
+        <input id="proxyInput" type="url" placeholder="https://geotime-tiles.yourname.workers.dev"/>
+        <button id="proxySave">SAVE</button>
+      </div>
+      <div id="proxyStatus"></div>
+      <div class="proxy-note">
+        <strong>Deploy worker in 2 minutes:</strong><br>
+        1. Download <strong>wayback-worker.js</strong> (provided alongside this file)<br>
+        2. Go to <strong>dash.cloudflare.com → Workers &amp; Pages → Create</strong><br>
+        3. Paste the worker code → Deploy<br>
+        4. Copy the <strong>.workers.dev</strong> URL and paste above<br>
+        Free tier: <strong>100,000 requests/day</strong> — sufficient for personal use
+      </div>
+      <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
+        <span class="proxy-close" id="proxyClose">Close</span>
+        <span id="proxyCurrentStatus" style="font-family:var(--mono);font-size:10px;color:var(--dim)"></span>
+      </div>
+    </div>
   </div>
 
   <!-- VIEWS -->
@@ -274,62 +333,70 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
 <script>
 // ════════════════════════════════════════════════════════════════════
-//  TILE: Google Hybrid (satellite + crisp baked-in labels)
-//  HISTORICAL VISUAL: CSS filter per year (brightness/sepia/saturation)
-//  Older years = warmer/desaturated, newer = vivid/bright
+//  TILE STRATEGY
+//
+//  WITHOUT PROXY: Google Hybrid (satellite + labels). Same imagery
+//                 for all years — year label shown, no real historical diff.
+//
+//  WITH PROXY:    ESRI Wayback tiles via your Cloudflare Worker.
+//                 Real historical satellite imagery per year, 2014–2024.
+//                 Set PROXY_BASE below or enter it in the settings panel.
+//
+//  To deploy your proxy: use the wayback-worker.js file.
 // ════════════════════════════════════════════════════════════════════
 
-const YEARS = [2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+const YEARS = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 const NY = YEARS.length;
 const GSUBS = ['0','1','2','3'];
 
-// Google Hybrid = satellite + road/place labels baked in (crisp, clear)
+// ── PASTE YOUR WORKER URL HERE (e.g. https://geotime-tiles.myname.workers.dev) ──
+let PROXY_BASE = localStorage.getItem('geotime_proxy') || '';
+
+// ESRI Wayback release IDs per year (from their public catalog)
+const WAYBACK_IDS = {
+  2014: 10, 2015: 34, 2016: 54, 2017: 91, 2018: 140,
+  2019: 196, 2020: 254, 2021: 305, 2022: 368, 2023: 420, 2024: 478,
+};
+
+// Google Hybrid = satellite + crisp baked-in labels. Always works.
 const HYBRID_URL = 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
 
-// Per-year visual filter — creates visible era difference between panes
-// 2013 = older/warmer/dimmer  →  2024 = vivid/bright/cool
-const YEAR_FILTER = {
-  2013: 'brightness(0.78) saturate(0.55) sepia(0.30) contrast(0.90)',
-  2014: 'brightness(0.81) saturate(0.62) sepia(0.24) contrast(0.91)',
-  2015: 'brightness(0.84) saturate(0.68) sepia(0.18) contrast(0.92)',
-  2016: 'brightness(0.87) saturate(0.74) sepia(0.13) contrast(0.93)',
-  2017: 'brightness(0.89) saturate(0.80) sepia(0.09) contrast(0.94)',
-  2018: 'brightness(0.91) saturate(0.86) sepia(0.06) contrast(0.95)',
-  2019: 'brightness(0.93) saturate(0.91) sepia(0.03) contrast(0.97)',
-  2020: 'brightness(0.96) saturate(0.96) contrast(0.98)',
-  2021: 'brightness(0.98) saturate(1.01) contrast(1.00)',
-  2022: 'brightness(1.00) saturate(1.04) contrast(1.01)',
-  2023: 'brightness(1.02) saturate(1.08) contrast(1.02)',
-  2024: 'brightness(1.05) saturate(1.13) contrast(1.03) hue-rotate(3deg)',
-};
-
-// Map container IDs for CSS filter targeting
-const MAP_CONTAINERS = {
-  mL: 'mL', mR: 'mR', mSB: 'mSB', mST: 'mST', mA: 'mA'
-};
-
-function applyFilter(elId, yearIdx) {
-  const el = document.getElementById(elId);
-  if (el) el.style.filter = YEAR_FILTER[YEARS[yearIdx]] || '';
+function tileUrl(yearIdx) {
+  const year = YEARS[yearIdx];
+  if (PROXY_BASE) {
+    const base = PROXY_BASE.replace(/\/$/, '');
+    const id = WAYBACK_IDS[year];
+    // Proxy route: /tile/{releaseId}/{z}/{y}/{x}
+    return `${base}/tile/${id}/{z}/{y}/{x}`;
+  }
+  return HYBRID_URL; // fallback — no historical diff
 }
+
+function hasProxy() { return !!PROXY_BASE; }
 
 // ── Layer management ─────────────────────────────────────────────────────────
 
 const mapLayers = new Map();
 
-function swapLayer(m, elId, yearIdx) {
+function swapLayer(m, yearIdx) {
   const old = mapLayers.get(m);
-  const newL = L.tileLayer(HYBRID_URL, { subdomains: GSUBS, maxZoom: 20 }).addTo(m);
+  const url = tileUrl(yearIdx);
+  const opts = PROXY_BASE
+    ? { maxZoom: 20 }
+    : { subdomains: GSUBS, maxZoom: 20 };
+  const newL = L.tileLayer(url, opts).addTo(m);
   mapLayers.set(m, newL);
-  if (old) m.removeLayer(old);
-  applyFilter(elId, yearIdx);  // ← apply visual era difference
+  if (old) setTimeout(() => { try { m.removeLayer(old); } catch(e){} }, 500);
   return newL;
 }
 
-function addBaseLayer(m, elId, yearIdx) {
-  const l = L.tileLayer(HYBRID_URL, { subdomains: GSUBS, maxZoom: 20 }).addTo(m);
+function addBaseLayer(m, yearIdx) {
+  const url = tileUrl(yearIdx);
+  const opts = PROXY_BASE
+    ? { maxZoom: 20 }
+    : { subdomains: GSUBS, maxZoom: 20 };
+  const l = L.tileLayer(url, opts).addTo(m);
   mapLayers.set(m, l);
-  applyFilter(elId, yearIdx);
   return l;
 }
 
@@ -354,8 +421,8 @@ function mkMap(id) {
   return m;
 }
 
-function addLayer(m, elId, yearIdx) {
-  return addBaseLayer(m, elId, yearIdx);
+function addLayer(m, yearIdx) {
+  return addBaseLayer(m, yearIdx);
 }
 
 // Create all 5 maps
@@ -366,12 +433,12 @@ const mST = mkMap('mST');
 const mA  = mkMap('mA');
 const ALL = [mL, mR, mSB, mST, mA];
 
-// Add tiles with initial year filters
-addBaseLayer(mL,  'mL',  0);       // before = 2013
-addBaseLayer(mR,  'mR',  NY - 1);  // after  = 2024
-addBaseLayer(mSB, 'mSB', 0);
-addBaseLayer(mST, 'mST', NY - 1);
-addBaseLayer(mA,  'mA',  0);
+// Add tiles with correct starting years
+addBaseLayer(mL,  0);
+addBaseLayer(mR,  NY - 1);
+addBaseLayer(mSB, 0);
+addBaseLayer(mST, NY - 1);
+addBaseLayer(mA,  0);
 
 // Add zoom controls
 ALL.forEach(m => L.control.zoom({ position:'bottomright' }).addTo(m));
@@ -404,13 +471,85 @@ setTimeout(() => {
   initSwipe();
 }, 400);
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ── Proxy panel ───────────────────────────────────────────────────────────────
 
-// Show a one-time info toast about historical tile limitation
+function updateProxyStatus() {
+  const btn = document.getElementById('settingsBtn');
+  const cur = document.getElementById('proxyCurrentStatus');
+  if (PROXY_BASE) {
+    btn.style.borderColor = 'var(--green)';
+    btn.style.color = 'var(--green)';
+    if (cur) cur.textContent = '✓ Proxy active: ' + PROXY_BASE.replace('https://','').split('/')[0];
+  } else {
+    btn.style.borderColor = '';
+    btn.style.color = '';
+    if (cur) cur.textContent = 'No proxy — showing current imagery only';
+  }
+}
+
+document.getElementById('settingsBtn').onclick = () => {
+  document.getElementById('proxyInput').value = PROXY_BASE || '';
+  document.getElementById('proxyStatus').textContent = '';
+  document.getElementById('proxyPanel').classList.add('show');
+  updateProxyStatus();
+};
+document.getElementById('proxyClose').onclick = () => {
+  document.getElementById('proxyPanel').classList.remove('show');
+};
+
+document.getElementById('proxySave').onclick = async () => {
+  const val = document.getElementById('proxyInput').value.trim().replace(/\/$/, '');
+  const statusEl = document.getElementById('proxyStatus');
+
+  if (!val) {
+    // Clear proxy
+    PROXY_BASE = '';
+    localStorage.removeItem('geotime_proxy');
+    statusEl.style.color = 'var(--dim)';
+    statusEl.textContent = 'Proxy cleared. Using Google imagery.';
+    updateProxyStatus();
+    applyCompareLayers();
+    return;
+  }
+
+  statusEl.style.color = 'var(--dim)';
+  statusEl.textContent = 'Testing connection…';
+
+  try {
+    const testUrl = `${val}/tile/year/2019/4/6/11`;
+    const r = await fetch(testUrl, { signal: AbortSignal.timeout(8000) });
+    if (r.ok && r.headers.get('content-type')?.includes('image')) {
+      PROXY_BASE = val;
+      localStorage.setItem('geotime_proxy', val);
+      statusEl.style.color = 'var(--green)';
+      statusEl.textContent = '✓ Connected! Real historical imagery active.';
+      updateProxyStatus();
+      applyCompareLayers(); // reload all maps with real tiles
+    } else {
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = `Worker responded but returned ${r.status}. Check the URL.`;
+    }
+  } catch(e) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Could not connect. Check the URL and try again.';
+  }
+};
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+updateProxyStatus();
+
+// Toast: show status about proxy on load
 setTimeout(() => {
   const toast = document.getElementById('toast');
-  if (toast) { toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 7000); }
-}, 1200);
+  if (!toast) return;
+  if (PROXY_BASE) {
+    toast.innerHTML = '<strong style="color:var(--green)">✓ Proxy active</strong> — real ESRI Wayback historical imagery loaded.';
+  } else {
+    toast.innerHTML = '<strong>No proxy configured.</strong> Both maps show current Google imagery. Click <strong>⚙ PROXY</strong> to unlock real historical tiles.';
+  }
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 6000);
+}, 1000);
 
 // ── Year selects ──────────────────────────────────────────────────────────────
 
@@ -438,10 +577,10 @@ function updLabels() {
 
 function applyCompareLayers() {
   updLabels();
-  swapLayer(mL,  'mL',  cmpB);
-  swapLayer(mR,  'mR',  cmpA);
-  swapLayer(mSB, 'mSB', cmpB);
-  swapLayer(mST, 'mST', cmpA);
+  swapLayer(mL,  cmpB);
+  swapLayer(mR,  cmpA);
+  swapLayer(mSB, cmpB);
+  swapLayer(mST, cmpA);
 }
 
 updLabels();
@@ -469,7 +608,7 @@ function updYear() {
   document.getElementById('ydsp').textContent   = y;
   document.getElementById('animYr').textContent = y;
   tksEl.querySelectorAll('.tk').forEach((t,i) => t.classList.toggle('on', i===yIdx));
-  if (mode === 'anim') swapLayer(mA, 'mA', yIdx);
+  if (mode === 'anim') swapLayer(mA, yIdx);
 }
 function updTrack() {
   sldr.style.setProperty('--p', (yIdx/(NY-1)*100)+'%');
@@ -506,7 +645,7 @@ function gotoMode(m) {
     setTimeout(() => {
       mA.invalidateSize();
       mA.setView(center, zoom);
-      swapLayer(mA, 'mA', yIdx);
+      swapLayer(mA, yIdx);
     }, 80);
   }
 }
