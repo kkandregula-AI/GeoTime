@@ -294,14 +294,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 const YEARS  = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 const NY     = YEARS.length;
 const GSUBS  = ['0','1','2','3'];
-// Google Hybrid = satellite + crisp labels baked in
+// OSM — always loads at all zoom levels, used as base
+const OSM     = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+// Google Hybrid = satellite + labels. Good up to zoom ~18
 const GHYBRID = 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
-// ESRI Wayback release IDs per year (used when proxy is active)
-const WBIDS  = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
+// ESRI Wayback release IDs per year
+const WBIDS   = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
 
 let PROXY = localStorage.getItem('gt_proxy') || '';
 
-function tileUrl(yi) {
+function satUrl(yi) {
   if (PROXY) {
     return `${PROXY.replace(/\/$/,'')}/tile/${WBIDS[YEARS[yi]]}/{z}/{y}/{x}`;
   }
@@ -310,16 +312,24 @@ function tileUrl(yi) {
 
 // ═══════════════════════════════════════════════════════
 //  LAYER MANAGEMENT
+//  Each map has: [0] OSM base (permanent), [1] satellite (swappable)
 // ═══════════════════════════════════════════════════════
-const LAYERS = new Map(); // mapInstance → tileLayer
+const SAT_LAYERS = new Map(); // map → current satellite layer
+
+function initMap(map) {
+  // OSM base — always visible, fills gaps at high zoom
+  L.tileLayer(OSM, { maxZoom:19, opacity:0.15, zIndex:1 }).addTo(map);
+}
 
 function setLayer(map, yi) {
-  const old = LAYERS.get(map);
-  const opts = PROXY ? {maxZoom:20} : {subdomains:GSUBS, maxZoom:20};
-  const lay = L.tileLayer(tileUrl(yi), opts).addTo(map);
-  LAYERS.set(map, lay);
-  // Remove old layer after new one loads (avoids flash)
-  if (old) lay.once('load', () => { try { map.removeLayer(old); } catch(e){} });
+  const old = SAT_LAYERS.get(map);
+  // Remove old immediately — no waiting for load event
+  if (old) { try { map.removeLayer(old); } catch(e){} }
+  const opts = PROXY
+    ? { maxZoom:18, zIndex:2 }
+    : { subdomains:GSUBS, maxZoom:18, zIndex:2 };
+  const lay = L.tileLayer(satUrl(yi), opts).addTo(map);
+  SAT_LAYERS.set(map, lay);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -337,11 +347,12 @@ let ptimer  = null;
 // ═══════════════════════════════════════════════════════
 //  MAPS  — created AFTER body renders, containers have size
 // ═══════════════════════════════════════════════════════
-const MOPTS = { zoomControl:false, attributionControl:false, maxZoom:20, minZoom:2 };
+const MOPTS = { zoomControl:false, attributionControl:false, maxZoom:18, minZoom:2 };
 
 function mkMap(id) {
   const m = L.map(id, MOPTS);
   m.setView(center, zoom);
+  initMap(m);   // add OSM base layer
   return m;
 }
 
@@ -663,28 +674,35 @@ document.getElementById('psave').onclick = async () => {
   const val = purlEl.value.trim().replace(/\/$/,'');
   if (!val) { pstatEl.style.color='var(--red)'; pstatEl.textContent='Please enter a URL.'; return; }
   pstatEl.style.color = 'var(--dim)'; pstatEl.textContent = 'Testing worker…';
+
+  const doSave = () => {
+    PROXY = val; localStorage.setItem('gt_proxy', val);
+    pstatEl.style.color = 'var(--green)'; pstatEl.textContent = '✓ Saved! Maps reloading with historical tiles…';
+    updProxyUI(); applyCmp();
+  };
+
   try {
-    // Hit /tile with no params — worker returns JSON health check
     const r = await fetch(val + '/tile', {signal: AbortSignal.timeout(10000)});
     if (r.ok) {
-      PROXY = val; localStorage.setItem('gt_proxy', val);
-      pstatEl.style.color = 'var(--green)'; pstatEl.textContent = '✓ Connected! Historical imagery active.';
-      updProxyUI(); applyCmp();
+      doSave();
     } else {
-      // Worker reachable but unexpected status — save anyway option
       pstatEl.style.color = 'var(--amber)';
-      pstatEl.innerHTML = `Worker responded ${r.status}. <button onclick="forceSave('${val}')" style="font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px">Save anyway</button>`;
+      pstatEl.textContent = `Worker responded ${r.status}. `;
+      const btn = document.createElement('button');
+      btn.textContent = 'Save anyway';
+      btn.style.cssText = 'font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px';
+      btn.onclick = doSave;
+      pstatEl.appendChild(btn);
     }
   } catch {
     pstatEl.style.color = 'var(--amber)';
-    pstatEl.innerHTML = `Could not verify. <button onclick="forceSave('${val}')" style="font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px">Save anyway</button>`;
+    pstatEl.textContent = 'Could not verify. ';
+    const btn = document.createElement('button');
+    btn.textContent = 'Save anyway';
+    btn.style.cssText = 'font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px';
+    btn.onclick = doSave;
+    pstatEl.appendChild(btn);
   }
-};
-
-window.forceSave = (val) => {
-  PROXY = val; localStorage.setItem('gt_proxy', val);
-  pstatEl.style.color = 'var(--green)'; pstatEl.textContent = '✓ Saved. Maps reloading…';
-  updProxyUI(); applyCmp();
 };
 
 function updProxyUI() {
