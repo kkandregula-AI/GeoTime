@@ -294,10 +294,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 const YEARS  = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 const NY     = YEARS.length;
 const GSUBS  = ['0','1','2','3'];
-// OSM — always loads at all zoom levels, used as base
-const OSM     = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-// Google Hybrid = satellite + labels. Good up to zoom ~18
-const GHYBRID = 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
+// Google Hybrid — mt1 is the most reliable endpoint, no subdomain rotation needed
+const GHYBRID = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
 // ESRI Wayback release IDs per year
 const WBIDS   = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
 
@@ -312,23 +310,20 @@ function satUrl(yi) {
 
 // ═══════════════════════════════════════════════════════
 //  LAYER MANAGEMENT
-//  Each map has: [0] OSM base (permanent), [1] satellite (swappable)
 // ═══════════════════════════════════════════════════════
-const SAT_LAYERS = new Map(); // map → current satellite layer
+const SAT_LAYERS = new Map();
 
 function initMap(map) {
-  // OSM base — always visible, fills gaps at high zoom
-  L.tileLayer(OSM, { maxZoom:19, opacity:0.15, zIndex:1 }).addTo(map);
+  // OSM base — always visible fallback at all zoom levels
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, zIndex: 1
+  }).addTo(map);
 }
 
 function setLayer(map, yi) {
   const old = SAT_LAYERS.get(map);
-  // Remove old immediately — no waiting for load event
   if (old) { try { map.removeLayer(old); } catch(e){} }
-  const opts = PROXY
-    ? { maxZoom:18, zIndex:2 }
-    : { subdomains:GSUBS, maxZoom:18, zIndex:2 };
-  const lay = L.tileLayer(satUrl(yi), opts).addTo(map);
+  const lay = L.tileLayer(satUrl(yi), { maxZoom:18, zIndex:2 }).addTo(map);
   SAT_LAYERS.set(map, lay);
 }
 
