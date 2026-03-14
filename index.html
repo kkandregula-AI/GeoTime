@@ -16,10 +16,12 @@
   --mono:'Share Tech Mono',monospace;--sans:'Barlow Condensed',sans-serif;
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
-#app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 
-/* HEADER */
-#hdr{background:var(--panel);border-bottom:2px solid var(--border);flex-shrink:0;z-index:10;position:relative}
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* ── HEADER ── */
+#hdr{background:var(--panel);border-bottom:2px solid var(--border);flex-shrink:0}
 .hr1{display:flex;align-items:center;gap:8px;padding:8px 10px}
 .logo-ring{width:26px;height:26px;flex-shrink:0;border:2px solid var(--amber);border-radius:50%;
   display:flex;align-items:center;justify-content:center;animation:pulse 3s infinite}
@@ -31,7 +33,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .mb{font-family:var(--mono);font-size:10px;background:transparent;border:1px solid var(--border);
   color:var(--dim);padding:5px 8px;cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap}
 .mb.on{background:rgba(0,200,212,.12);border-color:var(--cyan);color:var(--cyan)}
-.hr2{display:flex;padding:0 10px 8px;gap:0}
+.hr2{display:flex;padding:0 10px 8px}
 #si{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-right:none;
   color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:12px;outline:none}
 #si:focus{border-color:var(--cyan)}
@@ -39,57 +41,58 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #sb{background:var(--amber);color:var(--bg);border:none;padding:8px 14px;
   font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0}
 
-/* search dropdown — fixed position, outside all stacking contexts */
-#sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--border);
-  border-top:none;z-index:99998;max-height:260px;overflow-y:auto;
-  box-shadow:0 12px 32px rgba(0,0,0,.95);min-width:200px;}
-#sd.on{display:block}
-.sitem{padding:9px 12px;font-family:var(--mono);font-size:11px;border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5}
-.sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
+/* ── MAP AREA — flex:1 gives it all remaining height ── */
+#maparea{flex:1;position:relative;min-height:0}
 
-/* VIEWS */
-#views{flex:1;position:relative;overflow:hidden}
-.vp{position:absolute;inset:0;display:none}
-.vp.on{display:flex}
-#vSplit{flex-direction:row}
-.half{flex:1;position:relative;overflow:hidden}
-.hlabel{position:absolute;top:8px;left:8px;z-index:400;background:rgba(7,9,13,.9);
-  border:1px solid;font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none}
+/* Each view panel fills maparea exactly */
+.view{display:none;position:absolute;top:0;left:0;right:0;bottom:0}
+.view.on{display:block}
+#vSplit.on{display:flex}
+
+/* Split: two halves side by side */
+.half{flex:1;position:relative;min-width:0;min-height:0}
+/* Leaflet map containers — fill their parent completely */
+#mL,#mR,#mSB,#mST,#mA{position:absolute;top:0;left:0;right:0;bottom:0}
+/* Swipe: base map fills all, top map clipped */
+#mST{clip-path:inset(0 50% 0 0)}
+
+/* Labels & stamps */
+.hlabel{position:absolute;top:8px;left:8px;z-index:400;background:rgba(7,9,13,.88);
+  border:1px solid;font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none;letter-spacing:1px}
 .hlabel.L{color:var(--cyan);border-color:rgba(0,200,212,.3)}
 .hlabel.R{color:var(--amber);border-color:rgba(240,165,0,.3)}
-.yr-stamp{position:absolute;bottom:40px;left:10px;z-index:400;pointer-events:none;
-  font-family:var(--mono);font-size:20px;font-weight:bold;color:#fff;letter-spacing:2px;
-  text-shadow:0 0 8px rgba(0,0,0,1),0 2px 4px rgba(0,0,0,1);
-  background:rgba(0,0,0,.5);padding:3px 10px;border-left:3px solid var(--amber)}
+.yr-stamp{position:absolute;bottom:44px;left:10px;z-index:400;pointer-events:none;
+  font-family:var(--mono);font-size:18px;font-weight:bold;color:#fff;letter-spacing:2px;
+  text-shadow:0 2px 8px rgba(0,0,0,1);background:rgba(0,0,0,.55);padding:3px 10px;
+  border-left:3px solid var(--amber)}
 .yr-stamp.cy{border-left-color:var(--cyan)}
-.divbar{width:3px;background:var(--amber);flex-shrink:0;z-index:500;position:relative;cursor:col-resize}
+.divbar{width:3px;background:var(--amber);flex-shrink:0;position:relative;z-index:10;cursor:col-resize}
 .divbar::after{content:'⇔';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   background:var(--amber);color:var(--bg);width:26px;height:26px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:12px}
-#vSwipe{position:relative}
-#mSB,#mST{position:absolute;inset:0}
-#mST{clip-path:inset(0 50% 0 0)}
+
+/* Swipe handle */
 .swhandle{position:absolute;top:0;bottom:0;left:50%;width:3px;background:var(--amber);
-  z-index:600;transform:translateX(-50%);cursor:col-resize}
+  z-index:20;transform:translateX(-50%);cursor:col-resize}
 .swbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   width:34px;height:34px;background:var(--amber);border-radius:50%;
   display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:14px;
   user-select:none;box-shadow:0 0 10px rgba(240,165,0,.5)}
-.swtag{position:absolute;top:8px;z-index:500;background:rgba(7,9,13,.9);
+.swtag{position:absolute;top:8px;z-index:20;background:rgba(7,9,13,.88);
   border:1px solid var(--border);font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none}
 .swtag.B{left:8px;color:var(--cyan)}.swtag.A{right:8px;color:var(--amber)}
-#vAnim{position:relative}
-.animyr{position:absolute;top:8px;left:10px;z-index:500;pointer-events:none;
+
+/* Animate overlay */
+.animyr{position:absolute;top:8px;left:10px;z-index:20;pointer-events:none;
   font-family:var(--mono);font-size:54px;color:var(--amber);opacity:.7;
   text-shadow:0 0 20px rgba(240,165,0,.4);line-height:1}
-.animdot{position:absolute;top:68px;left:13px;z-index:500;pointer-events:none;
+.animdot{position:absolute;top:68px;left:13px;z-index:20;pointer-events:none;
   font-family:var(--mono);font-size:10px;color:var(--dim);display:flex;align-items:center;gap:5px}
 .dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
-.mbox{width:100%;height:100%}
 
-/* BOTTOM */
-#bot{background:var(--panel);border-top:2px solid var(--border);padding:8px 10px 6px;flex-shrink:0;z-index:100}
+/* ── BOTTOM BAR ── */
+#bot{background:var(--panel);border-top:2px solid var(--border);padding:8px 10px 6px;flex-shrink:0}
 .btop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap}
 .ybig{font-family:var(--mono);font-size:22px;color:var(--amber);letter-spacing:2px;line-height:1}
 .ylab{font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:1px}
@@ -106,18 +109,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .cbtn.pl{border-color:var(--green);color:var(--green)}
 .spsel{background:var(--bg);border:1px solid var(--border);color:var(--dim);
   font-family:var(--mono);font-size:10px;padding:3px 5px;outline:none;cursor:pointer}
-#proxyBtn{font-family:var(--mono);font-size:10px;letter-spacing:.5px;background:transparent;
-  border:1px solid var(--amber);color:var(--amber);padding:5px 10px;cursor:pointer;white-space:nowrap;transition:all .15s}
-#proxyBtn:hover{background:rgba(240,165,0,.1)}
+#proxyBtn{font-family:var(--mono);font-size:10px;background:transparent;
+  border:1px solid var(--amber);color:var(--amber);padding:5px 10px;cursor:pointer;white-space:nowrap}
 #proxyBtn.ok{border-color:var(--green);color:var(--green)}
-
-/* proxy status strip */
 #proxyStrip{font-family:var(--mono);font-size:10px;color:var(--dim);
   padding:3px 0 1px;cursor:pointer;border-top:1px solid var(--border);margin-top:4px}
-#proxyStrip:hover{color:var(--text)}
 #proxyStrip.ok{color:var(--green)}
-
-/* timeline */
 .tl{position:relative;height:34px;margin-top:2px}
 .tks{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;pointer-events:none}
 .tk{display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:all;cursor:pointer}
@@ -129,13 +126,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #sldr::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
   border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 8px rgba(240,165,0,.7)}
 
-/* PROXY MODAL */
-#proxyModal{
-  display:none;position:fixed;inset:0;z-index:99999;
-  background:rgba(7,9,13,.95);
-  align-items:center;justify-content:center;
-  padding:20px;
-}
+/* ── SEARCH DROPDOWN (body-level fixed) ── */
+#sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--cyan);
+  border-top:none;z-index:9999;max-height:260px;overflow-y:auto;
+  box-shadow:0 12px 32px rgba(0,0,0,.95)}
+#sd.on{display:block}
+.sitem{padding:10px 12px;font-family:var(--mono);font-size:11px;
+  border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5;color:var(--text)}
+.sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
+
+/* ── PROXY MODAL (body-level fixed) ── */
+#proxyModal{display:none;position:fixed;inset:0;z-index:9998;
+  background:rgba(7,9,13,.96);align-items:center;justify-content:center;padding:20px}
 #proxyModal.on{display:flex}
 .pbox{background:var(--panel);border:2px solid var(--amber);padding:24px;width:100%;max-width:460px}
 .ptitle{font-family:var(--mono);font-size:13px;color:var(--amber);letter-spacing:2px;margin-bottom:12px}
@@ -147,19 +149,17 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #purl::placeholder{color:var(--dim)}
 #psave{background:var(--amber);color:var(--bg);border:none;padding:10px 16px;
   font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0;letter-spacing:1px}
-#psave:active{opacity:.8}
-#pstatus{font-family:var(--mono);font-size:11px;min-height:18px;margin-bottom:12px}
+#pstatus{font-family:var(--mono);font-size:11px;min-height:18px;margin-bottom:12px;line-height:1.5}
 .pnote{background:rgba(0,200,212,.06);border:1px solid rgba(0,200,212,.2);
   padding:10px 12px;font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.9;margin-bottom:14px}
 .pnote strong{color:var(--cyan)}
 .pfoot{display:flex;justify-content:space-between;align-items:center}
 #pclose{font-family:var(--mono);font-size:11px;color:var(--dim);cursor:pointer;
   background:transparent;border:1px solid var(--border);padding:6px 14px}
-#pclose:hover{color:var(--text);border-color:var(--text)}
 #pclear{font-family:var(--mono);font-size:10px;color:var(--red);cursor:pointer;
   background:transparent;border:none;text-decoration:underline}
 
-/* leaflet */
+/* Leaflet overrides */
 .leaflet-control-attribution{display:none!important}
 .leaflet-control-zoom{border:1px solid var(--border)!important}
 .leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important}
@@ -168,6 +168,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <body>
 
 <div id="app">
+
   <!-- HEADER -->
   <div id="hdr">
     <div class="hr1">
@@ -184,41 +185,46 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <button id="sb">LOCATE</button>
     </div>
   </div>
-  <!-- VIEWS -->
-  <div id="views">
-    <!-- SPLIT -->
-    <div class="vp on" id="vSplit">
+
+  <!-- MAP AREA -->
+  <div id="maparea">
+
+    <!-- SPLIT VIEW -->
+    <div class="view on" id="vSplit">
       <div class="half">
+        <div id="mL"></div>
         <div class="hlabel L" id="lblL">BEFORE · 2014</div>
-        <div id="mL" style="position:absolute;inset:0;"></div>
         <div class="yr-stamp cy" id="stL">2014</div>
       </div>
-      <div class="divbar"></div>
+      <div class="divbar" id="splitbar"></div>
       <div class="half">
+        <div id="mR"></div>
         <div class="hlabel R" id="lblR">AFTER · 2024</div>
-        <div id="mR" style="position:absolute;inset:0;"></div>
         <div class="yr-stamp" id="stR">2024</div>
       </div>
     </div>
-    <!-- SWIPE -->
-    <div class="vp" id="vSwipe">
+
+    <!-- SWIPE VIEW -->
+    <div class="view" id="vSwipe">
+      <div id="mSB"></div>
+      <div id="mST"></div>
+      <div class="swhandle" id="swH"><div class="swbtn">⇔</div></div>
       <div class="swtag B" id="swB">BEFORE · 2014</div>
       <div class="swtag A" id="swA">AFTER · 2024</div>
-      <div id="mSB" class="mbox"></div>
-      <div id="mST" class="mbox"></div>
-      <div class="swhandle" id="swH"><div class="swbtn">⇔</div></div>
-      <div class="yr-stamp cy" id="stSB" style="bottom:40px;left:10px">2014</div>
-      <div class="yr-stamp" id="stST" style="bottom:40px;right:10px;left:auto;border-left:none;border-right:3px solid var(--amber)">2024</div>
+      <div class="yr-stamp cy" style="bottom:44px;left:10px" id="stSB">2014</div>
+      <div class="yr-stamp"   style="bottom:44px;right:10px;left:auto;border-left:none;border-right:3px solid var(--amber)" id="stST">2024</div>
     </div>
-    <!-- ANIMATE -->
-    <div class="vp" id="vAnim">
+
+    <!-- ANIMATE VIEW -->
+    <div class="view" id="vAnim">
+      <div id="mA"></div>
       <div class="animyr" id="animYr">2014</div>
       <div class="animdot"><div class="dot"></div><span>PLAYING</span></div>
-      <div id="mA" class="mbox"></div>
     </div>
+
   </div>
 
-  <!-- BOTTOM -->
+  <!-- BOTTOM BAR -->
   <div id="bot">
     <div class="btop">
       <div><div class="ybig" id="ydsp">2014</div><div class="ylab">SELECTED YEAR</div></div>
@@ -241,25 +247,26 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <button id="proxyBtn">⚙ PROXY</button>
       </div>
     </div>
-    <div id="proxyStrip">⚠ No proxy — both maps show current imagery. Click ⚙ PROXY to fix.</div>
+    <div id="proxyStrip">⚠ No proxy — both maps show current imagery. Click ⚙ PROXY to unlock historical tiles.</div>
     <div class="tl">
       <div class="tks" id="tks"></div>
       <input type="range" id="sldr" min="0" step="1" value="0"/>
     </div>
   </div>
-</div>
 
-<!-- SEARCH DROPDOWN — direct body child, never clipped -->
+</div><!-- #app -->
+
+<!-- SEARCH DROPDOWN — body level, never clipped -->
 <div id="sd"></div>
 
-<!-- PROXY MODAL — direct body child, never clipped -->
+<!-- PROXY MODAL — body level, never clipped -->
 <div id="proxyModal">
   <div class="pbox">
     <div class="ptitle">⚙ CONNECT HISTORICAL TILE PROXY</div>
     <div class="psub">
-      Paste your <strong>Cloudflare Worker URL</strong> below.<br>
-      This unlocks real ESRI Wayback satellite imagery per year (2014–2024).<br>
-      Without it, both maps show current Google imagery.
+      Paste your <strong>Cloudflare Worker URL</strong> below to unlock real ESRI Wayback
+      satellite imagery per year (2014–2024).<br>
+      Without a proxy, all years show current Google imagery.
     </div>
     <div class="pinput-row">
       <input id="purl" type="url" placeholder="https://geotime-tiles.yourname.workers.dev"/>
@@ -267,11 +274,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     </div>
     <div id="pstatus"></div>
     <div class="pnote">
-      <strong>Deploy your worker (2 min):</strong><br>
-      1. Go to <strong>dash.cloudflare.com → Workers &amp; Pages → Create Worker</strong><br>
-      2. Click <strong>"Edit code"</strong> in the editor (not the 512-char preview box)<br>
-      3. Select all → delete → paste <strong>wayback-worker.js</strong> → click Deploy<br>
-      4. Copy the <strong>https://xxx.workers.dev</strong> URL → paste above → Save<br>
+      <strong>Deploy in 2 min:</strong><br>
+      1. <strong>dash.cloudflare.com → Workers &amp; Pages → Create Worker</strong><br>
+      2. Click <strong>"Edit code"</strong> → Select All → paste <strong>wayback-worker.js</strong> → Deploy<br>
+      3. Copy your <strong>.workers.dev</strong> URL → paste above → SAVE<br>
       Free tier: <strong>100,000 requests/day</strong>
     </div>
     <div class="pfoot">
@@ -282,38 +288,45 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 </div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
-const YEARS   = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
-const NY      = YEARS.length;
-const GSUBS   = ['0','1','2','3'];
-const HYBRID  = 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'; // satellite + labels
-const WBIDS   = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
+// ═══════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════
+const YEARS  = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+const NY     = YEARS.length;
+const GSUBS  = ['0','1','2','3'];
+// Google Hybrid = satellite + crisp labels baked in
+const GHYBRID = 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
+// ESRI Wayback release IDs per year (used when proxy is active)
+const WBIDS  = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
 
 let PROXY = localStorage.getItem('gt_proxy') || '';
 
 function tileUrl(yi) {
   if (PROXY) {
-    const id = WBIDS[YEARS[yi]];
-    return `${PROXY.replace(/\/$/,'')}/tile/${id}/{z}/{y}/{x}`;
+    return `${PROXY.replace(/\/$/,'')}/tile/${WBIDS[YEARS[yi]]}/{z}/{y}/{x}`;
   }
-  return HYBRID;
+  return GHYBRID;
 }
 
-// ─── LAYER MANAGEMENT ─────────────────────────────────────────────────────────
-const ML = new Map(); // map → current tile layer
+// ═══════════════════════════════════════════════════════
+//  LAYER MANAGEMENT
+// ═══════════════════════════════════════════════════════
+const LAYERS = new Map(); // mapInstance → tileLayer
 
-function swapLayer(map, yi) {
-  const old = ML.get(map);
-  const url = tileUrl(yi);
-  const opts = PROXY ? {maxZoom:20} : {subdomains:GSUBS,maxZoom:20};
-  const lay  = L.tileLayer(url, opts).addTo(map);
-  ML.set(map, lay);
-  if (old) setTimeout(() => { try { map.removeLayer(old); } catch(e){} }, 600);
+function setLayer(map, yi) {
+  const old = LAYERS.get(map);
+  const opts = PROXY ? {maxZoom:20} : {subdomains:GSUBS, maxZoom:20};
+  const lay = L.tileLayer(tileUrl(yi), opts).addTo(map);
+  LAYERS.set(map, lay);
+  // Remove old layer after new one loads (avoids flash)
+  if (old) lay.once('load', () => { try { map.removeLayer(old); } catch(e){} });
 }
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let center  = [17.4435, 78.3772];
-let zoom    = 13;
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let center  = [17.4435, 78.3772]; // Hyderabad HITEC City
+let zoom    = 12;
 let yIdx    = 0;
 let cmpB    = 0;
 let cmpA    = NY - 1;
@@ -321,109 +334,140 @@ let mode    = 'split';
 let playing = false;
 let ptimer  = null;
 
-// ─── MAPS ─────────────────────────────────────────────────────────────────────
-const MOPTS = {zoomControl:false, attributionControl:false, maxZoom:20, minZoom:2};
+// ═══════════════════════════════════════════════════════
+//  MAPS  — created AFTER body renders, containers have size
+// ═══════════════════════════════════════════════════════
+const MOPTS = { zoomControl:false, attributionControl:false, maxZoom:20, minZoom:2 };
 
 function mkMap(id) {
-  const m = L.map(document.getElementById(id), MOPTS);
+  const m = L.map(id, MOPTS);
   m.setView(center, zoom);
   return m;
 }
 
-const mL=mkMap('mL'), mR=mkMap('mR'), mSB=mkMap('mSB'), mST=mkMap('mST'), mA=mkMap('mA');
-const ALL = [mL,mR,mSB,mST,mA];
+// Create maps
+const mL  = mkMap('mL');
+const mR  = mkMap('mR');
+const mSB = mkMap('mSB');
+const mST = mkMap('mST');
+const mA  = mkMap('mA');
+const ALL = [mL, mR, mSB, mST, mA];
 
-swapLayer(mL,  0);
-swapLayer(mR,  NY-1);
-swapLayer(mSB, 0);
-swapLayer(mST, NY-1);
-swapLayer(mA,  0);
+// Add initial tile layers
+setLayer(mL,  cmpB);
+setLayer(mR,  cmpA);
+setLayer(mSB, cmpB);
+setLayer(mST, cmpA);
+setLayer(mA,  yIdx);
 
+// Zoom controls
 ALL.forEach(m => L.control.zoom({position:'bottomright'}).addTo(m));
 
-// ─── SYNC ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  SYNC ALL MAPS
+// ═══════════════════════════════════════════════════════
 let syncing = false;
-ALL.forEach((src,si) => {
+ALL.forEach((src, si) => {
   src.on('moveend', () => {
     if (syncing) return;
     syncing = true;
-    center = [src.getCenter().lat, src.getCenter().lng];
+    const c = src.getCenter();
+    center = [c.lat, c.lng];
     zoom   = src.getZoom();
-    ALL.forEach((t,ti) => { if (ti!==si) t.setView(center, zoom, {animate:false}); });
+    ALL.forEach((t, ti) => { if (ti !== si) t.setView(center, zoom, {animate:false}); });
     syncing = false;
   });
 });
 
-window.addEventListener('resize', () => ALL.forEach(m => m.invalidateSize()));
-
-function fullInit() {
-  ALL.forEach(m => { m.invalidateSize(); m.setView(center, zoom); });
-  initSwipe();
+// ═══════════════════════════════════════════════════════
+//  INVALIDATE MAPS — called after any layout change
+// ═══════════════════════════════════════════════════════
+function invAll() {
+  ALL.forEach(m => { m.invalidateSize(); });
 }
-// Three passes: rAF, 300ms, 800ms — guarantees flex layout is measured
-requestAnimationFrame(() => { fullInit(); });
-setTimeout(fullInit, 300);
-setTimeout(fullInit, 800);
+window.addEventListener('resize', invAll);
 
-// ─── YEAR SELECTS ─────────────────────────────────────────────────────────────
+// Initial invalidation — run after first paint so containers have real dimensions
+requestAnimationFrame(() => {
+  invAll();
+  ALL.forEach(m => m.setView(center, zoom));
+  initSwipe();
+  // Second pass for mobile where layout takes longer
+  setTimeout(() => { invAll(); ALL.forEach(m => m.setView(center, zoom)); }, 500);
+});
+
+// ═══════════════════════════════════════════════════════
+//  YEAR SELECTS
+// ═══════════════════════════════════════════════════════
 const selB = document.getElementById('selB');
 const selA = document.getElementById('selA');
-YEARS.forEach((y,i) => {
+YEARS.forEach((y, i) => {
   selB.innerHTML += `<option value="${i}">${y}</option>`;
   selA.innerHTML += `<option value="${i}">${y}</option>`;
 });
-selB.value = cmpB; selA.value = cmpA;
+selB.value = cmpB;
+selA.value = cmpA;
 
 function updStamps() {
   const yb = YEARS[cmpB], ya = YEARS[cmpA];
-  document.getElementById('lblL').textContent = `BEFORE · ${yb}`;
-  document.getElementById('lblR').textContent = `AFTER · ${ya}`;
-  document.getElementById('swB').textContent  = `BEFORE · ${yb}`;
-  document.getElementById('swA').textContent  = `AFTER · ${ya}`;
-  document.getElementById('stL').textContent  = yb;
-  document.getElementById('stR').textContent  = ya;
-  document.getElementById('stSB').textContent = yb;
-  document.getElementById('stST').textContent = ya;
+  document.getElementById('lblL').textContent  = `BEFORE · ${yb}`;
+  document.getElementById('lblR').textContent  = `AFTER · ${ya}`;
+  document.getElementById('swB').textContent   = `BEFORE · ${yb}`;
+  document.getElementById('swA').textContent   = `AFTER · ${ya}`;
+  document.getElementById('stL').textContent   = yb;
+  document.getElementById('stR').textContent   = ya;
+  document.getElementById('stSB').textContent  = yb;
+  document.getElementById('stST').textContent  = ya;
 }
 
 function applyCmp() {
   updStamps();
-  swapLayer(mL,  cmpB); swapLayer(mR,  cmpA);
-  swapLayer(mSB, cmpB); swapLayer(mST, cmpA);
+  setLayer(mL,  cmpB);
+  setLayer(mR,  cmpA);
+  setLayer(mSB, cmpB);
+  setLayer(mST, cmpA);
 }
 
 updStamps();
 selB.onchange = () => { cmpB = +selB.value; applyCmp(); };
 selA.onchange = () => { cmpA = +selA.value; applyCmp(); };
 
-// ─── TIMELINE ─────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  TIMELINE TICKS + SLIDER
+// ═══════════════════════════════════════════════════════
 const tksEl = document.getElementById('tks');
 const sldr  = document.getElementById('sldr');
 sldr.max = NY - 1;
 
-YEARS.forEach((y,i) => {
+YEARS.forEach((y, i) => {
   const t = document.createElement('div');
-  t.className = 'tk' + (i===0?' on':'');
+  t.className = 'tk' + (i === 0 ? ' on' : '');
   t.innerHTML = `<div class="tkl"></div><div class="tkn">${y}</div>`;
-  t.onclick = () => { yIdx=i; sldr.value=i; updYear(); updTrack(); };
+  t.onclick = () => { yIdx = i; sldr.value = i; updYear(); updTrack(); };
   tksEl.appendChild(t);
 });
 
-sldr.oninput = () => { yIdx=+sldr.value; updYear(); updTrack(); };
+sldr.oninput = () => { yIdx = +sldr.value; updYear(); updTrack(); };
 
 function updYear() {
   const y = YEARS[yIdx];
   document.getElementById('ydsp').textContent   = y;
   document.getElementById('animYr').textContent = y;
-  tksEl.querySelectorAll('.tk').forEach((t,i) => t.classList.toggle('on', i===yIdx));
-  if (mode==='anim') swapLayer(mA, yIdx);
+  tksEl.querySelectorAll('.tk').forEach((t, i) => t.classList.toggle('on', i === yIdx));
+  // Always update animate map; update split/swipe only in those modes
+  if (mode === 'anim')  setLayer(mA, yIdx);
+  if (mode === 'split') { cmpB = yIdx; selB.value = yIdx; applyCmp(); }
+  if (mode === 'swipe') { cmpB = yIdx; selB.value = yIdx; applyCmp(); }
 }
+
 function updTrack() {
-  sldr.style.setProperty('--p', (yIdx/(NY-1)*100)+'%');
+  sldr.style.setProperty('--p', (yIdx / (NY - 1) * 100) + '%');
 }
 updTrack();
 
-// ─── MODES ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  MODE SWITCHING
+// ═══════════════════════════════════════════════════════
 document.querySelectorAll('.mb').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.mb').forEach(b => b.classList.remove('on'));
@@ -434,109 +478,162 @@ document.querySelectorAll('.mb').forEach(btn => {
 
 function gotoMode(m) {
   mode = m;
-  ['vSplit','vSwipe','vAnim'].forEach(id => document.getElementById(id).classList.remove('on'));
+  document.getElementById('vSplit').classList.remove('on');
+  document.getElementById('vSwipe').classList.remove('on');
+  document.getElementById('vAnim').classList.remove('on');
   document.getElementById('cmprow').classList.remove('on');
-  if (m==='split') {
+
+  if (m === 'split') {
     document.getElementById('vSplit').classList.add('on');
     document.getElementById('cmprow').classList.add('on');
-    setTimeout(() => { mL.invalidateSize(); mR.invalidateSize(); }, 80);
-  } else if (m==='swipe') {
+    setTimeout(() => { mL.invalidateSize(); mR.invalidateSize(); }, 60);
+  } else if (m === 'swipe') {
     document.getElementById('vSwipe').classList.add('on');
     document.getElementById('cmprow').classList.add('on');
-    setTimeout(() => { mSB.invalidateSize(); mST.invalidateSize(); initSwipe(); }, 80);
+    setTimeout(() => { mSB.invalidateSize(); mST.invalidateSize(); initSwipe(); }, 60);
   } else {
     document.getElementById('vAnim').classList.add('on');
-    setTimeout(() => { mA.invalidateSize(); mA.setView(center,zoom); swapLayer(mA,yIdx); }, 80);
+    setTimeout(() => { mA.invalidateSize(); mA.setView(center, zoom); setLayer(mA, yIdx); }, 60);
   }
 }
 
-// ─── SWIPE ────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  SWIPE DRAG
+// ═══════════════════════════════════════════════════════
 function initSwipe() {
   const H = document.getElementById('swH');
   const T = document.getElementById('mST');
   const W = document.getElementById('vSwipe');
   let drag = false;
+
   function mv(x) {
     const r = W.getBoundingClientRect();
-    const p = Math.max(5, Math.min(95, (x-r.left)/r.width*100));
-    H.style.left = p+'%'; T.style.clipPath = `inset(0 ${100-p}% 0 0)`;
+    const p = Math.max(5, Math.min(95, (x - r.left) / r.width * 100));
+    H.style.left = p + '%';
+    T.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
   }
-  const H2 = H.cloneNode(true); H.parentNode.replaceChild(H2,H);
-  H2.addEventListener('mousedown',  e => { drag=true; e.preventDefault(); });
-  H2.addEventListener('touchstart', () => drag=true, {passive:true});
-  document.addEventListener('mousemove',  e => { if(drag) mv(e.clientX); });
-  document.addEventListener('touchmove',  e => { if(drag) mv(e.touches[0].clientX); }, {passive:true});
-  document.addEventListener('mouseup',  () => drag=false);
-  document.addEventListener('touchend', () => drag=false);
+
+  // Remove old listeners
+  const H2 = H.cloneNode(true);
+  H.parentNode.replaceChild(H2, H);
+  H2.addEventListener('mousedown',  e => { drag = true; e.preventDefault(); });
+  H2.addEventListener('touchstart', () => drag = true, {passive:true});
+  document.addEventListener('mousemove',  e => { if (drag) mv(e.clientX); });
+  document.addEventListener('touchmove',  e => { if (drag) mv(e.touches[0].clientX); }, {passive:true});
+  document.addEventListener('mouseup',  () => drag = false);
+  document.addEventListener('touchend', () => drag = false);
+
   const r = W.getBoundingClientRect();
-  mv(r.left + r.width/2);
+  mv(r.left + r.width / 2);
 }
 
-// ─── PLAYBACK ─────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+//  PLAYBACK
+// ═══════════════════════════════════════════════════════
 document.getElementById('cPl').onclick = () => playing ? stopPlay() : startPlay();
-document.getElementById('cBk').onclick = () => { stopPlay(); yIdx=0; sldr.value=0; updYear(); updTrack(); };
-document.getElementById('cFw').onclick = () => { stopPlay(); yIdx=NY-1; sldr.value=NY-1; updYear(); updTrack(); };
+document.getElementById('cBk').onclick = () => { stopPlay(); yIdx = 0; sldr.value = 0; updYear(); updTrack(); };
+document.getElementById('cFw').onclick = () => { stopPlay(); yIdx = NY-1; sldr.value = NY-1; updYear(); updTrack(); };
 
 function startPlay() {
-  if (mode!=='anim') { gotoMode('anim'); document.querySelectorAll('.mb').forEach(b => b.classList.toggle('on',b.dataset.m==='anim')); }
-  playing=true; document.getElementById('cPl').textContent='⏸'; document.getElementById('cPl').classList.add('pl');
-  if (yIdx>=NY-1) yIdx=0;
+  if (mode !== 'anim') {
+    gotoMode('anim');
+    document.querySelectorAll('.mb').forEach(b => b.classList.toggle('on', b.dataset.m === 'anim'));
+  }
+  playing = true;
+  document.getElementById('cPl').textContent = '⏸';
+  document.getElementById('cPl').classList.add('pl');
+  if (yIdx >= NY - 1) yIdx = 0;
   const ms = +document.getElementById('spd').value;
-  ptimer = setInterval(() => { yIdx++; if(yIdx>=NY){yIdx=NY-1;stopPlay();return;} updYear(); sldr.value=yIdx; updTrack(); }, ms);
+  ptimer = setInterval(() => {
+    yIdx++;
+    if (yIdx >= NY) { yIdx = NY - 1; stopPlay(); return; }
+    updYear(); sldr.value = yIdx; updTrack();
+  }, ms);
 }
 function stopPlay() {
-  playing=false; clearInterval(ptimer);
-  document.getElementById('cPl').textContent='▶'; document.getElementById('cPl').classList.remove('pl');
+  playing = false; clearInterval(ptimer);
+  document.getElementById('cPl').textContent = '▶';
+  document.getElementById('cPl').classList.remove('pl');
 }
 
-// ─── SEARCH ───────────────────────────────────────────────────────────────────
-const siEl=document.getElementById('si'), sbEl=document.getElementById('sb'), sdEl=document.getElementById('sd');
-let sres=[], hiI=-1, sdt=null;
+// ═══════════════════════════════════════════════════════
+//  SEARCH  (Photon/Komoot — CORS-open, no key needed)
+// ═══════════════════════════════════════════════════════
+const siEl = document.getElementById('si');
+const sbEl = document.getElementById('sb');
+const sdEl = document.getElementById('sd');
+let sres = [], hiI = -1, sdt = null;
 
 function sdPos() {
-  const r=siEl.getBoundingClientRect(), r2=sbEl.getBoundingClientRect();
-  sdEl.style.top=r.bottom+'px'; sdEl.style.left=r.left+'px'; sdEl.style.width=(r2.right-r.left)+'px';
+  const r  = siEl.getBoundingClientRect();
+  const r2 = sbEl.getBoundingClientRect();
+  sdEl.style.top   = r.bottom + 'px';
+  sdEl.style.left  = r.left   + 'px';
+  sdEl.style.width = (r2.right - r.left) + 'px';
 }
-function bname(p) { return [p.name,p.city!==p.name&&p.city,p.state,p.country].filter(Boolean).join(', '); }
+
+function bname(p) {
+  return [p.name, p.city !== p.name && p.city, p.state, p.country].filter(Boolean).join(', ');
+}
+
 function renderSD(items) {
-  sres=items; hiI=-1; sdEl.innerHTML='';
-  if(!items.length){sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">No results</div>';return;}
-  items.forEach((it,i) => {
-    const d=document.createElement('div'); d.className='sitem';
-    d.innerHTML=bname(it.properties);
-    d.onmousedown=e=>e.preventDefault(); d.onclick=()=>pick(i);
+  sres = items; hiI = -1; sdEl.innerHTML = '';
+  if (!items.length) {
+    sdEl.innerHTML = '<div class="sitem" style="color:var(--dim);pointer-events:none">No results</div>';
+    return;
+  }
+  items.forEach((it, i) => {
+    const d = document.createElement('div');
+    d.className = 'sitem';
+    const type = (it.properties.osm_value || '').replace(/_/g,' ');
+    d.innerHTML = bname(it.properties) + (type ? ` <span style="color:var(--dim);font-size:9px">${type}</span>` : '');
+    d.onmousedown = e => e.preventDefault();
+    d.onclick = () => pick(i);
     sdEl.appendChild(d);
   });
 }
+
 function pick(i) {
-  const f=sres[i]; if(!f) return;
-  const [lng,lat]=f.geometry.coordinates;
-  ALL.forEach(m=>m.setView([lat,lng],13,{animate:true}));
-  center=[lat,lng]; zoom=13;
-  siEl.value=bname(f.properties).split(',')[0];
+  const f = sres[i]; if (!f) return;
+  const [lng, lat] = f.geometry.coordinates;
+  ALL.forEach(m => m.setView([lat, lng], 13, {animate:true}));
+  center = [lat, lng]; zoom = 13;
+  siEl.value = bname(f.properties).split(',')[0];
   sdEl.classList.remove('on');
 }
-async function doSearch(q) {
-  if(q.length<2){sdEl.classList.remove('on');return;}
-  sdPos(); sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">Searching…</div>'; sdEl.classList.add('on');
-  try {
-    const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=7&lang=en`);
-    const d=await r.json(); renderSD(d.features||[]);
-  } catch { sdEl.innerHTML='<div class="sitem" style="color:var(--red);pointer-events:none">Search error</div>'; }
-}
-siEl.addEventListener('input', ()=>{ clearTimeout(sdt); sdt=setTimeout(()=>doSearch(siEl.value.trim()),300); });
-siEl.addEventListener('focus', sdPos);
-siEl.addEventListener('keydown', e => {
-  const its=sdEl.querySelectorAll('.sitem');
-  if(e.key==='ArrowDown'){e.preventDefault();hiI=Math.min(hiI+1,its.length-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
-  else if(e.key==='ArrowUp'){e.preventDefault();hiI=Math.max(hiI-1,-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
-  else if(e.key==='Enter'){hiI>=0?pick(hiI):doSearch(siEl.value.trim());}
-  else if(e.key==='Escape') sdEl.classList.remove('on');
-});
-sbEl.onclick=()=>doSearch(siEl.value.trim());
-document.addEventListener('click', e=>{ if(!e.target.closest('#si')&&!e.target.closest('#sb')&&!e.target.closest('#sd')) sdEl.classList.remove('on'); });
 
-// ─── PROXY MODAL ──────────────────────────────────────────────────────────────
+async function doSearch(q) {
+  if (q.length < 2) { sdEl.classList.remove('on'); return; }
+  sdPos();
+  sdEl.innerHTML = '<div class="sitem" style="color:var(--dim);pointer-events:none">Searching…</div>';
+  sdEl.classList.add('on');
+  try {
+    const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=7&lang=en`);
+    const d = await r.json();
+    renderSD(d.features || []);
+  } catch {
+    sdEl.innerHTML = '<div class="sitem" style="color:var(--red);pointer-events:none">Search unavailable</div>';
+  }
+}
+
+siEl.addEventListener('input',  () => { clearTimeout(sdt); sdt = setTimeout(() => doSearch(siEl.value.trim()), 300); });
+siEl.addEventListener('focus',  sdPos);
+siEl.addEventListener('keydown', e => {
+  const its = sdEl.querySelectorAll('.sitem');
+  if (e.key === 'ArrowDown') { e.preventDefault(); hiI = Math.min(hiI+1, its.length-1); its.forEach((x,i) => x.classList.toggle('hi', i===hiI)); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); hiI = Math.max(hiI-1, -1); its.forEach((x,i) => x.classList.toggle('hi', i===hiI)); }
+  else if (e.key === 'Enter') { hiI >= 0 ? pick(hiI) : doSearch(siEl.value.trim()); }
+  else if (e.key === 'Escape') sdEl.classList.remove('on');
+});
+sbEl.onclick = () => doSearch(siEl.value.trim());
+document.addEventListener('click', e => {
+  if (!e.target.closest('#si') && !e.target.closest('#sb') && !e.target.closest('#sd'))
+    sdEl.classList.remove('on');
+});
+
+// ═══════════════════════════════════════════════════════
+//  PROXY MODAL
+// ═══════════════════════════════════════════════════════
 const modal   = document.getElementById('proxyModal');
 const purlEl  = document.getElementById('purl');
 const pstatEl = document.getElementById('pstatus');
@@ -550,10 +647,10 @@ function openProxy() {
 }
 function closeProxy() { modal.classList.remove('on'); }
 
-document.getElementById('proxyBtn').onclick   = openProxy;
-document.getElementById('proxyStrip').onclick  = openProxy;
-document.getElementById('pclose').onclick      = closeProxy;
-modal.addEventListener('click', e => { if (e.target===modal) closeProxy(); });
+document.getElementById('proxyBtn').onclick  = openProxy;
+document.getElementById('proxyStrip').onclick = openProxy;
+document.getElementById('pclose').onclick    = closeProxy;
+modal.addEventListener('click', e => { if (e.target === modal) closeProxy(); });
 
 document.getElementById('pclear').onclick = () => {
   PROXY = ''; localStorage.removeItem('gt_proxy');
@@ -565,31 +662,29 @@ document.getElementById('pclear').onclick = () => {
 document.getElementById('psave').onclick = async () => {
   const val = purlEl.value.trim().replace(/\/$/,'');
   if (!val) { pstatEl.style.color='var(--red)'; pstatEl.textContent='Please enter a URL.'; return; }
-  pstatEl.style.color='var(--dim)'; pstatEl.textContent='Testing connection…';
+  pstatEl.style.color = 'var(--dim)'; pstatEl.textContent = 'Testing worker…';
   try {
-    // Hit the worker root — returns JSON health check, no ESRI involved
+    // Hit /tile with no params — worker returns JSON health check
     const r = await fetch(val + '/tile', {signal: AbortSignal.timeout(10000)});
     if (r.ok) {
       PROXY = val; localStorage.setItem('gt_proxy', val);
-      pstatEl.style.color='var(--green)'; pstatEl.textContent='✓ Worker connected! Real historical imagery active.';
+      pstatEl.style.color = 'var(--green)'; pstatEl.textContent = '✓ Connected! Historical imagery active.';
       updProxyUI(); applyCmp();
     } else {
-      pstatEl.style.color='var(--red)'; pstatEl.textContent=`Worker responded ${r.status}. Try saving anyway?`;
-      // Show a "save anyway" button
-      const btn = document.createElement('button');
-      btn.textContent = 'Save anyway'; btn.style.cssText='margin-left:10px;font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:3px 8px';
-      btn.onclick = () => { PROXY=val; localStorage.setItem('gt_proxy',val); updProxyUI(); applyCmp(); pstatEl.textContent='✓ Saved.'; pstatEl.style.color='var(--green)'; };
-      pstatEl.appendChild(btn);
+      // Worker reachable but unexpected status — save anyway option
+      pstatEl.style.color = 'var(--amber)';
+      pstatEl.innerHTML = `Worker responded ${r.status}. <button onclick="forceSave('${val}')" style="font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px">Save anyway</button>`;
     }
-  } catch(e) {
-    // Network error — but let user save anyway in case it's a CORS preflight issue
-    pstatEl.style.color='var(--amber)';
-    pstatEl.innerHTML='Could not verify — <button id="saveAnyway" style="font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:3px 8px">Save URL anyway</button>';
-    document.getElementById('saveAnyway').onclick = () => {
-      PROXY=val; localStorage.setItem('gt_proxy',val); updProxyUI(); applyCmp();
-      pstatEl.style.color='var(--green)'; pstatEl.textContent='✓ Saved. Maps reloaded.';
-    };
+  } catch {
+    pstatEl.style.color = 'var(--amber)';
+    pstatEl.innerHTML = `Could not verify. <button onclick="forceSave('${val}')" style="font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px">Save anyway</button>`;
   }
+};
+
+window.forceSave = (val) => {
+  PROXY = val; localStorage.setItem('gt_proxy', val);
+  pstatEl.style.color = 'var(--green)'; pstatEl.textContent = '✓ Saved. Maps reloading…';
+  updProxyUI(); applyCmp();
 };
 
 function updProxyUI() {
@@ -597,14 +692,13 @@ function updProxyUI() {
   const strip = document.getElementById('proxyStrip');
   if (PROXY) {
     const d = PROXY.replace('https://','').split('/')[0];
-    btn.classList.add('ok'); btn.textContent='✓ PROXY';
-    strip.classList.add('ok'); strip.textContent=`✓ Proxy active: ${d} — real historical imagery enabled`;
+    btn.classList.add('ok'); btn.textContent = '✓ PROXY';
+    strip.classList.add('ok'); strip.textContent = `✓ Proxy active: ${d} — real historical imagery`;
   } else {
-    btn.classList.remove('ok'); btn.textContent='⚙ PROXY';
-    strip.classList.remove('ok'); strip.textContent='⚠ No proxy — both maps show current imagery. Click ⚙ PROXY to fix.';
+    btn.classList.remove('ok'); btn.textContent = '⚙ PROXY';
+    strip.classList.remove('ok'); strip.textContent = '⚠ No proxy — both maps show current imagery. Click ⚙ PROXY to unlock historical tiles.';
   }
 }
-
 updProxyUI();
 </script>
 </body>
