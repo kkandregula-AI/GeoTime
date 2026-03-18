@@ -654,7 +654,8 @@ document.getElementById('psave').onclick = async () => {
   };
 
   try {
-    const r = await fetch(val+'/tile', {signal:AbortSignal.timeout(10000)});
+    // Test root — always returns 200 JSON health check
+    const r = await fetch(val + '/', {signal:AbortSignal.timeout(10000)});
     if (r.ok) { doSave(); }
     else {
       pstatEl.style.color='var(--amber)'; pstatEl.textContent=`Worker responded ${r.status}. `;
