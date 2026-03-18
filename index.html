@@ -294,7 +294,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 const YEARS  = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 const NY     = YEARS.length;
 const GSUBS  = ['0','1','2','3'];
-// Google Hybrid — mt1 is the most reliable endpoint, no subdomain rotation needed
+// Google Hybrid — mt1, stable endpoint
 const GHYBRID = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
 // ESRI Wayback release IDs per year
 const WBIDS   = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
@@ -305,26 +305,50 @@ function satUrl(yi) {
   if (PROXY) {
     return `${PROXY.replace(/\/$/,'')}/tile/${WBIDS[YEARS[yi]]}/{z}/{y}/{x}`;
   }
-  return GHYBRID;
+  return GHYBRID; // same image all years — proxy needed for real historical diff
 }
 
 // ═══════════════════════════════════════════════════════
 //  LAYER MANAGEMENT
+//  Without proxy: one permanent satellite layer, never removed.
+//  With proxy: swap to year-specific Wayback tile URL.
 // ═══════════════════════════════════════════════════════
 const SAT_LAYERS = new Map();
 
 function initMap(map) {
-  // OSM base — always visible fallback at all zoom levels
+  // OSM as permanent base — shows roads/labels even when satellite fails
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19, zIndex: 1
+    maxZoom:19, zIndex:1
   }).addTo(map);
 }
 
 function setLayer(map, yi) {
   const old = SAT_LAYERS.get(map);
+  const url = satUrl(yi);
+
+  // If no proxy: all years share the same URL.
+  // Don't remove and re-add — it causes blank flash. Just leave it.
+  if (!PROXY && old) return;
+
+  // With proxy OR first load: add new layer, then remove old
   if (old) { try { map.removeLayer(old); } catch(e){} }
-  const lay = L.tileLayer(satUrl(yi), { maxZoom:18, zIndex:2 }).addTo(map);
+  const lay = L.tileLayer(url, { maxZoom:18, zIndex:2 }).addTo(map);
   SAT_LAYERS.set(map, lay);
+}
+
+// Called once on startup and after proxy is saved — loads sat layer on all maps
+function loadAllLayers() {
+  setLayer(mL,  cmpB);
+  setLayer(mR,  cmpA);
+  setLayer(mSB, cmpB);
+  setLayer(mST, cmpA);
+  setLayer(mA,  yIdx);
+}
+
+// Force-reload all layers (used when proxy changes)
+function reloadAllLayers() {
+  SAT_LAYERS.clear(); // clear cache so setLayer adds fresh layers
+  loadAllLayers();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -359,12 +383,8 @@ const mST = mkMap('mST');
 const mA  = mkMap('mA');
 const ALL = [mL, mR, mSB, mST, mA];
 
-// Add initial tile layers
-setLayer(mL,  cmpB);
-setLayer(mR,  cmpA);
-setLayer(mSB, cmpB);
-setLayer(mST, cmpA);
-setLayer(mA,  yIdx);
+// Load initial satellite layers
+loadAllLayers();
 
 // Zoom controls
 ALL.forEach(m => L.control.zoom({position:'bottomright'}).addTo(m));
@@ -428,10 +448,14 @@ function updStamps() {
 
 function applyCmp() {
   updStamps();
-  setLayer(mL,  cmpB);
-  setLayer(mR,  cmpA);
-  setLayer(mSB, cmpB);
-  setLayer(mST, cmpA);
+  if (PROXY) {
+    // With proxy: each year has different tiles — swap them
+    setLayer(mL,  cmpB);
+    setLayer(mR,  cmpA);
+    setLayer(mSB, cmpB);
+    setLayer(mST, cmpA);
+  }
+  // Without proxy: same Google tile for all years — just update labels
 }
 
 updStamps();
@@ -460,8 +484,7 @@ function updYear() {
   document.getElementById('ydsp').textContent   = y;
   document.getElementById('animYr').textContent = y;
   tksEl.querySelectorAll('.tk').forEach((t, i) => t.classList.toggle('on', i === yIdx));
-  // Always update animate map; update split/swipe only in those modes
-  if (mode === 'anim')  setLayer(mA, yIdx);
+  if (mode === 'anim' && PROXY) { setLayer(mA, yIdx); }
   if (mode === 'split') { cmpB = yIdx; selB.value = yIdx; applyCmp(); }
   if (mode === 'swipe') { cmpB = yIdx; selB.value = yIdx; applyCmp(); }
 }
@@ -662,7 +685,7 @@ document.getElementById('pclear').onclick = () => {
   PROXY = ''; localStorage.removeItem('gt_proxy');
   purlEl.value = '';
   pstatEl.style.color = 'var(--dim)'; pstatEl.textContent = 'Proxy cleared.';
-  updProxyUI(); applyCmp();
+  updProxyUI(); reloadAllLayers();
 };
 
 document.getElementById('psave').onclick = async () => {
@@ -673,7 +696,7 @@ document.getElementById('psave').onclick = async () => {
   const doSave = () => {
     PROXY = val; localStorage.setItem('gt_proxy', val);
     pstatEl.style.color = 'var(--green)'; pstatEl.textContent = '✓ Saved! Maps reloading with historical tiles…';
-    updProxyUI(); applyCmp();
+    updProxyUI(); reloadAllLayers();
   };
 
   try {
