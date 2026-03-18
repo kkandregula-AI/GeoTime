@@ -43,6 +43,327 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #maparea{flex:1;position:relative;min-height:0}
 .view{display:none;position:absolute;top:0;left:0;right:0;bottom:0}
 .view.on{display:block}
+#vSplit.on{display:flex}
+
+/* GEE frames */
+#vGEE{position:relative}
+#vGEE iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+#geeBadge{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:400;pointer-events:none;
+  background:rgba(7,9,13,.9);border:1px solid var(--amber);
+  font-family:var(--mono);font-size:11px;color:var(--amber);padding:4px 14px;white-space:nowrap;text-align:center}
+
+/* Split GEE - two iframes side by side */
+#vSplit{flex-direction:row}
+.gee-half{flex:1;position:relative;overflow:hidden}
+.gee-half iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yr-label{position:absolute;top:8px;left:8px;z-index:400;background:rgba(7,9,13,.9);
+  border:1px solid;font-family:var(--mono);font-size:12px;font-weight:bold;
+  padding:4px 10px;pointer-events:none;letter-spacing:1px}
+.yr-label.L{color:var(--cyan);border-color:rgba(0,200,212,.4)}
+.yr-label.R{color:var(--amber);border-color:rgba(240,165,0,.4)}
+.divbar{width:3px;background:var(--amber);flex-shrink:0;position:relative;z-index:10}
+.divbar::after{content:'⇔';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:var(--amber);color:var(--bg);width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:12px}
+
+/* BOTTOM BAR */
+#bot{background:var(--panel);border-top:2px solid var(--border);padding:8px 10px;flex-shrink:0}
+.btop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.ybig{font-family:var(--mono);font-size:20px;color:var(--amber);letter-spacing:2px;line-height:1}
+.ylab{font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:2px}
+.ctrls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ysel{background:#1a2e45;border:1px solid var(--border);color:#fff;
+  font-family:var(--mono);font-size:13px;padding:5px 8px;outline:none;cursor:pointer;min-width:70px}
+.ysel option{background:#1a2e45;color:#fff}
+.cmplbl{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.sep{color:var(--dim);font-family:var(--mono)}
+.abtn{font-family:var(--mono);font-size:10px;background:transparent;
+  border:1px solid var(--cyan);color:var(--cyan);padding:6px 10px;cursor:pointer;white-space:nowrap}
+.abtn:hover{background:rgba(0,200,212,.1)}
+.abtn.amber{border-color:var(--amber);color:var(--amber)}
+.note{font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:4px;line-height:1.5}
+.note strong{color:var(--green)}
+
+/* search */
+#sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--cyan);
+  border-top:none;z-index:9999;max-height:260px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.95)}
+#sd.on{display:block}
+.sitem{padding:10px 12px;font-family:var(--mono);font-size:11px;
+  border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5;color:var(--text)}
+.sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
+.leaflet-control-attribution{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="hdr">
+    <div class="hr1">
+      <div class="logo-ring"></div>
+      <div><div class="logo-name">GEOTIME</div><div class="logo-sub">EARTH CHANGE VISUALIZER</div></div>
+      <div class="modes">
+        <button class="mb on" data-m="split">SPLIT YEARS</button>
+        <button class="mb" data-m="single">SINGLE · PLAY</button>
+      </div>
+    </div>
+    <div class="hr2">
+      <input id="si" type="text" placeholder="Search city, landmark, region…" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      <button id="sb">LOCATE</button>
+    </div>
+  </div>
+
+  <!-- MAP AREA -->
+  <div id="maparea">
+
+    <!-- SPLIT: two GEE iframes side by side -->
+    <div class="view on" id="vSplit">
+      <div class="gee-half">
+        <iframe id="geeL" src="about:blank" allowfullscreen></iframe>
+        <div class="yr-label L" id="lblL">2000</div>
+      </div>
+      <div class="divbar"></div>
+      <div class="gee-half">
+        <iframe id="geeR" src="about:blank" allowfullscreen></iframe>
+        <div class="yr-label R" id="lblR">2023</div>
+      </div>
+    </div>
+
+    <!-- SINGLE: one GEE iframe, plays through all years -->
+    <div class="view" id="vSingle">
+      <iframe id="geeS" src="about:blank" allowfullscreen></iframe>
+      <div id="geeBadge">🛰 Google Earth Engine · Cloud-free Landsat 1984–2022 · Use ▶ controls below to scrub years</div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div id="bot">
+    <div class="btop">
+
+      <!-- Split mode controls -->
+      <div id="splitCtrls" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div>
+          <div class="ybig" id="ydsp">2000 → 2023</div>
+          <div class="ylab">COMPARE TWO YEARS · Cloud-free Landsat</div>
+        </div>
+        <div class="ctrls">
+          <span class="cmplbl">LEFT</span>
+          <select class="ysel" id="selL"></select>
+          <span class="sep">vs</span>
+          <span class="cmplbl">RIGHT</span>
+          <select class="ysel" id="selR"></select>
+          <button class="abtn" id="applyBtn">APPLY</button>
+        </div>
+      </div>
+
+      <!-- Single mode controls -->
+      <div id="singleCtrls" style="display:none;align-items:center;gap:8px;flex-wrap:wrap">
+        <div>
+          <div class="ybig">1984 → 2022</div>
+          <div class="ylab">PLAYING ALL YEARS · Use GEE controls inside the viewer</div>
+        </div>
+        <div class="ctrls">
+          <button class="abtn" id="refreshBtn">↺ RELOAD</button>
+          <button class="abtn amber" id="openBtn">↗ OPEN FULL</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="note">
+      <strong>✓ Cloud-free:</strong> GEE annual composites pick the best cloud-free pixel from every year's worth of images.
+      Search a location above, choose years, click APPLY.
+    </div>
+  </div>
+</div>
+
+<div id="sd"></div>
+
+<script>
+// GeoTime — powered by Google Earth Engine Timelapse
+// Cloud-free annual Landsat composites 1984–2022
+// Two iframes side by side = genuine two-year comparison
+
+const YEARS_SPLIT = [];
+for (let y = 1984; y <= 2022; y++) YEARS_SPLIT.push(y);
+
+let center = [17.4435, 78.3772]; // Hyderabad
+let zoom   = 10;
+let yearL  = 2000;
+let yearR  = 2022;
+let mode   = 'split';
+
+// Build GEE Timelapse URL
+// t param = fractional year position 0-1 (0=1984, 1=2022)
+// ps = playback speed
+// bt/et = begin/end time
+function geeUrl(year) {
+  const lat = center[0].toFixed(4);
+  const lng = center[1].toFixed(4);
+  const z   = Math.min(zoom, 14);
+  // t = position in timeline (0=1984, 1=2022, 38 years total)
+  const t   = ((year - 1984) / 38).toFixed(3);
+  return `https://earthengine.google.com/timelapse/#v=${lat},${lng},${z},latLng&t=${t}&ps=50&bt=19840101&et=20221231&startDwell=0&endDwell=0`;
+}
+
+function geeUrlPlay() {
+  const lat = center[0].toFixed(4);
+  const lng = center[1].toFixed(4);
+  const z   = Math.min(zoom, 14);
+  // Start from beginning, play through all years
+  return `https://earthengine.google.com/timelapse/#v=${lat},${lng},${z},latLng&t=0&ps=50&bt=19840101&et=20221231&startDwell=0&endDwell=0`;
+}
+
+function loadFrames() {
+  document.getElementById('geeL').src = geeUrl(yearL);
+  document.getElementById('geeR').src = geeUrl(yearR);
+  document.getElementById('lblL').textContent = yearL;
+  document.getElementById('lblR').textContent = yearR;
+  document.getElementById('ydsp').textContent = `${yearL} → ${yearR}`;
+}
+
+function loadSingle() {
+  document.getElementById('geeS').src = geeUrlPlay();
+}
+
+// Year selects
+const selL = document.getElementById('selL');
+const selR = document.getElementById('selR');
+YEARS_SPLIT.forEach(y => {
+  selL.innerHTML += `<option value="${y}">${y}</option>`;
+  selR.innerHTML += `<option value="${y}">${y}</option>`;
+});
+selL.value = yearL;
+selR.value = yearR;
+
+document.getElementById('applyBtn').onclick = () => {
+  yearL = +selL.value;
+  yearR = +selR.value;
+  loadFrames();
+};
+
+// Mode switching
+document.querySelectorAll('.mb').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.mb').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    mode = btn.dataset.m;
+
+    if (mode === 'split') {
+      document.getElementById('vSplit').classList.add('on');
+      document.getElementById('vSingle').classList.remove('on');
+      document.getElementById('splitCtrls').style.display = 'flex';
+      document.getElementById('singleCtrls').style.display = 'none';
+      loadFrames();
+    } else {
+      document.getElementById('vSplit').classList.remove('on');
+      document.getElementById('vSingle').classList.add('on');
+      document.getElementById('splitCtrls').style.display = 'none';
+      document.getElementById('singleCtrls').style.display = 'flex';
+      loadSingle();
+    }
+  };
+});
+
+document.getElementById('refreshBtn').onclick = loadSingle;
+document.getElementById('openBtn').onclick = () => window.open(geeUrlPlay(), '_blank');
+
+// Initial load
+loadFrames();
+
+// SEARCH
+const siEl=document.getElementById('si'),sbEl=document.getElementById('sb'),sdEl=document.getElementById('sd');
+let sres=[],hiI=-1,sdt=null;
+function sdPos(){
+  const r=siEl.getBoundingClientRect(),r2=sbEl.getBoundingClientRect();
+  sdEl.style.top=r.bottom+'px';sdEl.style.left=r.left+'px';sdEl.style.width=(r2.right-r.left)+'px';
+}
+function bname(p){return[p.name,p.city!==p.name&&p.city,p.state,p.country].filter(Boolean).join(', ');}
+function renderSD(items){
+  sres=items;hiI=-1;sdEl.innerHTML='';
+  if(!items.length){sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">No results</div>';return;}
+  items.forEach((it,i)=>{
+    const d=document.createElement('div');d.className='sitem';
+    d.innerHTML=bname(it.properties);
+    d.onmousedown=e=>e.preventDefault();d.onclick=()=>pick(i);
+    sdEl.appendChild(d);
+  });
+}
+function pick(i){
+  const f=sres[i];if(!f)return;
+  const[lng,lat]=f.geometry.coordinates;
+  center=[lat,lng];zoom=11;
+  siEl.value=bname(f.properties).split(',')[0];sdEl.classList.remove('on');
+  if(mode==='split') loadFrames(); else loadSingle();
+}
+async function doSearch(q){
+  if(q.length<2){sdEl.classList.remove('on');return;}
+  sdPos();sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">Searching…</div>';sdEl.classList.add('on');
+  try{
+    const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=7&lang=en`);
+    const d=await r.json();renderSD(d.features||[]);
+  }catch{sdEl.innerHTML='<div class="sitem" style="color:var(--red);pointer-events:none">Search unavailable</div>';}
+}
+siEl.addEventListener('input',()=>{clearTimeout(sdt);sdt=setTimeout(()=>doSearch(siEl.value.trim()),300);});
+siEl.addEventListener('focus',sdPos);
+siEl.addEventListener('keydown',e=>{
+  const its=sdEl.querySelectorAll('.sitem');
+  if(e.key==='ArrowDown'){e.preventDefault();hiI=Math.min(hiI+1,its.length-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
+  else if(e.key==='ArrowUp'){e.preventDefault();hiI=Math.max(hiI-1,-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
+  else if(e.key==='Enter'){hiI>=0?pick(hiI):doSearch(siEl.value.trim());}
+  else if(e.key==='Escape')sdEl.classList.remove('on');
+});
+sbEl.onclick=()=>doSearch(siEl.value.trim());
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#si')&&!e.target.closest('#sb')&&!e.target.closest('#sd'))sdEl.classList.remove('on');
+});
+</script>
+</body>
+</html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>GeoTime — Earth Change Visualizer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07090d;--panel:#0d1520;--border:#1a2d45;
+  --amber:#f0a500;--cyan:#00c8d4;--text:#b8cfe0;
+  --dim:#3a5168;--green:#3ddc84;--red:#ff4d6a;
+  --mono:'Share Tech Mono',monospace;--sans:'Barlow Condensed',sans-serif;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* HEADER */
+#hdr{background:var(--panel);border-bottom:2px solid var(--border);flex-shrink:0}
+.hr1{display:flex;align-items:center;gap:8px;padding:8px 10px}
+.logo-ring{width:26px;height:26px;flex-shrink:0;border:2px solid var(--amber);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;animation:pulse 3s infinite}
+.logo-ring::after{content:'';width:7px;height:7px;background:var(--amber);border-radius:50%}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,165,0,.5)}50%{box-shadow:0 0 0 5px rgba(240,165,0,0)}}
+.logo-name{font-family:var(--mono);font-size:15px;letter-spacing:3px;color:var(--amber);white-space:nowrap}
+.logo-sub{font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:2px}
+.modes{display:flex;gap:3px;margin-left:auto;flex-shrink:0}
+.mb{font-family:var(--mono);font-size:10px;background:transparent;border:1px solid var(--border);
+  color:var(--dim);padding:5px 8px;cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.mb.on{background:rgba(0,200,212,.12);border-color:var(--cyan);color:var(--cyan)}
+.hr2{display:flex;padding:0 10px 8px}
+#si{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-right:none;
+  color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:12px;outline:none}
+#si:focus{border-color:var(--cyan)}
+#si::placeholder{color:var(--dim);font-size:11px}
+#sb{background:var(--amber);color:var(--bg);border:none;padding:8px 14px;
+  font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0}
+
+/* MAP AREA */
+#maparea{flex:1;position:relative;min-height:0}
+.view{display:none;position:absolute;top:0;left:0;right:0;bottom:0}
+.view.on{display:block}
 #vSplit.on,#vSwipe.on{display:flex}
 #mS,#mL,#mR,#mSB,#mST,#mA{position:absolute;top:0;left:0;right:0;bottom:0}
 #mST{clip-path:inset(0 50% 0 0)}
@@ -273,20 +594,29 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 const YEARS  = [2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
 const NY     = YEARS.length;
 
-// Mid-August = best global cloud-free coverage
+// January = dry season, clear skies over India and most of Asia/Africa
 const DATES  = {
-  2012:'2012-08-15',2013:'2013-08-15',2014:'2014-08-15',2015:'2015-08-15',
-  2016:'2016-08-15',2017:'2017-08-15',2018:'2018-08-15',2019:'2019-08-15',
-  2020:'2020-08-15',2021:'2021-08-15',2022:'2022-08-15',2023:'2023-08-15',
+  2012:'2012-01-15',2013:'2013-01-15',2014:'2014-01-15',2015:'2015-01-15',
+  2016:'2016-01-15',2017:'2017-01-15',2018:'2018-01-15',2019:'2019-01-15',
+  2020:'2020-01-15',2021:'2021-01-15',2022:'2022-01-15',2023:'2023-01-15',
 };
 
 function gibsUrl(yi) {
   const date  = DATES[YEARS[yi]];
-  const layer = 'MODIS_Terra_CorrectedReflectance_TrueColor';
-  // Confirmed correct URL format from NASA GIBS API docs:
-  // https://nasa-gibs.github.io/gibs-api-docs/access-basics/
-  // TileMatrixSet for MODIS True Color in epsg3857 = GoogleMapsCompatible_Level9
-  return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
+  // Try Landsat cloud-free mosaic first (better quality, annual composite)
+  // Fallback: MODIS Terra True Color (daily, may have clouds)
+  const layer = 'Landsat_WELD_CorrectedReflectance_TrueColor_Global_Annual';
+  const modis = 'MODIS_Terra_CorrectedReflectance_TrueColor';
+  
+  // Use Landsat annual cloud-free composite for 2013-2020
+  // Use MODIS for other years (Landsat mosaic only covers certain years)
+  const yr = YEARS[yi];
+  if (yr >= 2013 && yr <= 2020) {
+    // Landsat WELD annual mosaic — cloud free, 30m resolution, beautiful
+    return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${yr}-01-01/GoogleMapsCompatible_Level12/{z}/{y}/{x}.jpg`;
+  }
+  // MODIS True Color for other years — use January for clearer skies
+  return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${modis}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
 }
 
 // Labels overlay — CartoDB transparent labels only (place names on top of satellite)
