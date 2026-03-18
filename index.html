@@ -16,8 +16,6 @@
   --mono:'Share Tech Mono',monospace;--sans:'Barlow Condensed',sans-serif;
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
-
-/* ── LAYOUT ── */
 #app{display:flex;flex-direction:column;height:100vh}
 
 /* ── HEADER ── */
@@ -33,7 +31,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .mb{font-family:var(--mono);font-size:10px;background:transparent;border:1px solid var(--border);
   color:var(--dim);padding:5px 8px;cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap}
 .mb.on{background:rgba(0,200,212,.12);border-color:var(--cyan);color:var(--cyan)}
-.hr2{display:flex;padding:0 10px 8px}
+.hr2{display:flex;padding:0 10px 8px;gap:0}
 #si{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-right:none;
   color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:12px;outline:none}
 #si:focus{border-color:var(--cyan)}
@@ -41,22 +39,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #sb{background:var(--amber);color:var(--bg);border:none;padding:8px 14px;
   font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0}
 
-/* ── MAP AREA — flex:1 gives it all remaining height ── */
+/* ── MAP AREA ── */
 #maparea{flex:1;position:relative;min-height:0}
-
-/* Each view panel fills maparea exactly */
 .view{display:none;position:absolute;top:0;left:0;right:0;bottom:0}
 .view.on{display:block}
 #vSplit.on{display:flex}
-
-/* Split: two halves side by side */
 .half{flex:1;position:relative;min-width:0;min-height:0}
-/* Leaflet map containers — fill their parent completely */
-#mL,#mR,#mSB,#mST,#mA{position:absolute;top:0;left:0;right:0;bottom:0}
-/* Swipe: base map fills all, top map clipped */
+#mL,#mR,#mSB,#mST,#mA,#mSingle{position:absolute;top:0;left:0;right:0;bottom:0}
 #mST{clip-path:inset(0 50% 0 0)}
-
-/* Labels & stamps */
 .hlabel{position:absolute;top:8px;left:8px;z-index:400;background:rgba(7,9,13,.88);
   border:1px solid;font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none;letter-spacing:1px}
 .hlabel.L{color:var(--cyan);border-color:rgba(0,200,212,.3)}
@@ -70,8 +60,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .divbar::after{content:'⇔';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   background:var(--amber);color:var(--bg);width:26px;height:26px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:12px}
-
-/* Swipe handle */
 .swhandle{position:absolute;top:0;bottom:0;left:50%;width:3px;background:var(--amber);
   z-index:20;transform:translateX(-50%);cursor:col-resize}
 .swbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -81,18 +69,37 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .swtag{position:absolute;top:8px;z-index:20;background:rgba(7,9,13,.88);
   border:1px solid var(--border);font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none}
 .swtag.B{left:8px;color:var(--cyan)}.swtag.A{right:8px;color:var(--amber)}
-
-/* Animate overlay */
 .animyr{position:absolute;top:8px;left:10px;z-index:20;pointer-events:none;
-  font-family:var(--mono);font-size:54px;color:var(--amber);opacity:.7;
-  text-shadow:0 0 20px rgba(240,165,0,.4);line-height:1}
+  font-family:var(--mono);font-size:54px;color:var(--amber);opacity:.7;line-height:1;
+  text-shadow:0 0 20px rgba(240,165,0,.4)}
 .animdot{position:absolute;top:68px;left:13px;z-index:20;pointer-events:none;
   font-family:var(--mono);font-size:10px;color:var(--dim);display:flex;align-items:center;gap:5px}
 .dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
 
+/* ── NO-PROXY BANNER (shown on single map) ── */
+#noproxyBanner{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  z-index:400;background:rgba(13,21,32,.92);border:1px solid var(--amber);
+  font-family:var(--mono);font-size:11px;color:var(--text);padding:10px 18px;
+  text-align:center;line-height:1.8;white-space:nowrap;pointer-events:none}
+#noproxyBanner strong{color:var(--amber)}
+#noproxyBanner span{color:var(--cyan)}
+
+/* single map view */
+#vSingle #mSingle{position:absolute;top:0;left:0;right:0;bottom:0}
+#noproxyBanner{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
+  background:rgba(13,21,32,.92);border:1px solid var(--amber);
+  font-family:var(--mono);font-size:11px;color:var(--dim);padding:10px 16px;
+  z-index:400;text-align:center;line-height:1.7;white-space:nowrap;pointer-events:none}
+#noproxyBanner strong{color:var(--amber)}
+#noproxyBanner span{color:var(--cyan)}
+
 /* ── BOTTOM BAR ── */
 #bot{background:var(--panel);border-top:2px solid var(--border);padding:8px 10px 6px;flex-shrink:0}
+
+/* proxy-mode bottom: full controls */
+#botProxy{display:none}
+#botProxy.on{display:block}
 .btop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap}
 .ybig{font-family:var(--mono);font-size:22px;color:var(--amber);letter-spacing:2px;line-height:1}
 .ylab{font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:1px}
@@ -109,12 +116,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .cbtn.pl{border-color:var(--green);color:var(--green)}
 .spsel{background:var(--bg);border:1px solid var(--border);color:var(--dim);
   font-family:var(--mono);font-size:10px;padding:3px 5px;outline:none;cursor:pointer}
-#proxyBtn{font-family:var(--mono);font-size:10px;background:transparent;
-  border:1px solid var(--amber);color:var(--amber);padding:5px 10px;cursor:pointer;white-space:nowrap}
-#proxyBtn.ok{border-color:var(--green);color:var(--green)}
-#proxyStrip{font-family:var(--mono);font-size:10px;color:var(--dim);
-  padding:3px 0 1px;cursor:pointer;border-top:1px solid var(--border);margin-top:4px}
-#proxyStrip.ok{color:var(--green)}
 .tl{position:relative;height:34px;margin-top:2px}
 .tks{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;pointer-events:none}
 .tk{display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:all;cursor:pointer}
@@ -126,16 +127,25 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #sldr::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
   border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 8px rgba(240,165,0,.7)}
 
-/* ── SEARCH DROPDOWN (body-level fixed) ── */
-#sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--cyan);
-  border-top:none;z-index:9999;max-height:260px;overflow-y:auto;
-  box-shadow:0 12px 32px rgba(0,0,0,.95)}
-#sd.on{display:block}
-.sitem{padding:10px 12px;font-family:var(--mono);font-size:11px;
-  border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5;color:var(--text)}
-.sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
+/* no-proxy bottom: just proxy button */
+#botSimple{display:none}
+#botSimple.on{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0}
+.simple-msg{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.6}
+.simple-msg strong{color:var(--amber)}
 
-/* ── PROXY MODAL (body-level fixed) ── */
+/* shared buttons */
+.proxybtn{font-family:var(--mono);font-size:11px;background:var(--amber);
+  border:none;color:var(--bg);padding:8px 14px;cursor:pointer;font-weight:700;white-space:nowrap;flex-shrink:0}
+.proxybtn.ok{background:transparent;border:1px solid var(--green);color:var(--green);font-weight:400}
+#geeBtn{font-family:var(--mono);font-size:10px;background:transparent;
+  border:1px solid var(--cyan);color:var(--cyan);padding:5px 10px;cursor:pointer;white-space:nowrap}
+
+/* Leaflet */
+.leaflet-control-attribution{display:none!important}
+.leaflet-control-zoom{border:1px solid var(--border)!important}
+.leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important}
+
+/* PROXY MODAL */
 #proxyModal{display:none;position:fixed;inset:0;z-index:9998;
   background:rgba(7,9,13,.96);align-items:center;justify-content:center;padding:20px}
 #proxyModal.on{display:flex}
@@ -148,7 +158,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   padding:10px 12px;font-family:var(--mono);font-size:12px;outline:none;min-width:0}
 #purl::placeholder{color:var(--dim)}
 #psave{background:var(--amber);color:var(--bg);border:none;padding:10px 16px;
-  font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0;letter-spacing:1px}
+  font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0}
 #pstatus{font-family:var(--mono);font-size:11px;min-height:18px;margin-bottom:12px;line-height:1.5}
 .pnote{background:rgba(0,200,212,.06);border:1px solid rgba(0,200,212,.2);
   padding:10px 12px;font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.9;margin-bottom:14px}
@@ -159,14 +169,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #pclear{font-family:var(--mono);font-size:10px;color:var(--red);cursor:pointer;
   background:transparent;border:none;text-decoration:underline}
 
-/* Leaflet overrides */
-.leaflet-control-attribution{display:none!important}
-.leaflet-control-zoom{border:1px solid var(--border)!important}
-.leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important}
+/* SEARCH */
+#sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--cyan);
+  border-top:none;z-index:9999;max-height:260px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.95)}
+#sd.on{display:block}
+.sitem{padding:10px 12px;font-family:var(--mono);font-size:11px;
+  border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5;color:var(--text)}
+.sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
 </style>
 </head>
 <body>
-
 <div id="app">
 
   <!-- HEADER -->
@@ -174,14 +186,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div class="hr1">
       <div class="logo-ring"></div>
       <div><div class="logo-name">GEOTIME</div><div class="logo-sub">EARTH CHANGE VISUALIZER</div></div>
-      <div class="modes">
+      <!-- mode buttons — only visible when proxy active -->
+      <div class="modes" id="modeBar" style="display:none">
         <button class="mb on" data-m="split">SPLIT</button>
         <button class="mb" data-m="swipe">SWIPE</button>
         <button class="mb" data-m="anim">ANIM</button>
       </div>
     </div>
     <div class="hr2">
-      <input id="si" type="text" placeholder="Search city, landmark, region…" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      <input id="si" type="text" placeholder="Search any city, landmark, region…" autocomplete="off" autocorrect="off" spellcheck="false"/>
       <button id="sb">LOCATE</button>
     </div>
   </div>
@@ -189,14 +202,23 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   <!-- MAP AREA -->
   <div id="maparea">
 
-    <!-- SPLIT VIEW -->
-    <div class="view on" id="vSplit">
+    <!-- SINGLE MAP (no proxy) -->
+    <div class="view on" id="vSingle">
+      <div id="mSingle"></div>
+      <div id="noproxyBanner">
+        <strong>Satellite Viewer Mode</strong> — Current imagery only<br>
+        Connect <span>⚙ PROXY</span> below to unlock year-by-year historical comparison
+      </div>
+    </div>
+
+    <!-- SPLIT (proxy) -->
+    <div class="view" id="vSplit">
       <div class="half">
         <div id="mL"></div>
         <div class="hlabel L" id="lblL">BEFORE · 2014</div>
         <div class="yr-stamp cy" id="stL">2014</div>
       </div>
-      <div class="divbar" id="splitbar"></div>
+      <div class="divbar"></div>
       <div class="half">
         <div id="mR"></div>
         <div class="hlabel R" id="lblR">AFTER · 2024</div>
@@ -204,7 +226,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       </div>
     </div>
 
-    <!-- SWIPE VIEW -->
+    <!-- SWIPE (proxy) -->
     <div class="view" id="vSwipe">
       <div id="mSB"></div>
       <div id="mST"></div>
@@ -212,10 +234,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div class="swtag B" id="swB">BEFORE · 2014</div>
       <div class="swtag A" id="swA">AFTER · 2024</div>
       <div class="yr-stamp cy" style="bottom:44px;left:10px" id="stSB">2014</div>
-      <div class="yr-stamp"   style="bottom:44px;right:10px;left:auto;border-left:none;border-right:3px solid var(--amber)" id="stST">2024</div>
+      <div class="yr-stamp" style="bottom:44px;right:10px;left:auto;border-left:none;border-right:3px solid var(--amber)" id="stST">2024</div>
     </div>
 
-    <!-- ANIMATE VIEW -->
+    <!-- ANIMATE (proxy) -->
     <div class="view" id="vAnim">
       <div id="mA"></div>
       <div class="animyr" id="animYr">2014</div>
@@ -226,47 +248,61 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
   <!-- BOTTOM BAR -->
   <div id="bot">
-    <div class="btop">
-      <div><div class="ybig" id="ydsp">2014</div><div class="ylab">SELECTED YEAR</div></div>
-      <div class="cmprow on" id="cmprow">
-        <span class="cmplbl">COMPARE</span>
-        <select class="ysel" id="selB"></select>
-        <span class="sep">→</span>
-        <select class="ysel" id="selA"></select>
+
+    <!-- NO PROXY: simple row with proxy connect button -->
+    <div id="botSimple" class="on">
+      <div class="simple-msg">
+        <strong>No proxy connected.</strong> Showing current Google satellite imagery.<br>
+        Connect proxy to compare real satellite imagery across years (2014–2024).
       </div>
-      <div class="ctrls">
-        <button class="cbtn" id="cBk">⏮</button>
-        <button class="cbtn" id="cPl">▶</button>
-        <button class="cbtn" id="cFw">⏭</button>
-        <select class="spsel" id="spd">
-          <option value="2000">0.5×</option>
-          <option value="1200" selected>1×</option>
-          <option value="600">2×</option>
-          <option value="300">4×</option>
-        </select>
-        <button id="proxyBtn">⚙ PROXY</button>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button id="geeBtn">🌍 TIMELAPSE</button>
+        <button class="proxybtn" id="proxyBtnSimple">⚙ CONNECT PROXY</button>
       </div>
     </div>
-    <div id="proxyStrip">⚠ No proxy — both maps show current imagery. Click ⚙ PROXY to unlock historical tiles.</div>
-    <div class="tl">
-      <div class="tks" id="tks"></div>
-      <input type="range" id="sldr" min="0" step="1" value="0"/>
+
+    <!-- PROXY ACTIVE: full year controls -->
+    <div id="botProxy">
+      <div class="btop">
+        <div><div class="ybig" id="ydsp">2014</div><div class="ylab">SELECTED YEAR</div></div>
+        <div class="cmprow on" id="cmprow">
+          <span class="cmplbl">COMPARE</span>
+          <select class="ysel" id="selB"></select>
+          <span class="sep">→</span>
+          <select class="ysel" id="selA"></select>
+        </div>
+        <div class="ctrls">
+          <button class="cbtn" id="cBk">⏮</button>
+          <button class="cbtn" id="cPl">▶</button>
+          <button class="cbtn" id="cFw">⏭</button>
+          <select class="spsel" id="spd">
+            <option value="2000">0.5×</option>
+            <option value="1200" selected>1×</option>
+            <option value="600">2×</option>
+            <option value="300">4×</option>
+          </select>
+          <button class="proxybtn ok" id="proxyBtnFull">✓ PROXY</button>
+        </div>
+      </div>
+      <div class="tl">
+        <div class="tks" id="tks"></div>
+        <input type="range" id="sldr" min="0" step="1" value="0"/>
+      </div>
     </div>
+
   </div>
+</div>
 
-</div><!-- #app -->
-
-<!-- SEARCH DROPDOWN — body level, never clipped -->
+<!-- SEARCH DROPDOWN -->
 <div id="sd"></div>
 
-<!-- PROXY MODAL — body level, never clipped -->
+<!-- PROXY MODAL -->
 <div id="proxyModal">
   <div class="pbox">
     <div class="ptitle">⚙ CONNECT HISTORICAL TILE PROXY</div>
     <div class="psub">
-      Paste your <strong>Cloudflare Worker URL</strong> below to unlock real ESRI Wayback
-      satellite imagery per year (2014–2024).<br>
-      Without a proxy, all years show current Google imagery.
+      Paste your <strong>Cloudflare Worker URL</strong> to unlock real ESRI Wayback
+      satellite imagery per year (2014–2024).
     </div>
     <div class="pinput-row">
       <input id="purl" type="url" placeholder="https://geotime-tiles.yourname.workers.dev"/>
@@ -277,84 +313,45 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <strong>Deploy in 2 min:</strong><br>
       1. <strong>dash.cloudflare.com → Workers &amp; Pages → Create Worker</strong><br>
       2. Click <strong>"Edit code"</strong> → Select All → paste <strong>wayback-worker.js</strong> → Deploy<br>
-      3. Copy your <strong>.workers.dev</strong> URL → paste above → SAVE<br>
-      Free tier: <strong>100,000 requests/day</strong>
+      3. Copy your <strong>.workers.dev</strong> URL → paste above → SAVE
     </div>
     <div class="pfoot">
       <button id="pclose">✕ Close</button>
-      <button id="pclear">Clear saved proxy</button>
+      <button id="pclear">Clear proxy</button>
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════════════════════
-const YEARS  = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
-const NY     = YEARS.length;
-const GSUBS  = ['0','1','2','3'];
-// Google Hybrid — mt1, stable endpoint
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const YEARS   = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+const NY      = YEARS.length;
 const GHYBRID = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
-// ESRI Wayback release IDs per year
 const WBIDS   = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
 
 let PROXY = localStorage.getItem('gt_proxy') || '';
 
 function satUrl(yi) {
-  if (PROXY) {
-    return `${PROXY.replace(/\/$/,'')}/tile/${WBIDS[YEARS[yi]]}/{z}/{y}/{x}`;
-  }
-  return GHYBRID; // same image all years — proxy needed for real historical diff
+  if (PROXY) return `${PROXY.replace(/\/$/,'')}/tile/${WBIDS[YEARS[yi]]}/{z}/{y}/{x}`;
+  return GHYBRID;
 }
 
-// ═══════════════════════════════════════════════════════
-//  LAYER MANAGEMENT
-//  Without proxy: one permanent satellite layer, never removed.
-//  With proxy: swap to year-specific Wayback tile URL.
-// ═══════════════════════════════════════════════════════
-const SAT_LAYERS = new Map();
+// ── LAYER MANAGEMENT ──────────────────────────────────────────────────────────
+const SAT = new Map();
 
 function initMap(map) {
-  // OSM as permanent base — shows roads/labels even when satellite fails
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom:19, zIndex:1
-  }).addTo(map);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, zIndex:1}).addTo(map);
 }
 
 function setLayer(map, yi) {
-  const old = SAT_LAYERS.get(map);
-  const url = satUrl(yi);
-
-  // If no proxy: all years share the same URL.
-  // Don't remove and re-add — it causes blank flash. Just leave it.
-  if (!PROXY && old) return;
-
-  // With proxy OR first load: add new layer, then remove old
+  const old = SAT.get(map);
   if (old) { try { map.removeLayer(old); } catch(e){} }
-  const lay = L.tileLayer(url, { maxZoom:18, zIndex:2 }).addTo(map);
-  SAT_LAYERS.set(map, lay);
+  const lay = L.tileLayer(satUrl(yi), {maxZoom:18, zIndex:2}).addTo(map);
+  SAT.set(map, lay);
 }
 
-// Called once on startup and after proxy is saved — loads sat layer on all maps
-function loadAllLayers() {
-  setLayer(mL,  cmpB);
-  setLayer(mR,  cmpA);
-  setLayer(mSB, cmpB);
-  setLayer(mST, cmpA);
-  setLayer(mA,  yIdx);
-}
-
-// Force-reload all layers (used when proxy changes)
-function reloadAllLayers() {
-  SAT_LAYERS.clear(); // clear cache so setLayer adds fresh layers
-  loadAllLayers();
-}
-
-// ═══════════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════════
-let center  = [17.4435, 78.3772]; // Hyderabad HITEC City
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let center  = [17.4435, 78.3772];
 let zoom    = 12;
 let yIdx    = 0;
 let cmpB    = 0;
@@ -363,108 +360,145 @@ let mode    = 'split';
 let playing = false;
 let ptimer  = null;
 
-// ═══════════════════════════════════════════════════════
-//  MAPS  — created AFTER body renders, containers have size
-// ═══════════════════════════════════════════════════════
-const MOPTS = { zoomControl:false, attributionControl:false, maxZoom:18, minZoom:2 };
+// ── MAPS ──────────────────────────────────────────────────────────────────────
+const MOPTS = {zoomControl:false, attributionControl:false, maxZoom:18, minZoom:2};
 
 function mkMap(id) {
   const m = L.map(id, MOPTS);
   m.setView(center, zoom);
-  initMap(m);   // add OSM base layer
+  initMap(m);
   return m;
 }
 
-// Create maps
-const mL  = mkMap('mL');
-const mR  = mkMap('mR');
-const mSB = mkMap('mSB');
-const mST = mkMap('mST');
-const mA  = mkMap('mA');
-const ALL = [mL, mR, mSB, mST, mA];
+const mSingle = mkMap('mSingle');
+const mL      = mkMap('mL');
+const mR      = mkMap('mR');
+const mSB     = mkMap('mSB');
+const mST     = mkMap('mST');
+const mA      = mkMap('mA');
+const ALL     = [mSingle, mL, mR, mSB, mST, mA];
 
-// Load initial satellite layers — AFTER invalidateSize below, not here
-// (maps need real pixel dimensions before tiles can load)
-
-// Zoom controls
 ALL.forEach(m => L.control.zoom({position:'bottomright'}).addTo(m));
 
-// ═══════════════════════════════════════════════════════
-//  SYNC ALL MAPS
-// ═══════════════════════════════════════════════════════
+// ── SYNC ──────────────────────────────────────────────────────────────────────
 let syncing = false;
 ALL.forEach((src, si) => {
   src.on('moveend', () => {
     if (syncing) return;
     syncing = true;
-    const c = src.getCenter();
-    center = [c.lat, c.lng];
+    center = [src.getCenter().lat, src.getCenter().lng];
     zoom   = src.getZoom();
     ALL.forEach((t, ti) => { if (ti !== si) t.setView(center, zoom, {animate:false}); });
     syncing = false;
   });
 });
 
-// ═══════════════════════════════════════════════════════
-//  INVALIDATE MAPS — called after any layout change
-// ═══════════════════════════════════════════════════════
-function invAll() {
-  ALL.forEach(m => { m.invalidateSize(); });
-}
+function invAll() { ALL.forEach(m => m.invalidateSize()); }
 window.addEventListener('resize', invAll);
 
-// Initial invalidation + layer load — inside rAF so all containers have real pixel dimensions
 requestAnimationFrame(() => {
   invAll();
   ALL.forEach(m => m.setView(center, zoom));
-  loadAllLayers();   // ← load tiles AFTER containers are sized
+  // Load satellite on single map always; load comparison maps only if proxy active
+  setLayer(mSingle, 0);
+  if (PROXY) loadProxyLayers();
   initSwipe();
   setTimeout(() => { invAll(); ALL.forEach(m => m.setView(center, zoom)); }, 500);
 });
 
-// ═══════════════════════════════════════════════════════
-//  YEAR SELECTS
-// ═══════════════════════════════════════════════════════
+function loadProxyLayers() {
+  setLayer(mL,  cmpB);
+  setLayer(mR,  cmpA);
+  setLayer(mSB, cmpB);
+  setLayer(mST, cmpA);
+  setLayer(mA,  yIdx);
+}
+
+// ── UI MODE: proxy vs no-proxy ────────────────────────────────────────────────
+function applyProxyUI() {
+  const hasProxy = !!PROXY;
+  // Bottom bar
+  document.getElementById('botSimple').classList.toggle('on', !hasProxy);
+  document.getElementById('botProxy').classList.toggle('on',  hasProxy);
+  // Mode buttons in header
+  document.getElementById('modeBar').style.display = hasProxy ? 'flex' : 'none';
+
+  if (hasProxy) {
+    // Switch from single view to split
+    showView('split');
+    loadProxyLayers();
+  } else {
+    // Back to single map view
+    showView('single');
+    setLayer(mSingle, 0);
+  }
+}
+
+function showView(v) {
+  ['vSingle','vSplit','vSwipe','vAnim'].forEach(id =>
+    document.getElementById(id).classList.remove('on'));
+  document.getElementById('cmprow')?.classList.remove('on');
+
+  if (v === 'single') {
+    document.getElementById('vSingle').classList.add('on');
+    mode = 'single';
+    setTimeout(() => mSingle.invalidateSize(), 60);
+  } else if (v === 'split') {
+    document.getElementById('vSplit').classList.add('on');
+    document.getElementById('cmprow').classList.add('on');
+    mode = 'split';
+    setTimeout(() => { mL.invalidateSize(); mR.invalidateSize(); }, 60);
+  } else if (v === 'swipe') {
+    document.getElementById('vSwipe').classList.add('on');
+    document.getElementById('cmprow').classList.add('on');
+    mode = 'swipe';
+    setTimeout(() => { mSB.invalidateSize(); mST.invalidateSize(); initSwipe(); }, 60);
+  } else if (v === 'anim') {
+    document.getElementById('vAnim').classList.add('on');
+    mode = 'anim';
+    setTimeout(() => { mA.invalidateSize(); mA.setView(center, zoom); setLayer(mA, yIdx); }, 60);
+  }
+}
+
+// ── MODE BUTTONS ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.mb').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.mb').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    showView(btn.dataset.m);
+  };
+});
+
+// ── YEAR SELECTS ──────────────────────────────────────────────────────────────
 const selB = document.getElementById('selB');
 const selA = document.getElementById('selA');
 YEARS.forEach((y, i) => {
   selB.innerHTML += `<option value="${i}">${y}</option>`;
   selA.innerHTML += `<option value="${i}">${y}</option>`;
 });
-selB.value = cmpB;
-selA.value = cmpA;
+selB.value = cmpB; selA.value = cmpA;
 
 function updStamps() {
   const yb = YEARS[cmpB], ya = YEARS[cmpA];
-  document.getElementById('lblL').textContent  = `BEFORE · ${yb}`;
-  document.getElementById('lblR').textContent  = `AFTER · ${ya}`;
-  document.getElementById('swB').textContent   = `BEFORE · ${yb}`;
-  document.getElementById('swA').textContent   = `AFTER · ${ya}`;
-  document.getElementById('stL').textContent   = yb;
-  document.getElementById('stR').textContent   = ya;
-  document.getElementById('stSB').textContent  = yb;
-  document.getElementById('stST').textContent  = ya;
+  ['lblL','stL'].forEach(id => document.getElementById(id) && (document.getElementById(id).textContent = id.startsWith('lbl') ? `BEFORE · ${yb}` : yb));
+  ['lblR','stR'].forEach(id => document.getElementById(id) && (document.getElementById(id).textContent = id.startsWith('lbl') ? `AFTER · ${ya}` : ya));
+  document.getElementById('swB').textContent  = `BEFORE · ${yb}`;
+  document.getElementById('swA').textContent  = `AFTER · ${ya}`;
+  document.getElementById('stSB').textContent = yb;
+  document.getElementById('stST').textContent = ya;
 }
 
 function applyCmp() {
   updStamps();
-  if (PROXY) {
-    // With proxy: each year has different tiles — swap them
-    setLayer(mL,  cmpB);
-    setLayer(mR,  cmpA);
-    setLayer(mSB, cmpB);
-    setLayer(mST, cmpA);
-  }
-  // Without proxy: same Google tile for all years — just update labels
+  setLayer(mL,  cmpB); setLayer(mR,  cmpA);
+  setLayer(mSB, cmpB); setLayer(mST, cmpA);
 }
 
 updStamps();
 selB.onchange = () => { cmpB = +selB.value; applyCmp(); };
 selA.onchange = () => { cmpA = +selA.value; applyCmp(); };
 
-// ═══════════════════════════════════════════════════════
-//  TIMELINE TICKS + SLIDER
-// ═══════════════════════════════════════════════════════
+// ── TIMELINE ──────────────────────────────────────────────────────────────────
 const tksEl = document.getElementById('tks');
 const sldr  = document.getElementById('sldr');
 sldr.max = NY - 1;
@@ -476,7 +510,6 @@ YEARS.forEach((y, i) => {
   t.onclick = () => { yIdx = i; sldr.value = i; updYear(); updTrack(); };
   tksEl.appendChild(t);
 });
-
 sldr.oninput = () => { yIdx = +sldr.value; updYear(); updTrack(); };
 
 function updYear() {
@@ -484,258 +517,161 @@ function updYear() {
   document.getElementById('ydsp').textContent   = y;
   document.getElementById('animYr').textContent = y;
   tksEl.querySelectorAll('.tk').forEach((t, i) => t.classList.toggle('on', i === yIdx));
-  if (mode === 'anim' && PROXY) { setLayer(mA, yIdx); }
+  if (mode === 'anim')  setLayer(mA, yIdx);
   if (mode === 'split') { cmpB = yIdx; selB.value = yIdx; applyCmp(); }
   if (mode === 'swipe') { cmpB = yIdx; selB.value = yIdx; applyCmp(); }
 }
-
-function updTrack() {
-  sldr.style.setProperty('--p', (yIdx / (NY - 1) * 100) + '%');
-}
+function updTrack() { sldr.style.setProperty('--p', (yIdx / (NY-1) * 100) + '%'); }
 updTrack();
 
-// ═══════════════════════════════════════════════════════
-//  MODE SWITCHING
-// ═══════════════════════════════════════════════════════
-document.querySelectorAll('.mb').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.mb').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    gotoMode(btn.dataset.m);
-  };
-});
-
-function gotoMode(m) {
-  mode = m;
-  document.getElementById('vSplit').classList.remove('on');
-  document.getElementById('vSwipe').classList.remove('on');
-  document.getElementById('vAnim').classList.remove('on');
-  document.getElementById('cmprow').classList.remove('on');
-
-  if (m === 'split') {
-    document.getElementById('vSplit').classList.add('on');
-    document.getElementById('cmprow').classList.add('on');
-    setTimeout(() => { mL.invalidateSize(); mR.invalidateSize(); }, 60);
-  } else if (m === 'swipe') {
-    document.getElementById('vSwipe').classList.add('on');
-    document.getElementById('cmprow').classList.add('on');
-    setTimeout(() => { mSB.invalidateSize(); mST.invalidateSize(); initSwipe(); }, 60);
-  } else {
-    document.getElementById('vAnim').classList.add('on');
-    setTimeout(() => { mA.invalidateSize(); mA.setView(center, zoom); setLayer(mA, yIdx); }, 60);
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-//  SWIPE DRAG
-// ═══════════════════════════════════════════════════════
+// ── SWIPE ─────────────────────────────────────────────────────────────────────
 function initSwipe() {
   const H = document.getElementById('swH');
   const T = document.getElementById('mST');
   const W = document.getElementById('vSwipe');
   let drag = false;
-
   function mv(x) {
     const r = W.getBoundingClientRect();
     const p = Math.max(5, Math.min(95, (x - r.left) / r.width * 100));
-    H.style.left = p + '%';
-    T.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
+    H.style.left = p + '%'; T.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
   }
-
-  // Remove old listeners
-  const H2 = H.cloneNode(true);
-  H.parentNode.replaceChild(H2, H);
+  const H2 = H.cloneNode(true); H.parentNode.replaceChild(H2, H);
   H2.addEventListener('mousedown',  e => { drag = true; e.preventDefault(); });
   H2.addEventListener('touchstart', () => drag = true, {passive:true});
   document.addEventListener('mousemove',  e => { if (drag) mv(e.clientX); });
   document.addEventListener('touchmove',  e => { if (drag) mv(e.touches[0].clientX); }, {passive:true});
   document.addEventListener('mouseup',  () => drag = false);
   document.addEventListener('touchend', () => drag = false);
-
   const r = W.getBoundingClientRect();
   mv(r.left + r.width / 2);
 }
 
-// ═══════════════════════════════════════════════════════
-//  PLAYBACK
-// ═══════════════════════════════════════════════════════
+// ── PLAYBACK ──────────────────────────────────────────────────────────────────
 document.getElementById('cPl').onclick = () => playing ? stopPlay() : startPlay();
-document.getElementById('cBk').onclick = () => { stopPlay(); yIdx = 0; sldr.value = 0; updYear(); updTrack(); };
-document.getElementById('cFw').onclick = () => { stopPlay(); yIdx = NY-1; sldr.value = NY-1; updYear(); updTrack(); };
+document.getElementById('cBk').onclick = () => { stopPlay(); yIdx=0; sldr.value=0; updYear(); updTrack(); };
+document.getElementById('cFw').onclick = () => { stopPlay(); yIdx=NY-1; sldr.value=NY-1; updYear(); updTrack(); };
 
 function startPlay() {
-  if (mode !== 'anim') {
-    gotoMode('anim');
-    document.querySelectorAll('.mb').forEach(b => b.classList.toggle('on', b.dataset.m === 'anim'));
-  }
+  if (mode !== 'anim') { showView('anim'); document.querySelectorAll('.mb').forEach(b => b.classList.toggle('on', b.dataset.m==='anim')); }
   playing = true;
   document.getElementById('cPl').textContent = '⏸';
   document.getElementById('cPl').classList.add('pl');
-  if (yIdx >= NY - 1) yIdx = 0;
+  if (yIdx >= NY-1) yIdx = 0;
   const ms = +document.getElementById('spd').value;
   ptimer = setInterval(() => {
-    yIdx++;
-    if (yIdx >= NY) { yIdx = NY - 1; stopPlay(); return; }
-    updYear(); sldr.value = yIdx; updTrack();
+    yIdx++; if (yIdx >= NY) { yIdx=NY-1; stopPlay(); return; }
+    updYear(); sldr.value=yIdx; updTrack();
   }, ms);
 }
 function stopPlay() {
-  playing = false; clearInterval(ptimer);
-  document.getElementById('cPl').textContent = '▶';
-  document.getElementById('cPl').classList.remove('pl');
+  playing=false; clearInterval(ptimer);
+  document.getElementById('cPl').textContent='▶'; document.getElementById('cPl').classList.remove('pl');
 }
 
-// ═══════════════════════════════════════════════════════
-//  SEARCH  (Photon/Komoot — CORS-open, no key needed)
-// ═══════════════════════════════════════════════════════
-const siEl = document.getElementById('si');
-const sbEl = document.getElementById('sb');
-const sdEl = document.getElementById('sd');
-let sres = [], hiI = -1, sdt = null;
-
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+const siEl=document.getElementById('si'), sbEl=document.getElementById('sb'), sdEl=document.getElementById('sd');
+let sres=[], hiI=-1, sdt=null;
 function sdPos() {
-  const r  = siEl.getBoundingClientRect();
-  const r2 = sbEl.getBoundingClientRect();
-  sdEl.style.top   = r.bottom + 'px';
-  sdEl.style.left  = r.left   + 'px';
-  sdEl.style.width = (r2.right - r.left) + 'px';
+  const r=siEl.getBoundingClientRect(), r2=sbEl.getBoundingClientRect();
+  sdEl.style.top=r.bottom+'px'; sdEl.style.left=r.left+'px'; sdEl.style.width=(r2.right-r.left)+'px';
 }
-
-function bname(p) {
-  return [p.name, p.city !== p.name && p.city, p.state, p.country].filter(Boolean).join(', ');
-}
-
+function bname(p) { return [p.name, p.city!==p.name&&p.city, p.state, p.country].filter(Boolean).join(', '); }
 function renderSD(items) {
-  sres = items; hiI = -1; sdEl.innerHTML = '';
-  if (!items.length) {
-    sdEl.innerHTML = '<div class="sitem" style="color:var(--dim);pointer-events:none">No results</div>';
-    return;
-  }
+  sres=items; hiI=-1; sdEl.innerHTML='';
+  if (!items.length) { sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">No results</div>'; return; }
   items.forEach((it, i) => {
-    const d = document.createElement('div');
-    d.className = 'sitem';
-    const type = (it.properties.osm_value || '').replace(/_/g,' ');
-    d.innerHTML = bname(it.properties) + (type ? ` <span style="color:var(--dim);font-size:9px">${type}</span>` : '');
-    d.onmousedown = e => e.preventDefault();
-    d.onclick = () => pick(i);
+    const d=document.createElement('div'); d.className='sitem';
+    const type=(it.properties.osm_value||'').replace(/_/g,' ');
+    d.innerHTML=bname(it.properties)+(type?` <span style="color:var(--dim);font-size:9px">${type}</span>`:'');
+    d.onmousedown=e=>e.preventDefault(); d.onclick=()=>pick(i);
     sdEl.appendChild(d);
   });
 }
-
 function pick(i) {
-  const f = sres[i]; if (!f) return;
-  const [lng, lat] = f.geometry.coordinates;
-  ALL.forEach(m => m.setView([lat, lng], 13, {animate:true}));
-  center = [lat, lng]; zoom = 13;
-  siEl.value = bname(f.properties).split(',')[0];
+  const f=sres[i]; if(!f) return;
+  const [lng,lat]=f.geometry.coordinates;
+  ALL.forEach(m=>m.setView([lat,lng],13,{animate:true}));
+  center=[lat,lng]; zoom=13;
+  siEl.value=bname(f.properties).split(',')[0];
   sdEl.classList.remove('on');
 }
-
 async function doSearch(q) {
-  if (q.length < 2) { sdEl.classList.remove('on'); return; }
-  sdPos();
-  sdEl.innerHTML = '<div class="sitem" style="color:var(--dim);pointer-events:none">Searching…</div>';
-  sdEl.classList.add('on');
+  if (q.length<2){sdEl.classList.remove('on');return;}
+  sdPos(); sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">Searching…</div>'; sdEl.classList.add('on');
   try {
-    const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=7&lang=en`);
-    const d = await r.json();
-    renderSD(d.features || []);
-  } catch {
-    sdEl.innerHTML = '<div class="sitem" style="color:var(--red);pointer-events:none">Search unavailable</div>';
-  }
+    const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=7&lang=en`);
+    const d=await r.json(); renderSD(d.features||[]);
+  } catch { sdEl.innerHTML='<div class="sitem" style="color:var(--red);pointer-events:none">Search unavailable</div>'; }
 }
-
-siEl.addEventListener('input',  () => { clearTimeout(sdt); sdt = setTimeout(() => doSearch(siEl.value.trim()), 300); });
-siEl.addEventListener('focus',  sdPos);
-siEl.addEventListener('keydown', e => {
-  const its = sdEl.querySelectorAll('.sitem');
-  if (e.key === 'ArrowDown') { e.preventDefault(); hiI = Math.min(hiI+1, its.length-1); its.forEach((x,i) => x.classList.toggle('hi', i===hiI)); }
-  else if (e.key === 'ArrowUp') { e.preventDefault(); hiI = Math.max(hiI-1, -1); its.forEach((x,i) => x.classList.toggle('hi', i===hiI)); }
-  else if (e.key === 'Enter') { hiI >= 0 ? pick(hiI) : doSearch(siEl.value.trim()); }
-  else if (e.key === 'Escape') sdEl.classList.remove('on');
+siEl.addEventListener('input', ()=>{ clearTimeout(sdt); sdt=setTimeout(()=>doSearch(siEl.value.trim()),300); });
+siEl.addEventListener('focus', sdPos);
+siEl.addEventListener('keydown', e=>{
+  const its=sdEl.querySelectorAll('.sitem');
+  if(e.key==='ArrowDown'){e.preventDefault();hiI=Math.min(hiI+1,its.length-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
+  else if(e.key==='ArrowUp'){e.preventDefault();hiI=Math.max(hiI-1,-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
+  else if(e.key==='Enter'){hiI>=0?pick(hiI):doSearch(siEl.value.trim());}
+  else if(e.key==='Escape') sdEl.classList.remove('on');
 });
-sbEl.onclick = () => doSearch(siEl.value.trim());
-document.addEventListener('click', e => {
-  if (!e.target.closest('#si') && !e.target.closest('#sb') && !e.target.closest('#sd'))
-    sdEl.classList.remove('on');
+sbEl.onclick=()=>doSearch(siEl.value.trim());
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#si')&&!e.target.closest('#sb')&&!e.target.closest('#sd')) sdEl.classList.remove('on');
 });
 
-// ═══════════════════════════════════════════════════════
-//  PROXY MODAL
-// ═══════════════════════════════════════════════════════
+// ── GEE TIMELAPSE ─────────────────────────────────────────────────────────────
+document.getElementById('geeBtn').onclick = () => {
+  const [lat, lng] = center;
+  window.open(`https://earthengine.google.com/timelapse/#v=${lat.toFixed(4)},${lng.toFixed(4)},${Math.min(zoom+1,13)},latLng&t=1.03&ps=50&bt=19840101&et=20231231`, '_blank');
+};
+
+// ── PROXY MODAL ───────────────────────────────────────────────────────────────
 const modal   = document.getElementById('proxyModal');
 const purlEl  = document.getElementById('purl');
 const pstatEl = document.getElementById('pstatus');
 
-function openProxy() {
-  purlEl.value = PROXY || '';
-  pstatEl.textContent = '';
-  pstatEl.style.color = '';
-  modal.classList.add('on');
-  setTimeout(() => purlEl.focus(), 100);
-}
+function openProxy() { purlEl.value=PROXY||''; pstatEl.textContent=''; pstatEl.style.color=''; modal.classList.add('on'); setTimeout(()=>purlEl.focus(),100); }
 function closeProxy() { modal.classList.remove('on'); }
 
-document.getElementById('proxyBtn').onclick  = openProxy;
-document.getElementById('proxyStrip').onclick = openProxy;
-document.getElementById('pclose').onclick    = closeProxy;
-modal.addEventListener('click', e => { if (e.target === modal) closeProxy(); });
+document.getElementById('proxyBtnSimple').onclick = openProxy;
+document.getElementById('proxyBtnFull').onclick   = openProxy;
+document.getElementById('pclose').onclick         = closeProxy;
+modal.addEventListener('click', e=>{ if(e.target===modal) closeProxy(); });
 
 document.getElementById('pclear').onclick = () => {
-  PROXY = ''; localStorage.removeItem('gt_proxy');
-  purlEl.value = '';
-  pstatEl.style.color = 'var(--dim)'; pstatEl.textContent = 'Proxy cleared.';
-  updProxyUI(); reloadAllLayers();
+  PROXY=''; localStorage.removeItem('gt_proxy');
+  purlEl.value=''; pstatEl.style.color='var(--dim)'; pstatEl.textContent='Proxy cleared.';
+  applyProxyUI();
 };
 
 document.getElementById('psave').onclick = async () => {
   const val = purlEl.value.trim().replace(/\/$/,'');
   if (!val) { pstatEl.style.color='var(--red)'; pstatEl.textContent='Please enter a URL.'; return; }
-  pstatEl.style.color = 'var(--dim)'; pstatEl.textContent = 'Testing worker…';
+  pstatEl.style.color='var(--dim)'; pstatEl.textContent='Testing worker…';
 
   const doSave = () => {
-    PROXY = val; localStorage.setItem('gt_proxy', val);
-    pstatEl.style.color = 'var(--green)'; pstatEl.textContent = '✓ Saved! Maps reloading with historical tiles…';
-    updProxyUI(); reloadAllLayers();
+    PROXY=val; localStorage.setItem('gt_proxy',val);
+    pstatEl.style.color='var(--green)'; pstatEl.textContent='✓ Connected! Loading historical tiles…';
+    setTimeout(() => { closeProxy(); applyProxyUI(); }, 1200);
   };
 
   try {
-    const r = await fetch(val + '/tile', {signal: AbortSignal.timeout(10000)});
-    if (r.ok) {
-      doSave();
-    } else {
-      pstatEl.style.color = 'var(--amber)';
-      pstatEl.textContent = `Worker responded ${r.status}. `;
-      const btn = document.createElement('button');
-      btn.textContent = 'Save anyway';
-      btn.style.cssText = 'font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px';
-      btn.onclick = doSave;
-      pstatEl.appendChild(btn);
+    const r = await fetch(val+'/tile', {signal:AbortSignal.timeout(10000)});
+    if (r.ok) { doSave(); }
+    else {
+      pstatEl.style.color='var(--amber)'; pstatEl.textContent=`Worker responded ${r.status}. `;
+      const b=document.createElement('button');
+      b.textContent='Save anyway'; b.style.cssText='font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px';
+      b.onclick=doSave; pstatEl.appendChild(b);
     }
   } catch {
-    pstatEl.style.color = 'var(--amber)';
-    pstatEl.textContent = 'Could not verify. ';
-    const btn = document.createElement('button');
-    btn.textContent = 'Save anyway';
-    btn.style.cssText = 'font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px';
-    btn.onclick = doSave;
-    pstatEl.appendChild(btn);
+    pstatEl.style.color='var(--amber)'; pstatEl.textContent='Could not verify. ';
+    const b=document.createElement('button');
+    b.textContent='Save anyway'; b.style.cssText='font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px';
+    b.onclick=doSave; pstatEl.appendChild(b);
   }
 };
 
-function updProxyUI() {
-  const btn   = document.getElementById('proxyBtn');
-  const strip = document.getElementById('proxyStrip');
-  if (PROXY) {
-    const d = PROXY.replace('https://','').split('/')[0];
-    btn.classList.add('ok'); btn.textContent = '✓ PROXY';
-    strip.classList.add('ok'); strip.textContent = `✓ Proxy active: ${d} — real historical imagery`;
-  } else {
-    btn.classList.remove('ok'); btn.textContent = '⚙ PROXY';
-    strip.classList.remove('ok'); strip.textContent = '⚠ No proxy — both maps show current imagery. Click ⚙ PROXY to unlock historical tiles.';
-  }
-}
-updProxyUI();
+// ── INIT ──────────────────────────────────────────────────────────────────────
+applyProxyUI();
 </script>
 </body>
 </html>
