@@ -383,8 +383,8 @@ const mST = mkMap('mST');
 const mA  = mkMap('mA');
 const ALL = [mL, mR, mSB, mST, mA];
 
-// Load initial satellite layers
-loadAllLayers();
+// Load initial satellite layers — AFTER invalidateSize below, not here
+// (maps need real pixel dimensions before tiles can load)
 
 // Zoom controls
 ALL.forEach(m => L.control.zoom({position:'bottomright'}).addTo(m));
@@ -413,12 +413,12 @@ function invAll() {
 }
 window.addEventListener('resize', invAll);
 
-// Initial invalidation — run after first paint so containers have real dimensions
+// Initial invalidation + layer load — inside rAF so all containers have real pixel dimensions
 requestAnimationFrame(() => {
   invAll();
   ALL.forEach(m => m.setView(center, zoom));
+  loadAllLayers();   // ← load tiles AFTER containers are sized
   initSwipe();
-  // Second pass for mobile where layout takes longer
   setTimeout(() => { invAll(); ALL.forEach(m => m.setView(center, zoom)); }, 500);
 });
 
