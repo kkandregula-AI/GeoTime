@@ -381,45 +381,25 @@ let WBIDS = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305
 
 let PROXY = localStorage.getItem('gt_proxy') || '';
 
-// Fetch real release IDs — first try worker's own catalog, then CDN fallback
+// Fetch real release IDs from worker's /config endpoint
+// Worker fetches from official ESRI S3 config and returns year→releaseNum map
 async function fetchWaybackIds() {
-  // Try fetching from our own worker (returns yearIds in health check)
-  if (PROXY) {
-    try {
-      const r = await fetch(PROXY.replace(/\/$/,'') + '/', {signal: AbortSignal.timeout(5000)});
-      if (r.ok) {
-        const d = await r.json();
-        if (d.yearIds && Object.keys(d.yearIds).length >= 5) {
-          WBIDS = d.yearIds;
-          console.log('Wayback IDs from worker:', WBIDS);
-          loadProxyMaps();
-          return;
-        }
-      }
-    } catch(e) {}
-  }
-  // Fallback: fetch from ESRI Wayback public catalog via CDN
+  if (!PROXY) return;
   try {
-    const r = await fetch(
-      'https://cdn.jsdelivr.net/gh/vannizhang/world-imagery-wayback@master/src/assets/wayback-config.json',
-      {signal: AbortSignal.timeout(8000)}
-    );
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    const map = {};
-    data.forEach(entry => {
-      const yr = parseInt((entry.releaseDateLabel || '').substring(0,4));
-      if (yr >= 2014 && yr <= 2024) {
-        if (!map[yr] || entry.itemId > map[yr]) map[yr] = entry.itemId;
-      }
-    });
-    if (Object.keys(map).length >= 5) {
-      WBIDS = map;
-      console.log('Wayback IDs from CDN:', WBIDS);
-      if (PROXY) loadProxyMaps();
+    const r = await fetch(PROXY.replace(/\/$/,'') + '/config',
+      {signal: AbortSignal.timeout(10000)});
+    if (!r.ok) throw new Error('Config request failed');
+    const d = await r.json();
+    if (d.ok && d.yearIds && Object.keys(d.yearIds).length >= 5) {
+      // Convert string keys to numbers
+      const ids = {};
+      Object.entries(d.yearIds).forEach(([yr, id]) => { ids[+yr] = +id; });
+      WBIDS = ids;
+      console.log('✓ Real Wayback IDs loaded:', WBIDS);
+      loadProxyMaps(); // reload all maps with correct tile URLs
     }
   } catch(e) {
-    console.warn('Using fallback hardcoded Wayback IDs');
+    console.warn('Could not load Wayback config:', e.message);
   }
 }
 
