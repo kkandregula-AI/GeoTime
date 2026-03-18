@@ -18,7 +18,7 @@
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans)}
 #app{display:flex;flex-direction:column;height:100vh}
 
-/* ── HEADER ── */
+/* HEADER */
 #hdr{background:var(--panel);border-bottom:2px solid var(--border);flex-shrink:0}
 .hr1{display:flex;align-items:center;gap:8px;padding:8px 10px}
 .logo-ring{width:26px;height:26px;flex-shrink:0;border:2px solid var(--amber);border-radius:50%;
@@ -31,7 +31,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .mb{font-family:var(--mono);font-size:10px;background:transparent;border:1px solid var(--border);
   color:var(--dim);padding:5px 8px;cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap}
 .mb.on{background:rgba(0,200,212,.12);border-color:var(--cyan);color:var(--cyan)}
-.hr2{display:flex;padding:0 10px 8px;gap:0}
+.hr2{display:flex;padding:0 10px 8px}
 #si{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-right:none;
   color:var(--text);padding:8px 10px;font-family:var(--mono);font-size:12px;outline:none}
 #si:focus{border-color:var(--cyan)}
@@ -39,20 +39,27 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #sb{background:var(--amber);color:var(--bg);border:none;padding:8px 14px;
   font-family:var(--sans);font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0}
 
-/* ── MAP AREA ── */
+/* MAP AREA */
 #maparea{flex:1;position:relative;min-height:0}
 .view{display:none;position:absolute;top:0;left:0;right:0;bottom:0}
 .view.on{display:block}
 #vSplit.on{display:flex}
-.half{flex:1;position:relative;min-width:0;min-height:0}
-#mL,#mR,#mSB,#mST,#mA,#mSingle{position:absolute;top:0;left:0;right:0;bottom:0}
+#vTL.on{display:flex}
+
+/* map containers fill parent */
+#mS,#mL,#mR,#mSB,#mST,#mA,#mTL,#mTR{position:absolute;top:0;left:0;right:0;bottom:0}
 #mST{clip-path:inset(0 50% 0 0)}
+
+/* split halves */
+.half{flex:1;position:relative;min-width:0;min-height:0}
+
+/* labels */
 .hlabel{position:absolute;top:8px;left:8px;z-index:400;background:rgba(7,9,13,.88);
   border:1px solid;font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none;letter-spacing:1px}
 .hlabel.L{color:var(--cyan);border-color:rgba(0,200,212,.3)}
 .hlabel.R{color:var(--amber);border-color:rgba(240,165,0,.3)}
 .yr-stamp{position:absolute;bottom:44px;left:10px;z-index:400;pointer-events:none;
-  font-family:var(--mono);font-size:18px;font-weight:bold;color:#fff;letter-spacing:2px;
+  font-family:var(--mono);font-size:20px;font-weight:bold;color:#fff;letter-spacing:2px;
   text-shadow:0 2px 8px rgba(0,0,0,1);background:rgba(0,0,0,.55);padding:3px 10px;
   border-left:3px solid var(--amber)}
 .yr-stamp.cy{border-left-color:var(--cyan)}
@@ -60,6 +67,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .divbar::after{content:'⇔';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   background:var(--amber);color:var(--bg);width:26px;height:26px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:12px}
+
+/* swipe handle */
 .swhandle{position:absolute;top:0;bottom:0;left:50%;width:3px;background:var(--amber);
   z-index:20;transform:translateX(-50%);cursor:col-resize}
 .swbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -69,49 +78,39 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .swtag{position:absolute;top:8px;z-index:20;background:rgba(7,9,13,.88);
   border:1px solid var(--border);font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none}
 .swtag.B{left:8px;color:var(--cyan)}.swtag.A{right:8px;color:var(--amber)}
+
+/* animate overlay */
 .animyr{position:absolute;top:8px;left:10px;z-index:20;pointer-events:none;
-  font-family:var(--mono);font-size:54px;color:var(--amber);opacity:.7;line-height:1;
-  text-shadow:0 0 20px rgba(240,165,0,.4)}
+  font-family:var(--mono);font-size:54px;color:var(--amber);opacity:.7;
+  text-shadow:0 0 20px rgba(240,165,0,.4);line-height:1}
 .animdot{position:absolute;top:68px;left:13px;z-index:20;pointer-events:none;
   font-family:var(--mono);font-size:10px;color:var(--dim);display:flex;align-items:center;gap:5px}
 .dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
 
-/* ── NO-PROXY BANNER (shown on single map) ── */
-#noproxyBanner{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
-  z-index:400;background:rgba(13,21,32,.92);border:1px solid var(--amber);
-  font-family:var(--mono);font-size:11px;color:var(--text);padding:10px 18px;
-  text-align:center;line-height:1.8;white-space:nowrap;pointer-events:none}
-#noproxyBanner strong{color:var(--amber)}
-#noproxyBanner span{color:var(--cyan)}
+/* no-proxy banner */
+#noProxyBanner{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);
+  background:rgba(13,21,32,.92);border:1px solid var(--amber);
+  font-family:var(--mono);font-size:11px;color:var(--dim);padding:10px 16px;
+  z-index:400;text-align:center;line-height:1.7;pointer-events:none;white-space:nowrap}
+#noProxyBanner strong{color:var(--amber)}
 
 /* timelapse progress bar */
 #tlProgress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,.1);z-index:500;pointer-events:none}
-#tlBar{height:100%;background:var(--amber);width:0%;transition:width linear}
+#tlBar{height:100%;background:var(--amber);width:0%}
 
-/* timelapse year stamp */
-.tl-stamp{font-size:28px;bottom:20px}
-
-/* timelapse ticks row */
-#tlTicks{display:flex;justify-content:space-between;padding-top:6px;pointer-events:none}
-.tl-tk{font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;transition:color .2s}
-.tl-tk.on{color:var(--amber)}
-
-/* single map view */
-#vSingle #mSingle{position:absolute;top:0;left:0;right:0;bottom:0}
-#noproxyBanner{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
-  background:rgba(13,21,32,.92);border:1px solid var(--amber);
-  font-family:var(--mono);font-size:11px;color:var(--dim);padding:10px 16px;
-  z-index:400;text-align:center;line-height:1.7;white-space:nowrap;pointer-events:none}
-#noproxyBanner strong{color:var(--amber)}
-#noproxyBanner span{color:var(--cyan)}
-
-/* ── BOTTOM BAR ── */
+/* BOTTOM BAR */
 #bot{background:var(--panel);border-top:2px solid var(--border);padding:8px 10px 6px;flex-shrink:0}
 
-/* proxy-mode bottom: full controls */
+/* no-proxy bottom */
+#botSimple{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#botSimple.hide{display:none}
+.simple-msg{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.6}
+.simple-msg strong{color:var(--amber)}
+
+/* proxy bottom */
 #botProxy{display:none}
-#botProxy.on{display:block}
+#botProxy.show{display:block}
 .btop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap}
 .ybig{font-family:var(--mono);font-size:22px;color:var(--amber);letter-spacing:2px;line-height:1}
 .ylab{font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:1px}
@@ -139,25 +138,30 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #sldr::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
   border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 8px rgba(240,165,0,.7)}
 
-/* no-proxy bottom: just proxy button */
-#botSimple{display:none}
-#botSimple.on{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0}
-.simple-msg{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.6}
-.simple-msg strong{color:var(--amber)}
+/* timelapse bottom */
+#botTL{display:none}
+#botTL.show{display:block}
+.tl-tks{display:flex;justify-content:space-between;padding-top:4px}
+.tl-tk{font-family:var(--mono);font-size:9px;color:var(--dim);cursor:pointer;padding:2px 3px}
+.tl-tk.on{color:var(--amber)}
 
 /* shared buttons */
-.proxybtn{font-family:var(--mono);font-size:11px;background:var(--amber);
+.amberbtn{font-family:var(--mono);font-size:11px;background:var(--amber);
   border:none;color:var(--bg);padding:8px 14px;cursor:pointer;font-weight:700;white-space:nowrap;flex-shrink:0}
-.proxybtn.ok{background:transparent;border:1px solid var(--green);color:var(--green);font-weight:400}
-#geeBtn{font-family:var(--mono);font-size:10px;background:transparent;
-  border:1px solid var(--cyan);color:var(--cyan);padding:5px 10px;cursor:pointer;white-space:nowrap}
+.outbtn{font-family:var(--mono);font-size:10px;background:transparent;
+  border:1px solid var(--cyan);color:var(--cyan);padding:6px 10px;cursor:pointer;white-space:nowrap}
+.outbtn.amber{border-color:var(--amber);color:var(--amber)}
+.outbtn.green{border-color:var(--green);color:var(--green)}
 
-/* Leaflet */
-.leaflet-control-attribution{display:none!important}
-.leaflet-control-zoom{border:1px solid var(--border)!important}
-.leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important}
+/* search dropdown */
+#sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--cyan);
+  border-top:none;z-index:9999;max-height:260px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.95)}
+#sd.on{display:block}
+.sitem{padding:10px 12px;font-family:var(--mono);font-size:11px;
+  border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5;color:var(--text)}
+.sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
 
-/* PROXY MODAL */
+/* proxy modal */
 #proxyModal{display:none;position:fixed;inset:0;z-index:9998;
   background:rgba(7,9,13,.96);align-items:center;justify-content:center;padding:20px}
 #proxyModal.on{display:flex}
@@ -178,16 +182,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .pfoot{display:flex;justify-content:space-between;align-items:center}
 #pclose{font-family:var(--mono);font-size:11px;color:var(--dim);cursor:pointer;
   background:transparent;border:1px solid var(--border);padding:6px 14px}
-#pclear{font-family:var(--mono);font-size:10px;color:var(--red);cursor:pointer;
-  background:transparent;border:none;text-decoration:underline}
+#pclear{font-family:var(--mono);font-size:10px;color:var(--red);cursor:pointer;background:transparent;border:none;text-decoration:underline}
 
-/* SEARCH */
-#sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--cyan);
-  border-top:none;z-index:9999;max-height:260px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.95)}
-#sd.on{display:block}
-.sitem{padding:10px 12px;font-family:var(--mono);font-size:11px;
-  border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5;color:var(--text)}
-.sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
+.leaflet-control-attribution{display:none!important}
+.leaflet-control-zoom{border:1px solid var(--border)!important}
+.leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important}
 </style>
 </head>
 <body>
@@ -198,12 +197,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div class="hr1">
       <div class="logo-ring"></div>
       <div><div class="logo-name">GEOTIME</div><div class="logo-sub">EARTH CHANGE VISUALIZER</div></div>
-      <!-- mode buttons — only visible when proxy active -->
       <div class="modes" id="modeBar" style="display:none">
         <button class="mb on" data-m="split">SPLIT</button>
         <button class="mb" data-m="swipe">SWIPE</button>
         <button class="mb" data-m="anim">ANIM</button>
-        <button class="mb" data-m="timelapse">🌍 TIMELAPSE</button>
+        <button class="mb" data-m="tl">🌍 TIMELAPSE</button>
       </div>
     </div>
     <div class="hr2">
@@ -215,16 +213,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   <!-- MAP AREA -->
   <div id="maparea">
 
-    <!-- SINGLE MAP (no proxy) -->
-    <div class="view on" id="vSingle">
-      <div id="mSingle"></div>
-      <div id="noproxyBanner">
-        <strong>Satellite Viewer Mode</strong> — Current imagery only<br>
-        Connect <span>⚙ PROXY</span> below to unlock year-by-year historical comparison
-      </div>
+    <!-- SINGLE (no proxy) -->
+    <div class="view on" id="vS">
+      <div id="mS"></div>
+      <div id="noProxyBanner"><strong>Satellite Viewer</strong> — Connect ⚙ PROXY below for year-by-year historical comparison</div>
     </div>
 
-    <!-- SPLIT (proxy) -->
+    <!-- SPLIT -->
     <div class="view" id="vSplit">
       <div class="half">
         <div id="mL"></div>
@@ -239,7 +234,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       </div>
     </div>
 
-    <!-- SWIPE (proxy) -->
+    <!-- SWIPE -->
     <div class="view" id="vSwipe">
       <div id="mSB"></div>
       <div id="mST"></div>
@@ -250,100 +245,94 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div class="yr-stamp" style="bottom:44px;right:10px;left:auto;border-left:none;border-right:3px solid var(--amber)" id="stST">2024</div>
     </div>
 
-    <!-- ANIMATE (proxy) -->
+    <!-- ANIMATE -->
     <div class="view" id="vAnim">
       <div id="mA"></div>
       <div class="animyr" id="animYr">2014</div>
       <div class="animdot"><div class="dot"></div><span>PLAYING</span></div>
     </div>
 
-    <!-- TIMELAPSE (proxy) — two-pane split, auto-advances every 30s -->
-    <div class="view" id="vTimelapse">
+    <!-- TIMELAPSE -->
+    <div class="view" id="vTL">
       <div class="half">
         <div id="mTL"></div>
-        <div class="hlabel L" id="tlLblL">YEAR A</div>
-        <div class="yr-stamp cy tl-stamp" id="tlStL">—</div>
+        <div class="hlabel L" id="tlLblL">2014</div>
+        <div class="yr-stamp cy" id="tlStL">2014</div>
       </div>
       <div class="divbar"></div>
       <div class="half">
         <div id="mTR"></div>
-        <div class="hlabel R" id="tlLblR">YEAR B</div>
-        <div class="yr-stamp tl-stamp" id="tlStR">—</div>
+        <div class="hlabel R" id="tlLblR">2015</div>
+        <div class="yr-stamp" id="tlStR">2015</div>
       </div>
-      <!-- progress bar -->
       <div id="tlProgress"><div id="tlBar"></div></div>
     </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
   <div id="bot">
 
-    <!-- NO PROXY: simple row with proxy connect button -->
-    <div id="botSimple" class="on">
+    <!-- NO PROXY -->
+    <div id="botSimple">
       <div class="simple-msg">
-        <strong>No proxy connected.</strong> Showing current Google satellite imagery.<br>
-        Connect proxy to compare real satellite imagery across years (2014–2024).
+        <strong>No proxy.</strong> Showing current Google satellite imagery.<br>
+        Connect proxy to unlock real year-by-year historical comparison.
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0">
-        <button id="geeBtn">🌍 TIMELAPSE</button>
-        <button class="proxybtn" id="proxyBtnSimple">⚙ CONNECT PROXY</button>
+        <button class="outbtn" id="geeBtnS">🌍 TIMELAPSE</button>
+        <button class="amberbtn" id="connectBtn">⚙ CONNECT PROXY</button>
       </div>
     </div>
 
-    <!-- PROXY ACTIVE: full year controls -->
+    <!-- PROXY: normal modes -->
     <div id="botProxy">
-      <!-- Normal controls (split/swipe/anim modes) -->
-      <div id="botNormal">
-        <div class="btop">
-          <div><div class="ybig" id="ydsp">2014</div><div class="ylab">SELECTED YEAR</div></div>
-          <div class="cmprow on" id="cmprow">
-            <span class="cmplbl">COMPARE</span>
-            <select class="ysel" id="selB"></select>
-            <span class="sep">→</span>
-            <select class="ysel" id="selA"></select>
-          </div>
-          <div class="ctrls">
-            <button class="cbtn" id="cBk">⏮</button>
-            <button class="cbtn" id="cPl">▶</button>
-            <button class="cbtn" id="cFw">⏭</button>
-            <select class="spsel" id="spd">
-              <option value="2000">0.5×</option>
-              <option value="1200" selected>1×</option>
-              <option value="600">2×</option>
-              <option value="300">4×</option>
-            </select>
-            <button class="proxybtn ok" id="proxyBtnFull">✓ PROXY</button>
-          </div>
+      <div class="btop">
+        <div><div class="ybig" id="ydsp">2014</div><div class="ylab">SELECTED YEAR</div></div>
+        <div class="cmprow on" id="cmprow">
+          <span class="cmplbl">COMPARE</span>
+          <select class="ysel" id="selB"></select>
+          <span class="sep">→</span>
+          <select class="ysel" id="selA"></select>
         </div>
-        <div class="tl">
-          <div class="tks" id="tks"></div>
-          <input type="range" id="sldr" min="0" step="1" value="0"/>
+        <div class="ctrls">
+          <button class="cbtn" id="cBk">⏮</button>
+          <button class="cbtn" id="cPl">▶</button>
+          <button class="cbtn" id="cFw">⏭</button>
+          <select class="spsel" id="spd">
+            <option value="2000">0.5×</option>
+            <option value="1200" selected>1×</option>
+            <option value="600">2×</option>
+            <option value="300">4×</option>
+          </select>
+          <button class="outbtn green" id="proxyBtn">✓ PROXY</button>
         </div>
       </div>
+      <div class="tl">
+        <div class="tks" id="tks"></div>
+        <input type="range" id="sldr" min="0" step="1" value="0"/>
+      </div>
+    </div>
 
-      <!-- Timelapse controls (timelapse mode only) -->
-      <div id="botTimelapse" style="display:none">
-        <div class="btop">
-          <div>
-            <div class="ybig" id="tlPairDisplay">2014 → 2015</div>
-            <div class="ylab">CURRENT PAIR</div>
-          </div>
-          <div class="ctrls">
-            <button class="cbtn" id="tlPrev" title="Previous pair">⏮</button>
-            <button class="cbtn" id="tlPlayPause">⏸</button>
-            <button class="cbtn" id="tlNext" title="Next pair">⏭</button>
-            <select class="spsel" id="tlSpeed">
-              <option value="30000">30s</option>
-              <option value="15000">15s</option>
-              <option value="8000">8s</option>
-              <option value="4000">4s</option>
-              <option value="2000">2s</option>
-            </select>
-            <span class="cmplbl" style="margin-left:4px">per pair</span>
-            <button class="proxybtn ok" id="proxyBtnTL" style="margin-left:6px">✓ PROXY</button>
-          </div>
-        </div>
-        <div class="tl">
-          <div class="tks" id="tlTicks"></div>
+    <!-- PROXY: timelapse mode -->
+    <div id="botTL">
+      <div class="btop">
+        <div><div class="ybig" id="tlPairDisp">2014 → 2015</div><div class="ylab">CURRENT PAIR · 30s each</div></div>
+        <div class="ctrls">
+          <button class="cbtn" id="tlPrev">⏮</button>
+          <button class="cbtn" id="tlPlay">⏸</button>
+          <button class="cbtn" id="tlNext">⏭</button>
+          <select class="spsel" id="tlSpd">
+            <option value="30000" selected>30s</option>
+            <option value="15000">15s</option>
+            <option value="8000">8s</option>
+            <option value="4000">4s</option>
+            <option value="2000">2s</option>
+          </select>
+          <button class="outbtn green" id="tlProxyBtn">✓ PROXY</button>
         </div>
       </div>
+      <div class="tl-tks" id="tlTks"></div>
     </div>
 
   </div>
@@ -367,9 +356,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div id="pstatus"></div>
     <div class="pnote">
       <strong>Deploy in 2 min:</strong><br>
-      1. <strong>dash.cloudflare.com → Workers &amp; Pages → Create Worker</strong><br>
-      2. Click <strong>"Edit code"</strong> → Select All → paste <strong>wayback-worker.js</strong> → Deploy<br>
-      3. Copy your <strong>.workers.dev</strong> URL → paste above → SAVE
+      1. dash.cloudflare.com → Workers &amp; Pages → Create Worker → Deploy<br>
+      2. Edit code → Select All → paste wayback-worker.js → Save and Deploy<br>
+      3. Copy .workers.dev URL → paste above → SAVE
     </div>
     <div class="pfoot">
       <button id="pclose">✕ Close</button>
@@ -379,11 +368,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 </div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────────────────────────
-const YEARS   = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
-const NY      = YEARS.length;
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const YEARS  = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
+const NY     = YEARS.length;
 const GHYBRID = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
-const WBIDS   = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
+const WBIDS  = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
 
 let PROXY = localStorage.getItem('gt_proxy') || '';
 
@@ -392,10 +381,10 @@ function satUrl(yi) {
   return GHYBRID;
 }
 
-// ── LAYER MANAGEMENT ──────────────────────────────────────────────────────────
+// ─── LAYERS ───────────────────────────────────────────────────────────────────
 const SAT = new Map();
 
-function initMap(map) {
+function addBase(map) {
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, zIndex:1}).addTo(map);
 }
 
@@ -406,41 +395,43 @@ function setLayer(map, yi) {
   SAT.set(map, lay);
 }
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let center  = [17.4435, 78.3772];
-let zoom    = 12;
-let yIdx    = 0;
-let cmpB    = 0;
-let cmpA    = NY - 1;
-let tlPairIdx = 0;
-let mode    = 'split';
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let center = [17.4435, 78.3772];
+let zoom   = 12;
+let yIdx   = 0;
+let cmpB   = 0;
+let cmpA   = NY - 1;
+let mode   = 'single';
 let playing = false;
 let ptimer  = null;
+let tlPair  = 0;
+let tlGoing = false;
+let tlTimer = null;
+let syncing = false;
 
-// ── MAPS ──────────────────────────────────────────────────────────────────────
+// ─── MAPS ─────────────────────────────────────────────────────────────────────
 const MOPTS = {zoomControl:false, attributionControl:false, maxZoom:18, minZoom:2};
 
 function mkMap(id) {
   const m = L.map(id, MOPTS);
   m.setView(center, zoom);
-  initMap(m);
+  addBase(m);
   return m;
 }
 
-const mSingle = mkMap('mSingle');
-const mL      = mkMap('mL');
-const mR      = mkMap('mR');
-const mSB     = mkMap('mSB');
-const mST     = mkMap('mST');
-const mA      = mkMap('mA');
-const mTL     = mkMap('mTL');
-const mTR     = mkMap('mTR');
-const ALL     = [mSingle, mL, mR, mSB, mST, mA, mTL, mTR];
+const mS  = mkMap('mS');
+const mL  = mkMap('mL');
+const mR  = mkMap('mR');
+const mSB = mkMap('mSB');
+const mST = mkMap('mST');
+const mA  = mkMap('mA');
+const mTL = mkMap('mTL');
+const mTR = mkMap('mTR');
+const ALL = [mS, mL, mR, mSB, mST, mA, mTL, mTR];
 
 ALL.forEach(m => L.control.zoom({position:'bottomright'}).addTo(m));
 
-// ── SYNC ──────────────────────────────────────────────────────────────────────
-let syncing = false;
+// Sync all maps together
 ALL.forEach((src, si) => {
   src.on('moveend', () => {
     if (syncing) return;
@@ -455,96 +446,72 @@ ALL.forEach((src, si) => {
 function invAll() { ALL.forEach(m => m.invalidateSize()); }
 window.addEventListener('resize', invAll);
 
+// Init — load after layout is painted
 requestAnimationFrame(() => {
   invAll();
   ALL.forEach(m => m.setView(center, zoom));
-  // Load satellite on single map always; load comparison maps only if proxy active
-  setLayer(mSingle, 0);
-  if (PROXY) loadProxyLayers();
+  setLayer(mS, 0); // single map always loads
+  if (PROXY) loadProxyMaps();
   initSwipe();
   setTimeout(() => { invAll(); ALL.forEach(m => m.setView(center, zoom)); }, 500);
 });
 
-function loadProxyLayers() {
-  setLayer(mL,  cmpB);
-  setLayer(mR,  cmpA);
-  setLayer(mSB, cmpB);
-  setLayer(mST, cmpA);
+function loadProxyMaps() {
+  setLayer(mL,  cmpB); setLayer(mR,  cmpA);
+  setLayer(mSB, cmpB); setLayer(mST, cmpA);
   setLayer(mA,  yIdx);
-  setLayer(mTL, tlPairIdx);
-  setLayer(mTR, Math.min(tlPairIdx + 1, NY - 1));
+  setLayer(mTL, tlPair); setLayer(mTR, Math.min(tlPair+1, NY-1));
 }
 
-// ── UI MODE: proxy vs no-proxy ────────────────────────────────────────────────
-function applyProxyUI() {
-  const hasProxy = !!PROXY;
-  // Bottom bar
-  document.getElementById('botSimple').classList.toggle('on', !hasProxy);
-  document.getElementById('botProxy').classList.toggle('on',  hasProxy);
-  // Mode buttons in header
-  document.getElementById('modeBar').style.display = hasProxy ? 'flex' : 'none';
+// ─── UI SWITCHER ──────────────────────────────────────────────────────────────
+function applyUI() {
+  const has = !!PROXY;
+  document.getElementById('botSimple').classList.toggle('hide', has);
+  document.getElementById('botProxy').style.display  = (has && mode !== 'tl') ? 'block' : 'none';
+  document.getElementById('botTL').style.display     = (has && mode === 'tl') ? 'block' : 'none';
+  document.getElementById('modeBar').style.display   = has ? 'flex' : 'none';
 
-  if (hasProxy) {
-    // Switch from single view to split
-    showView('split');
-    loadProxyLayers();
-  } else {
-    // Back to single map view
-    showView('single');
-    setLayer(mSingle, 0);
-  }
-}
-
-function showView(v) {
-  ['vSingle','vSplit','vSwipe','vAnim','vTimelapse'].forEach(id =>
+  ['vS','vSplit','vSwipe','vAnim','vTL'].forEach(id =>
     document.getElementById(id).classList.remove('on'));
-  document.getElementById('cmprow')?.classList.remove('on');
-  stopTimelapse();
 
-  // Toggle bottom bar sections
-  const isTL = (v === 'timelapse');
-  document.getElementById('botNormal').style.display    = isTL ? 'none' : 'block';
-  document.getElementById('botTimelapse').style.display = isTL ? 'block' : 'none';
-
-  if (v === 'single') {
-    document.getElementById('vSingle').classList.add('on');
+  if (!has) {
+    document.getElementById('vS').classList.add('on');
     mode = 'single';
-    setTimeout(() => mSingle.invalidateSize(), 60);
-  } else if (v === 'split') {
+    setTimeout(() => mS.invalidateSize(), 60);
+  } else if (mode === 'split' || mode === 'single') {
+    mode = 'split';
     document.getElementById('vSplit').classList.add('on');
     document.getElementById('cmprow').classList.add('on');
-    mode = 'split';
     setTimeout(() => { mL.invalidateSize(); mR.invalidateSize(); }, 60);
-  } else if (v === 'swipe') {
+  } else if (mode === 'swipe') {
     document.getElementById('vSwipe').classList.add('on');
     document.getElementById('cmprow').classList.add('on');
-    mode = 'swipe';
     setTimeout(() => { mSB.invalidateSize(); mST.invalidateSize(); initSwipe(); }, 60);
-  } else if (v === 'anim') {
+  } else if (mode === 'anim') {
     document.getElementById('vAnim').classList.add('on');
-    mode = 'anim';
     setTimeout(() => { mA.invalidateSize(); mA.setView(center, zoom); setLayer(mA, yIdx); }, 60);
-  } else if (v === 'timelapse') {
-    document.getElementById('vTimelapse').classList.add('on');
-    mode = 'timelapse';
+  } else if (mode === 'tl') {
+    document.getElementById('vTL').classList.add('on');
     setTimeout(() => {
       mTL.invalidateSize(); mTR.invalidateSize();
       mTL.setView(center, zoom); mTR.setView(center, zoom);
-      startTimelapse();
+      tlStart();
     }, 60);
   }
 }
 
-// ── MODE BUTTONS ──────────────────────────────────────────────────────────────
+// Mode buttons
 document.querySelectorAll('.mb').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.mb').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
-    showView(btn.dataset.m);
+    stopPlay(); tlStop();
+    mode = btn.dataset.m;
+    applyUI();
   };
 });
 
-// ── YEAR SELECTS ──────────────────────────────────────────────────────────────
+// ─── YEAR SELECTS ─────────────────────────────────────────────────────────────
 const selB = document.getElementById('selB');
 const selA = document.getElementById('selA');
 YEARS.forEach((y, i) => {
@@ -555,12 +522,14 @@ selB.value = cmpB; selA.value = cmpA;
 
 function updStamps() {
   const yb = YEARS[cmpB], ya = YEARS[cmpA];
-  ['lblL','stL'].forEach(id => document.getElementById(id) && (document.getElementById(id).textContent = id.startsWith('lbl') ? `BEFORE · ${yb}` : yb));
-  ['lblR','stR'].forEach(id => document.getElementById(id) && (document.getElementById(id).textContent = id.startsWith('lbl') ? `AFTER · ${ya}` : ya));
-  document.getElementById('swB').textContent  = `BEFORE · ${yb}`;
-  document.getElementById('swA').textContent  = `AFTER · ${ya}`;
-  document.getElementById('stSB').textContent = yb;
-  document.getElementById('stST').textContent = ya;
+  document.getElementById('lblL').textContent  = `BEFORE · ${yb}`;
+  document.getElementById('lblR').textContent  = `AFTER · ${ya}`;
+  document.getElementById('swB').textContent   = `BEFORE · ${yb}`;
+  document.getElementById('swA').textContent   = `AFTER · ${ya}`;
+  document.getElementById('stL').textContent   = yb;
+  document.getElementById('stR').textContent   = ya;
+  document.getElementById('stSB').textContent  = yb;
+  document.getElementById('stST').textContent  = ya;
 }
 
 function applyCmp() {
@@ -573,33 +542,33 @@ updStamps();
 selB.onchange = () => { cmpB = +selB.value; applyCmp(); };
 selA.onchange = () => { cmpA = +selA.value; applyCmp(); };
 
-// ── TIMELINE ──────────────────────────────────────────────────────────────────
+// ─── TIMELINE ─────────────────────────────────────────────────────────────────
 const tksEl = document.getElementById('tks');
 const sldr  = document.getElementById('sldr');
 sldr.max = NY - 1;
 
 YEARS.forEach((y, i) => {
   const t = document.createElement('div');
-  t.className = 'tk' + (i === 0 ? ' on' : '');
+  t.className = 'tk' + (i===0?' on':'');
   t.innerHTML = `<div class="tkl"></div><div class="tkn">${y}</div>`;
-  t.onclick = () => { yIdx = i; sldr.value = i; updYear(); updTrack(); };
+  t.onclick = () => { yIdx=i; sldr.value=i; updYear(); updTrack(); };
   tksEl.appendChild(t);
 });
-sldr.oninput = () => { yIdx = +sldr.value; updYear(); updTrack(); };
+sldr.oninput = () => { yIdx=+sldr.value; updYear(); updTrack(); };
 
 function updYear() {
   const y = YEARS[yIdx];
   document.getElementById('ydsp').textContent   = y;
   document.getElementById('animYr').textContent = y;
-  tksEl.querySelectorAll('.tk').forEach((t, i) => t.classList.toggle('on', i === yIdx));
-  if (mode === 'anim')  setLayer(mA, yIdx);
-  if (mode === 'split') { cmpB = yIdx; selB.value = yIdx; applyCmp(); }
-  if (mode === 'swipe') { cmpB = yIdx; selB.value = yIdx; applyCmp(); }
+  tksEl.querySelectorAll('.tk').forEach((t,i) => t.classList.toggle('on', i===yIdx));
+  if (mode==='anim')  setLayer(mA, yIdx);
+  if (mode==='split') { cmpB=yIdx; selB.value=yIdx; applyCmp(); }
+  if (mode==='swipe') { cmpB=yIdx; selB.value=yIdx; applyCmp(); }
 }
-function updTrack() { sldr.style.setProperty('--p', (yIdx / (NY-1) * 100) + '%'); }
+function updTrack() { sldr.style.setProperty('--p', (yIdx/(NY-1)*100)+'%'); }
 updTrack();
 
-// ── SWIPE ─────────────────────────────────────────────────────────────────────
+// ─── SWIPE ────────────────────────────────────────────────────────────────────
 function initSwipe() {
   const H = document.getElementById('swH');
   const T = document.getElementById('mST');
@@ -607,34 +576,32 @@ function initSwipe() {
   let drag = false;
   function mv(x) {
     const r = W.getBoundingClientRect();
-    const p = Math.max(5, Math.min(95, (x - r.left) / r.width * 100));
-    H.style.left = p + '%'; T.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
+    const p = Math.max(5, Math.min(95, (x-r.left)/r.width*100));
+    H.style.left = p+'%'; T.style.clipPath = `inset(0 ${100-p}% 0 0)`;
   }
   const H2 = H.cloneNode(true); H.parentNode.replaceChild(H2, H);
-  H2.addEventListener('mousedown',  e => { drag = true; e.preventDefault(); });
-  H2.addEventListener('touchstart', () => drag = true, {passive:true});
-  document.addEventListener('mousemove',  e => { if (drag) mv(e.clientX); });
-  document.addEventListener('touchmove',  e => { if (drag) mv(e.touches[0].clientX); }, {passive:true});
-  document.addEventListener('mouseup',  () => drag = false);
-  document.addEventListener('touchend', () => drag = false);
+  H2.addEventListener('mousedown',  e=>{drag=true; e.preventDefault();});
+  H2.addEventListener('touchstart', ()=>drag=true, {passive:true});
+  document.addEventListener('mousemove',  e=>{if(drag) mv(e.clientX);});
+  document.addEventListener('touchmove',  e=>{if(drag) mv(e.touches[0].clientX);}, {passive:true});
+  document.addEventListener('mouseup',  ()=>drag=false);
+  document.addEventListener('touchend', ()=>drag=false);
   const r = W.getBoundingClientRect();
-  mv(r.left + r.width / 2);
+  mv(r.left + r.width/2);
 }
 
-// ── PLAYBACK ──────────────────────────────────────────────────────────────────
+// ─── PLAYBACK ─────────────────────────────────────────────────────────────────
 document.getElementById('cPl').onclick = () => playing ? stopPlay() : startPlay();
 document.getElementById('cBk').onclick = () => { stopPlay(); yIdx=0; sldr.value=0; updYear(); updTrack(); };
 document.getElementById('cFw').onclick = () => { stopPlay(); yIdx=NY-1; sldr.value=NY-1; updYear(); updTrack(); };
 
 function startPlay() {
-  if (mode !== 'anim') { showView('anim'); document.querySelectorAll('.mb').forEach(b => b.classList.toggle('on', b.dataset.m==='anim')); }
-  playing = true;
-  document.getElementById('cPl').textContent = '⏸';
-  document.getElementById('cPl').classList.add('pl');
-  if (yIdx >= NY-1) yIdx = 0;
+  if (mode!=='anim') { mode='anim'; applyUI(); document.querySelectorAll('.mb').forEach(b=>b.classList.toggle('on',b.dataset.m==='anim')); }
+  playing=true; document.getElementById('cPl').textContent='⏸'; document.getElementById('cPl').classList.add('pl');
+  if (yIdx>=NY-1) yIdx=0;
   const ms = +document.getElementById('spd').value;
-  ptimer = setInterval(() => {
-    yIdx++; if (yIdx >= NY) { yIdx=NY-1; stopPlay(); return; }
+  ptimer = setInterval(()=>{
+    yIdx++; if(yIdx>=NY){yIdx=NY-1; stopPlay(); return;}
     updYear(); sldr.value=yIdx; updTrack();
   }, ms);
 }
@@ -643,21 +610,84 @@ function stopPlay() {
   document.getElementById('cPl').textContent='▶'; document.getElementById('cPl').classList.remove('pl');
 }
 
-// ── SEARCH ────────────────────────────────────────────────────────────────────
+// ─── TIMELAPSE ────────────────────────────────────────────────────────────────
+// Build pair tick row
+const tlTks = document.getElementById('tlTks');
+for (let i = 0; i < NY-1; i++) {
+  const t = document.createElement('span');
+  t.className = 'tl-tk' + (i===0?' on':'');
+  t.textContent = `${YEARS[i]}→${YEARS[i+1]}`;
+  t.dataset.i = i;
+  t.onclick = () => { tlJump(+t.dataset.i); };
+  tlTks.appendChild(t);
+}
+
+function tlSetPair(i) {
+  tlPair = Math.max(0, Math.min(i, NY-2));
+  const ya = YEARS[tlPair], yb = YEARS[tlPair+1];
+  setLayer(mTL, tlPair); setLayer(mTR, tlPair+1);
+  document.getElementById('tlLblL').textContent   = `${ya}`;
+  document.getElementById('tlLblR').textContent   = `${yb}`;
+  document.getElementById('tlStL').textContent    = ya;
+  document.getElementById('tlStR').textContent    = yb;
+  document.getElementById('tlPairDisp').textContent = `${ya} → ${yb}`;
+  tlTks.querySelectorAll('.tl-tk').forEach((t,i) => t.classList.toggle('on', i===tlPair));
+}
+
+function tlSchedule() {
+  clearTimeout(tlTimer);
+  const ms = +document.getElementById('tlSpd').value;
+  const bar = document.getElementById('tlBar');
+  // Animate progress bar
+  bar.style.transition = 'none'; bar.style.width = '0%';
+  requestAnimationFrame(() => {
+    bar.style.transition = `width ${ms}ms linear`; bar.style.width = '100%';
+  });
+  tlTimer = setTimeout(() => {
+    if (!tlGoing) return;
+    tlSetPair(tlPair >= NY-2 ? 0 : tlPair+1);
+    tlSchedule();
+  }, ms);
+}
+
+function tlStart() {
+  tlSetPair(tlPair);
+  tlGoing = true;
+  document.getElementById('tlPlay').textContent = '⏸';
+  tlSchedule();
+}
+
+function tlStop() {
+  tlGoing = false; clearTimeout(tlTimer);
+  const bar = document.getElementById('tlBar');
+  if (bar) { bar.style.transition='none'; bar.style.width='0%'; }
+  const btn = document.getElementById('tlPlay');
+  if (btn) btn.textContent = '▶';
+}
+
+function tlJump(i) { clearTimeout(tlTimer); tlSetPair(i); if (tlGoing) tlSchedule(); }
+
+document.getElementById('tlPlay').onclick = () => {
+  if (tlGoing) { tlStop(); } else { tlGoing=true; document.getElementById('tlPlay').textContent='⏸'; tlSchedule(); }
+};
+document.getElementById('tlPrev').onclick = () => tlJump(tlPair-1);
+document.getElementById('tlNext').onclick = () => tlJump(tlPair+1);
+document.getElementById('tlSpd').onchange = () => { if (tlGoing) { clearTimeout(tlTimer); tlSchedule(); } };
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
 const siEl=document.getElementById('si'), sbEl=document.getElementById('sb'), sdEl=document.getElementById('sd');
 let sres=[], hiI=-1, sdt=null;
 function sdPos() {
   const r=siEl.getBoundingClientRect(), r2=sbEl.getBoundingClientRect();
   sdEl.style.top=r.bottom+'px'; sdEl.style.left=r.left+'px'; sdEl.style.width=(r2.right-r.left)+'px';
 }
-function bname(p) { return [p.name, p.city!==p.name&&p.city, p.state, p.country].filter(Boolean).join(', '); }
+function bname(p) { return [p.name,p.city!==p.name&&p.city,p.state,p.country].filter(Boolean).join(', '); }
 function renderSD(items) {
   sres=items; hiI=-1; sdEl.innerHTML='';
-  if (!items.length) { sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">No results</div>'; return; }
-  items.forEach((it, i) => {
+  if(!items.length){sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">No results</div>';return;}
+  items.forEach((it,i)=>{
     const d=document.createElement('div'); d.className='sitem';
-    const type=(it.properties.osm_value||'').replace(/_/g,' ');
-    d.innerHTML=bname(it.properties)+(type?` <span style="color:var(--dim);font-size:9px">${type}</span>`:'');
+    d.innerHTML=bname(it.properties);
     d.onmousedown=e=>e.preventDefault(); d.onclick=()=>pick(i);
     sdEl.appendChild(d);
   });
@@ -666,159 +696,29 @@ function pick(i) {
   const f=sres[i]; if(!f) return;
   const [lng,lat]=f.geometry.coordinates;
   ALL.forEach(m=>m.setView([lat,lng],13,{animate:true}));
-  center=[lat,lng]; zoom=13;
-  siEl.value=bname(f.properties).split(',')[0];
-  sdEl.classList.remove('on');
+  center=[lat,lng]; zoom=13; siEl.value=bname(f.properties).split(',')[0]; sdEl.classList.remove('on');
 }
 async function doSearch(q) {
-  if (q.length<2){sdEl.classList.remove('on');return;}
+  if(q.length<2){sdEl.classList.remove('on');return;}
   sdPos(); sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">Searching…</div>'; sdEl.classList.add('on');
   try {
     const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=7&lang=en`);
     const d=await r.json(); renderSD(d.features||[]);
   } catch { sdEl.innerHTML='<div class="sitem" style="color:var(--red);pointer-events:none">Search unavailable</div>'; }
 }
-siEl.addEventListener('input', ()=>{ clearTimeout(sdt); sdt=setTimeout(()=>doSearch(siEl.value.trim()),300); });
-siEl.addEventListener('focus', sdPos);
-siEl.addEventListener('keydown', e=>{
+siEl.addEventListener('input',()=>{clearTimeout(sdt);sdt=setTimeout(()=>doSearch(siEl.value.trim()),300);});
+siEl.addEventListener('focus',sdPos);
+siEl.addEventListener('keydown',e=>{
   const its=sdEl.querySelectorAll('.sitem');
   if(e.key==='ArrowDown'){e.preventDefault();hiI=Math.min(hiI+1,its.length-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
   else if(e.key==='ArrowUp'){e.preventDefault();hiI=Math.max(hiI-1,-1);its.forEach((x,i)=>x.classList.toggle('hi',i===hiI));}
   else if(e.key==='Enter'){hiI>=0?pick(hiI):doSearch(siEl.value.trim());}
-  else if(e.key==='Escape') sdEl.classList.remove('on');
+  else if(e.key==='Escape')sdEl.classList.remove('on');
 });
 sbEl.onclick=()=>doSearch(siEl.value.trim());
-document.addEventListener('click', e=>{
-  if(!e.target.closest('#si')&&!e.target.closest('#sb')&&!e.target.closest('#sd')) sdEl.classList.remove('on');
-});
+document.addEventListener('click',e=>{if(!e.target.closest('#si')&&!e.target.closest('#sb')&&!e.target.closest('#sd'))sdEl.classList.remove('on');});
 
-// ── TIMELAPSE ENGINE ──────────────────────────────────────────────────────────
-// Shows year pairs side by side, auto-advances every N seconds
-// Pairs: (2014,2015), (2015,2016), ..., (2023,2024)  = 10 pairs
-
-let tlPlaying  = false;
-let tlTimer    = null;
-let tlTickTimer = null;
-const TL_PAIRS = NY - 1;     // 10 pairs for 11 years
-
-// Build timelapse tick row
-const tlTicksEl = document.getElementById('tlTicks');
-for (let i = 0; i < TL_PAIRS; i++) {
-  const t = document.createElement('div');
-  t.className = 'tl-tk' + (i === 0 ? ' on' : '');
-  t.textContent = `${YEARS[i]}→${YEARS[i+1]}`;
-  t.dataset.pair = i;
-  t.style.pointerEvents = 'all';
-  t.style.cursor = 'pointer';
-  t.onclick = () => { jumpToPair(i); };
-  tlTicksEl.appendChild(t);
-}
-
-function setTLPair(pairIdx) {
-  tlPairIdx = Math.max(0, Math.min(pairIdx, TL_PAIRS - 1));
-  const yA = YEARS[tlPairIdx], yB = YEARS[tlPairIdx + 1];
-
-  // Update maps
-  setLayer(mTL, tlPairIdx);
-  setLayer(mTR, tlPairIdx + 1);
-
-  // Update labels
-  document.getElementById('tlLblL').textContent    = `YEAR A · ${yA}`;
-  document.getElementById('tlLblR').textContent    = `YEAR B · ${yB}`;
-  document.getElementById('tlStL').textContent     = yA;
-  document.getElementById('tlStR').textContent     = yB;
-  document.getElementById('tlPairDisplay').textContent = `${yA} → ${yB}`;
-
-  // Update ticks
-  tlTicksEl.querySelectorAll('.tl-tk').forEach((t, i) => t.classList.toggle('on', i === tlPairIdx));
-}
-
-function startTimelapse() {
-  setTLPair(tlPairIdx);
-  tlPlaying = true;
-  document.getElementById('tlPlayPause').textContent = '⏸';
-  scheduleTLNext();
-}
-
-function scheduleTLNext() {
-  clearInterval(tlTimer);
-  clearInterval(tlTickTimer);
-
-  const ms = +document.getElementById('tlSpeed').value;
-  const bar = document.getElementById('tlBar');
-
-  // Animate progress bar
-  bar.style.transition = 'none';
-  bar.style.width = '0%';
-  requestAnimationFrame(() => {
-    bar.style.transition = `width ${ms}ms linear`;
-    bar.style.width = '100%';
-  });
-
-  tlTimer = setTimeout(() => {
-    if (!tlPlaying) return;
-    const next = tlPairIdx + 1;
-    if (next >= TL_PAIRS) {
-      // Loop back to start
-      setTLPair(0);
-    } else {
-      setTLPair(next);
-    }
-    scheduleTLNext();
-  }, ms);
-}
-
-function stopTimelapse() {
-  tlPlaying = false;
-  clearTimeout(tlTimer);
-  clearInterval(tlTickTimer);
-  const bar = document.getElementById('tlBar');
-  if (bar) { bar.style.transition = 'none'; bar.style.width = '0%'; }
-  const btn = document.getElementById('tlPlayPause');
-  if (btn) btn.textContent = '▶';
-}
-
-function jumpToPair(i) {
-  clearTimeout(tlTimer);
-  setTLPair(i);
-  if (tlPlaying) scheduleTLNext();
-}
-
-document.getElementById('tlPlayPause').onclick = () => {
-  if (tlPlaying) {
-    stopTimelapse();
-    tlPlaying = false;
-    document.getElementById('tlPlayPause').textContent = '▶';
-  } else {
-    tlPlaying = true;
-    document.getElementById('tlPlayPause').textContent = '⏸';
-    scheduleTLNext();
-  }
-};
-document.getElementById('tlPrev').onclick = () => { jumpToPair(tlPairIdx - 1); };
-document.getElementById('tlNext').onclick = () => { jumpToPair(tlPairIdx + 1); };
-document.getElementById('tlSpeed').onchange = () => { if (tlPlaying) scheduleTLNext(); };
-document.getElementById('proxyBtnTL').onclick = openProxy;
-
-// Sync timelapse maps with main map position
-[mTL, mTR].forEach((src, si) => {
-  src.on('moveend', () => {
-    if (syncing) return;
-    syncing = true;
-    center = [src.getCenter().lat, src.getCenter().lng];
-    zoom   = src.getZoom();
-    ALL.forEach((t, ti) => { if (t !== src) t.setView(center, zoom, {animate:false}); });
-    syncing = false;
-  });
-});
-
-// ── GEE TIMELAPSE (no-proxy mode) ────────────────────────────────────────────
-document.getElementById('geeBtn').onclick = () => {
-  const [lat, lng] = center;
-  window.open(`https://earthengine.google.com/timelapse/#v=${lat.toFixed(4)},${lng.toFixed(4)},${Math.min(zoom+1,13)},latLng&t=1.03&ps=50&bt=19840101&et=20231231`, '_blank');
-};
-
-// ── PROXY MODAL ───────────────────────────────────────────────────────────────
+// ─── PROXY MODAL ──────────────────────────────────────────────────────────────
 const modal   = document.getElementById('proxyModal');
 const purlEl  = document.getElementById('purl');
 const pstatEl = document.getElementById('pstatus');
@@ -826,32 +726,32 @@ const pstatEl = document.getElementById('pstatus');
 function openProxy() { purlEl.value=PROXY||''; pstatEl.textContent=''; pstatEl.style.color=''; modal.classList.add('on'); setTimeout(()=>purlEl.focus(),100); }
 function closeProxy() { modal.classList.remove('on'); }
 
-document.getElementById('proxyBtnSimple').onclick = openProxy;
-document.getElementById('proxyBtnFull').onclick   = openProxy;
-document.getElementById('pclose').onclick         = closeProxy;
+document.getElementById('connectBtn').onclick  = openProxy;
+document.getElementById('proxyBtn').onclick    = openProxy;
+document.getElementById('tlProxyBtn').onclick  = openProxy;
+document.getElementById('geeBtnS').onclick     = () => window.open(`https://earthengine.google.com/timelapse/#v=${center[0].toFixed(4)},${center[1].toFixed(4)},${Math.min(zoom+1,13)},latLng&t=1.03&ps=50&bt=19840101&et=20231231`,'_blank');
+document.getElementById('pclose').onclick      = closeProxy;
 modal.addEventListener('click', e=>{ if(e.target===modal) closeProxy(); });
 
 document.getElementById('pclear').onclick = () => {
   PROXY=''; localStorage.removeItem('gt_proxy');
   purlEl.value=''; pstatEl.style.color='var(--dim)'; pstatEl.textContent='Proxy cleared.';
-  applyProxyUI();
+  mode='single'; applyUI();
 };
 
 document.getElementById('psave').onclick = async () => {
   const val = purlEl.value.trim().replace(/\/$/,'');
-  if (!val) { pstatEl.style.color='var(--red)'; pstatEl.textContent='Please enter a URL.'; return; }
+  if(!val){pstatEl.style.color='var(--red)';pstatEl.textContent='Please enter a URL.';return;}
   pstatEl.style.color='var(--dim)'; pstatEl.textContent='Testing worker…';
-
   const doSave = () => {
     PROXY=val; localStorage.setItem('gt_proxy',val);
     pstatEl.style.color='var(--green)'; pstatEl.textContent='✓ Connected! Loading historical tiles…';
-    setTimeout(() => { closeProxy(); applyProxyUI(); }, 1200);
+    mode='split';
+    setTimeout(()=>{ closeProxy(); loadProxyMaps(); applyUI(); }, 1000);
   };
-
   try {
-    // Test root — always returns 200 JSON health check
-    const r = await fetch(val + '/', {signal:AbortSignal.timeout(10000)});
-    if (r.ok) { doSave(); }
+    const r = await fetch(val+'/', {signal:AbortSignal.timeout(10000)});
+    if(r.ok) { doSave(); }
     else {
       pstatEl.style.color='var(--amber)'; pstatEl.textContent=`Worker responded ${r.status}. `;
       const b=document.createElement('button');
@@ -866,8 +766,8 @@ document.getElementById('psave').onclick = async () => {
   }
 };
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-applyProxyUI();
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+applyUI();
 </script>
 </body>
 </html>
