@@ -374,9 +374,54 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 const YEARS  = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 const NY     = YEARS.length;
 const GHYBRID = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
-const WBIDS  = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
+
+// Fallback IDs — used until real catalog loads
+// These are best-guess IDs; real ones fetched from Wayback catalog below
+let WBIDS = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
 
 let PROXY = localStorage.getItem('gt_proxy') || '';
+
+// Fetch real release IDs — first try worker's own catalog, then CDN fallback
+async function fetchWaybackIds() {
+  // Try fetching from our own worker (returns yearIds in health check)
+  if (PROXY) {
+    try {
+      const r = await fetch(PROXY.replace(/\/$/,'') + '/', {signal: AbortSignal.timeout(5000)});
+      if (r.ok) {
+        const d = await r.json();
+        if (d.yearIds && Object.keys(d.yearIds).length >= 5) {
+          WBIDS = d.yearIds;
+          console.log('Wayback IDs from worker:', WBIDS);
+          loadProxyMaps();
+          return;
+        }
+      }
+    } catch(e) {}
+  }
+  // Fallback: fetch from ESRI Wayback public catalog via CDN
+  try {
+    const r = await fetch(
+      'https://cdn.jsdelivr.net/gh/vannizhang/world-imagery-wayback@master/src/assets/wayback-config.json',
+      {signal: AbortSignal.timeout(8000)}
+    );
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    const map = {};
+    data.forEach(entry => {
+      const yr = parseInt((entry.releaseDateLabel || '').substring(0,4));
+      if (yr >= 2014 && yr <= 2024) {
+        if (!map[yr] || entry.itemId > map[yr]) map[yr] = entry.itemId;
+      }
+    });
+    if (Object.keys(map).length >= 5) {
+      WBIDS = map;
+      console.log('Wayback IDs from CDN:', WBIDS);
+      if (PROXY) loadProxyMaps();
+    }
+  } catch(e) {
+    console.warn('Using fallback hardcoded Wayback IDs');
+  }
+}
 
 function satUrl(yi) {
   if (PROXY) return `${PROXY.replace(/\/$/,'')}/tile/${WBIDS[YEARS[yi]]}/{z}/{y}/{x}`;
@@ -774,6 +819,8 @@ document.getElementById('psave').onclick = async () => {
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 applyUI();
+// Fetch real Wayback release IDs in background
+fetchWaybackIds();
 </script>
 </body>
 </html>
