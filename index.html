@@ -85,6 +85,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #noproxyBanner strong{color:var(--amber)}
 #noproxyBanner span{color:var(--cyan)}
 
+/* timelapse progress bar */
+#tlProgress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,.1);z-index:500;pointer-events:none}
+#tlBar{height:100%;background:var(--amber);width:0%;transition:width linear}
+
+/* timelapse year stamp */
+.tl-stamp{font-size:28px;bottom:20px}
+
+/* timelapse ticks row */
+#tlTicks{display:flex;justify-content:space-between;padding-top:6px;pointer-events:none}
+.tl-tk{font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;transition:color .2s}
+.tl-tk.on{color:var(--amber)}
+
 /* single map view */
 #vSingle #mSingle{position:absolute;top:0;left:0;right:0;bottom:0}
 #noproxyBanner{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
@@ -191,6 +203,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <button class="mb on" data-m="split">SPLIT</button>
         <button class="mb" data-m="swipe">SWIPE</button>
         <button class="mb" data-m="anim">ANIM</button>
+        <button class="mb" data-m="timelapse">🌍 TIMELAPSE</button>
       </div>
     </div>
     <div class="hr2">
@@ -244,9 +257,22 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div class="animdot"><div class="dot"></div><span>PLAYING</span></div>
     </div>
 
-  </div>
-
-  <!-- BOTTOM BAR -->
+    <!-- TIMELAPSE (proxy) — two-pane split, auto-advances every 30s -->
+    <div class="view" id="vTimelapse">
+      <div class="half">
+        <div id="mTL"></div>
+        <div class="hlabel L" id="tlLblL">YEAR A</div>
+        <div class="yr-stamp cy tl-stamp" id="tlStL">—</div>
+      </div>
+      <div class="divbar"></div>
+      <div class="half">
+        <div id="mTR"></div>
+        <div class="hlabel R" id="tlLblR">YEAR B</div>
+        <div class="yr-stamp tl-stamp" id="tlStR">—</div>
+      </div>
+      <!-- progress bar -->
+      <div id="tlProgress"><div id="tlBar"></div></div>
+    </div>
   <div id="bot">
 
     <!-- NO PROXY: simple row with proxy connect button -->
@@ -263,30 +289,60 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
     <!-- PROXY ACTIVE: full year controls -->
     <div id="botProxy">
-      <div class="btop">
-        <div><div class="ybig" id="ydsp">2014</div><div class="ylab">SELECTED YEAR</div></div>
-        <div class="cmprow on" id="cmprow">
-          <span class="cmplbl">COMPARE</span>
-          <select class="ysel" id="selB"></select>
-          <span class="sep">→</span>
-          <select class="ysel" id="selA"></select>
+      <!-- Normal controls (split/swipe/anim modes) -->
+      <div id="botNormal">
+        <div class="btop">
+          <div><div class="ybig" id="ydsp">2014</div><div class="ylab">SELECTED YEAR</div></div>
+          <div class="cmprow on" id="cmprow">
+            <span class="cmplbl">COMPARE</span>
+            <select class="ysel" id="selB"></select>
+            <span class="sep">→</span>
+            <select class="ysel" id="selA"></select>
+          </div>
+          <div class="ctrls">
+            <button class="cbtn" id="cBk">⏮</button>
+            <button class="cbtn" id="cPl">▶</button>
+            <button class="cbtn" id="cFw">⏭</button>
+            <select class="spsel" id="spd">
+              <option value="2000">0.5×</option>
+              <option value="1200" selected>1×</option>
+              <option value="600">2×</option>
+              <option value="300">4×</option>
+            </select>
+            <button class="proxybtn ok" id="proxyBtnFull">✓ PROXY</button>
+          </div>
         </div>
-        <div class="ctrls">
-          <button class="cbtn" id="cBk">⏮</button>
-          <button class="cbtn" id="cPl">▶</button>
-          <button class="cbtn" id="cFw">⏭</button>
-          <select class="spsel" id="spd">
-            <option value="2000">0.5×</option>
-            <option value="1200" selected>1×</option>
-            <option value="600">2×</option>
-            <option value="300">4×</option>
-          </select>
-          <button class="proxybtn ok" id="proxyBtnFull">✓ PROXY</button>
+        <div class="tl">
+          <div class="tks" id="tks"></div>
+          <input type="range" id="sldr" min="0" step="1" value="0"/>
         </div>
       </div>
-      <div class="tl">
-        <div class="tks" id="tks"></div>
-        <input type="range" id="sldr" min="0" step="1" value="0"/>
+
+      <!-- Timelapse controls (timelapse mode only) -->
+      <div id="botTimelapse" style="display:none">
+        <div class="btop">
+          <div>
+            <div class="ybig" id="tlPairDisplay">2014 → 2015</div>
+            <div class="ylab">CURRENT PAIR</div>
+          </div>
+          <div class="ctrls">
+            <button class="cbtn" id="tlPrev" title="Previous pair">⏮</button>
+            <button class="cbtn" id="tlPlayPause">⏸</button>
+            <button class="cbtn" id="tlNext" title="Next pair">⏭</button>
+            <select class="spsel" id="tlSpeed">
+              <option value="30000">30s</option>
+              <option value="15000">15s</option>
+              <option value="8000">8s</option>
+              <option value="4000">4s</option>
+              <option value="2000">2s</option>
+            </select>
+            <span class="cmplbl" style="margin-left:4px">per pair</span>
+            <button class="proxybtn ok" id="proxyBtnTL" style="margin-left:6px">✓ PROXY</button>
+          </div>
+        </div>
+        <div class="tl">
+          <div class="tks" id="tlTicks"></div>
+        </div>
       </div>
     </div>
 
@@ -356,6 +412,7 @@ let zoom    = 12;
 let yIdx    = 0;
 let cmpB    = 0;
 let cmpA    = NY - 1;
+let tlPairIdx = 0;
 let mode    = 'split';
 let playing = false;
 let ptimer  = null;
@@ -376,7 +433,9 @@ const mR      = mkMap('mR');
 const mSB     = mkMap('mSB');
 const mST     = mkMap('mST');
 const mA      = mkMap('mA');
-const ALL     = [mSingle, mL, mR, mSB, mST, mA];
+const mTL     = mkMap('mTL');
+const mTR     = mkMap('mTR');
+const ALL     = [mSingle, mL, mR, mSB, mST, mA, mTL, mTR];
 
 ALL.forEach(m => L.control.zoom({position:'bottomright'}).addTo(m));
 
@@ -412,6 +471,8 @@ function loadProxyLayers() {
   setLayer(mSB, cmpB);
   setLayer(mST, cmpA);
   setLayer(mA,  yIdx);
+  setLayer(mTL, tlPairIdx);
+  setLayer(mTR, Math.min(tlPairIdx + 1, NY - 1));
 }
 
 // ── UI MODE: proxy vs no-proxy ────────────────────────────────────────────────
@@ -435,9 +496,15 @@ function applyProxyUI() {
 }
 
 function showView(v) {
-  ['vSingle','vSplit','vSwipe','vAnim'].forEach(id =>
+  ['vSingle','vSplit','vSwipe','vAnim','vTimelapse'].forEach(id =>
     document.getElementById(id).classList.remove('on'));
   document.getElementById('cmprow')?.classList.remove('on');
+  stopTimelapse();
+
+  // Toggle bottom bar sections
+  const isTL = (v === 'timelapse');
+  document.getElementById('botNormal').style.display    = isTL ? 'none' : 'block';
+  document.getElementById('botTimelapse').style.display = isTL ? 'block' : 'none';
 
   if (v === 'single') {
     document.getElementById('vSingle').classList.add('on');
@@ -457,6 +524,14 @@ function showView(v) {
     document.getElementById('vAnim').classList.add('on');
     mode = 'anim';
     setTimeout(() => { mA.invalidateSize(); mA.setView(center, zoom); setLayer(mA, yIdx); }, 60);
+  } else if (v === 'timelapse') {
+    document.getElementById('vTimelapse').classList.add('on');
+    mode = 'timelapse';
+    setTimeout(() => {
+      mTL.invalidateSize(); mTR.invalidateSize();
+      mTL.setView(center, zoom); mTR.setView(center, zoom);
+      startTimelapse();
+    }, 60);
   }
 }
 
@@ -617,7 +692,128 @@ document.addEventListener('click', e=>{
   if(!e.target.closest('#si')&&!e.target.closest('#sb')&&!e.target.closest('#sd')) sdEl.classList.remove('on');
 });
 
-// ── GEE TIMELAPSE ─────────────────────────────────────────────────────────────
+// ── TIMELAPSE ENGINE ──────────────────────────────────────────────────────────
+// Shows year pairs side by side, auto-advances every N seconds
+// Pairs: (2014,2015), (2015,2016), ..., (2023,2024)  = 10 pairs
+
+let tlPairIdx  = 0;          // left year index (right = tlPairIdx+1)
+let tlPlaying  = false;
+let tlTimer    = null;
+let tlTickTimer = null;
+const TL_PAIRS = NY - 1;     // 10 pairs for 11 years
+
+// Build timelapse tick row
+const tlTicksEl = document.getElementById('tlTicks');
+for (let i = 0; i < TL_PAIRS; i++) {
+  const t = document.createElement('div');
+  t.className = 'tl-tk' + (i === 0 ? ' on' : '');
+  t.textContent = `${YEARS[i]}→${YEARS[i+1]}`;
+  t.dataset.pair = i;
+  t.style.pointerEvents = 'all';
+  t.style.cursor = 'pointer';
+  t.onclick = () => { jumpToPair(i); };
+  tlTicksEl.appendChild(t);
+}
+
+function setTLPair(pairIdx) {
+  tlPairIdx = Math.max(0, Math.min(pairIdx, TL_PAIRS - 1));
+  const yA = YEARS[tlPairIdx], yB = YEARS[tlPairIdx + 1];
+
+  // Update maps
+  setLayer(mTL, tlPairIdx);
+  setLayer(mTR, tlPairIdx + 1);
+
+  // Update labels
+  document.getElementById('tlLblL').textContent    = `YEAR A · ${yA}`;
+  document.getElementById('tlLblR').textContent    = `YEAR B · ${yB}`;
+  document.getElementById('tlStL').textContent     = yA;
+  document.getElementById('tlStR').textContent     = yB;
+  document.getElementById('tlPairDisplay').textContent = `${yA} → ${yB}`;
+
+  // Update ticks
+  tlTicksEl.querySelectorAll('.tl-tk').forEach((t, i) => t.classList.toggle('on', i === tlPairIdx));
+}
+
+function startTimelapse() {
+  setTLPair(tlPairIdx);
+  tlPlaying = true;
+  document.getElementById('tlPlayPause').textContent = '⏸';
+  scheduleTLNext();
+}
+
+function scheduleTLNext() {
+  clearInterval(tlTimer);
+  clearInterval(tlTickTimer);
+
+  const ms = +document.getElementById('tlSpeed').value;
+  const bar = document.getElementById('tlBar');
+
+  // Animate progress bar
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  requestAnimationFrame(() => {
+    bar.style.transition = `width ${ms}ms linear`;
+    bar.style.width = '100%';
+  });
+
+  tlTimer = setTimeout(() => {
+    if (!tlPlaying) return;
+    const next = tlPairIdx + 1;
+    if (next >= TL_PAIRS) {
+      // Loop back to start
+      setTLPair(0);
+    } else {
+      setTLPair(next);
+    }
+    scheduleTLNext();
+  }, ms);
+}
+
+function stopTimelapse() {
+  tlPlaying = false;
+  clearTimeout(tlTimer);
+  clearInterval(tlTickTimer);
+  const bar = document.getElementById('tlBar');
+  if (bar) { bar.style.transition = 'none'; bar.style.width = '0%'; }
+  const btn = document.getElementById('tlPlayPause');
+  if (btn) btn.textContent = '▶';
+}
+
+function jumpToPair(i) {
+  clearTimeout(tlTimer);
+  setTLPair(i);
+  if (tlPlaying) scheduleTLNext();
+}
+
+document.getElementById('tlPlayPause').onclick = () => {
+  if (tlPlaying) {
+    stopTimelapse();
+    tlPlaying = false;
+    document.getElementById('tlPlayPause').textContent = '▶';
+  } else {
+    tlPlaying = true;
+    document.getElementById('tlPlayPause').textContent = '⏸';
+    scheduleTLNext();
+  }
+};
+document.getElementById('tlPrev').onclick = () => { jumpToPair(tlPairIdx - 1); };
+document.getElementById('tlNext').onclick = () => { jumpToPair(tlPairIdx + 1); };
+document.getElementById('tlSpeed').onchange = () => { if (tlPlaying) scheduleTLNext(); };
+document.getElementById('proxyBtnTL').onclick = openProxy;
+
+// Sync timelapse maps with main map position
+[mTL, mTR].forEach((src, si) => {
+  src.on('moveend', () => {
+    if (syncing) return;
+    syncing = true;
+    center = [src.getCenter().lat, src.getCenter().lng];
+    zoom   = src.getZoom();
+    ALL.forEach((t, ti) => { if (t !== src) t.setView(center, zoom, {animate:false}); });
+    syncing = false;
+  });
+});
+
+// ── GEE TIMELAPSE (no-proxy mode) ────────────────────────────────────────────
 document.getElementById('geeBtn').onclick = () => {
   const [lat, lng] = center;
   window.open(`https://earthengine.google.com/timelapse/#v=${lat.toFixed(4)},${lng.toFixed(4)},${Math.min(zoom+1,13)},latLng&t=1.03&ps=50&bt=19840101&et=20231231`, '_blank');
