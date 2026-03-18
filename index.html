@@ -43,19 +43,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #maparea{flex:1;position:relative;min-height:0}
 .view{display:none;position:absolute;top:0;left:0;right:0;bottom:0}
 .view.on{display:block}
-#vSplit.on{display:flex}
-#vTL.on{display:flex}
-
-/* map containers fill parent */
-#mS,#mL,#mR,#mSB,#mST,#mA,#mTL,#mTR{position:absolute;top:0;left:0;right:0;bottom:0}
+#vSplit.on,#vSwipe.on{display:flex}
+#mS,#mL,#mR,#mSB,#mST,#mA{position:absolute;top:0;left:0;right:0;bottom:0}
 #mST{clip-path:inset(0 50% 0 0)}
-
-/* split halves */
 .half{flex:1;position:relative;min-width:0;min-height:0}
-
-/* labels */
 .hlabel{position:absolute;top:8px;left:8px;z-index:400;background:rgba(7,9,13,.88);
-  border:1px solid;font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none;letter-spacing:1px}
+  border:1px solid;font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none}
 .hlabel.L{color:var(--cyan);border-color:rgba(0,200,212,.3)}
 .hlabel.R{color:var(--amber);border-color:rgba(240,165,0,.3)}
 .yr-stamp{position:absolute;bottom:44px;left:10px;z-index:400;pointer-events:none;
@@ -67,8 +60,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .divbar::after{content:'⇔';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   background:var(--amber);color:var(--bg);width:26px;height:26px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;font-size:12px}
-
-/* swipe handle */
 .swhandle{position:absolute;top:0;bottom:0;left:50%;width:3px;background:var(--amber);
   z-index:20;transform:translateX(-50%);cursor:col-resize}
 .swbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -78,8 +69,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .swtag{position:absolute;top:8px;z-index:20;background:rgba(7,9,13,.88);
   border:1px solid var(--border);font-family:var(--mono);font-size:11px;padding:3px 9px;pointer-events:none}
 .swtag.B{left:8px;color:var(--cyan)}.swtag.A{right:8px;color:var(--amber)}
-
-/* animate overlay */
 .animyr{position:absolute;top:8px;left:10px;z-index:20;pointer-events:none;
   font-family:var(--mono);font-size:54px;color:var(--amber);opacity:.7;
   text-shadow:0 0 20px rgba(240,165,0,.4);line-height:1}
@@ -88,29 +77,19 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
 
-/* no-proxy banner */
-#noProxyBanner{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);
-  background:rgba(13,21,32,.92);border:1px solid var(--amber);
-  font-family:var(--mono);font-size:11px;color:var(--dim);padding:10px 16px;
-  z-index:400;text-align:center;line-height:1.7;pointer-events:none;white-space:nowrap}
-#noProxyBanner strong{color:var(--amber)}
+/* resolution banner */
+#resBanner{position:absolute;bottom:44px;right:10px;z-index:400;pointer-events:none;
+  background:rgba(7,9,13,.8);border:1px solid var(--border);
+  font-family:var(--mono);font-size:9px;color:var(--dim);padding:3px 8px}
 
-/* timelapse progress bar */
-#tlProgress{position:absolute;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,.1);z-index:500;pointer-events:none}
-#tlBar{height:100%;background:var(--amber);width:0%}
+/* GEE timelapse */
+#vTL iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+#tlBadge{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:400;
+  pointer-events:none;background:rgba(7,9,13,.88);border:1px solid var(--amber);
+  font-family:var(--mono);font-size:11px;color:var(--amber);padding:4px 14px;white-space:nowrap}
 
 /* BOTTOM BAR */
 #bot{background:var(--panel);border-top:2px solid var(--border);padding:8px 10px 6px;flex-shrink:0}
-
-/* no-proxy bottom */
-#botSimple{display:flex;align-items:center;justify-content:space-between;gap:10px}
-#botSimple.hide{display:none}
-.simple-msg{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.6}
-.simple-msg strong{color:var(--amber)}
-
-/* proxy bottom */
-#botProxy{display:none}
-#botProxy.show{display:block}
 .btop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap}
 .ybig{font-family:var(--mono);font-size:22px;color:var(--amber);letter-spacing:2px;line-height:1}
 .ylab{font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:1px}
@@ -139,53 +118,21 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   background:linear-gradient(to right,var(--amber) var(--p,0%),var(--border) var(--p,0%));outline:none}
 #sldr::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
   border-radius:50%;background:var(--amber);cursor:pointer;box-shadow:0 0 8px rgba(240,165,0,.7)}
-
 /* timelapse bottom */
 #botTL{display:none}
-#botTL.show{display:block}
-.tl-tks{display:flex;justify-content:space-between;padding-top:4px}
-.tl-tk{font-family:var(--mono);font-size:9px;color:var(--dim);cursor:pointer;padding:2px 3px}
-.tl-tk.on{color:var(--amber)}
-
-/* shared buttons */
-.amberbtn{font-family:var(--mono);font-size:11px;background:var(--amber);
-  border:none;color:var(--bg);padding:8px 14px;cursor:pointer;font-weight:700;white-space:nowrap;flex-shrink:0}
+#botTL.on{display:block}
+#botMain{display:block}
+#botMain.hide{display:none}
 .outbtn{font-family:var(--mono);font-size:10px;background:transparent;
   border:1px solid var(--cyan);color:var(--cyan);padding:6px 10px;cursor:pointer;white-space:nowrap}
 .outbtn.amber{border-color:var(--amber);color:var(--amber)}
-.outbtn.green{border-color:var(--green);color:var(--green)}
-
-/* search dropdown */
+/* search */
 #sd{display:none;position:fixed;background:var(--panel);border:1px solid var(--cyan);
   border-top:none;z-index:9999;max-height:260px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,.95)}
 #sd.on{display:block}
 .sitem{padding:10px 12px;font-family:var(--mono);font-size:11px;
   border-bottom:1px solid var(--border);cursor:pointer;line-height:1.5;color:var(--text)}
 .sitem:hover,.sitem.hi{background:#0f1d2e;color:var(--cyan)}
-
-/* proxy modal */
-#proxyModal{display:none;position:fixed;inset:0;z-index:9998;
-  background:rgba(7,9,13,.96);align-items:center;justify-content:center;padding:20px}
-#proxyModal.on{display:flex}
-.pbox{background:var(--panel);border:2px solid var(--amber);padding:24px;width:100%;max-width:460px}
-.ptitle{font-family:var(--mono);font-size:13px;color:var(--amber);letter-spacing:2px;margin-bottom:12px}
-.psub{font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.8;margin-bottom:16px}
-.psub strong{color:var(--text)}
-.pinput-row{display:flex;margin-bottom:8px}
-#purl{flex:1;background:var(--bg);border:2px solid var(--cyan);color:var(--text);
-  padding:10px 12px;font-family:var(--mono);font-size:12px;outline:none;min-width:0}
-#purl::placeholder{color:var(--dim)}
-#psave{background:var(--amber);color:var(--bg);border:none;padding:10px 16px;
-  font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0}
-#pstatus{font-family:var(--mono);font-size:11px;min-height:18px;margin-bottom:12px;line-height:1.5}
-.pnote{background:rgba(0,200,212,.06);border:1px solid rgba(0,200,212,.2);
-  padding:10px 12px;font-family:var(--mono);font-size:10px;color:var(--dim);line-height:1.9;margin-bottom:14px}
-.pnote strong{color:var(--cyan)}
-.pfoot{display:flex;justify-content:space-between;align-items:center}
-#pclose{font-family:var(--mono);font-size:11px;color:var(--dim);cursor:pointer;
-  background:transparent;border:1px solid var(--border);padding:6px 14px}
-#pclear{font-family:var(--mono);font-size:10px;color:var(--red);cursor:pointer;background:transparent;border:none;text-decoration:underline}
-
 .leaflet-control-attribution{display:none!important}
 .leaflet-control-zoom{border:1px solid var(--border)!important}
 .leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--border)!important}
@@ -198,16 +145,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   <div id="hdr">
     <div class="hr1">
       <div class="logo-ring"></div>
-      <div><div class="logo-name">GEOTIME</div><div class="logo-sub">EARTH CHANGE VISUALIZER</div></div>
-      <div class="modes" id="modeBar" style="display:none">
+      <div><div class="logo-name">GEOTIME</div><div class="logo-sub">EARTH CHANGE VISUALIZER · NASA GIBS</div></div>
+      <div class="modes">
         <button class="mb on" data-m="split">SPLIT</button>
         <button class="mb" data-m="swipe">SWIPE</button>
         <button class="mb" data-m="anim">ANIM</button>
-        <button class="mb" data-m="tl">🌍 TIMELAPSE</button>
+        <button class="mb" data-m="tl">🌍 GEE TIMELAPSE</button>
       </div>
     </div>
     <div class="hr2">
-      <input id="si" type="text" placeholder="Search any city, landmark, region…" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      <input id="si" type="text" placeholder="Search city, landmark, region…" autocomplete="off" autocorrect="off" spellcheck="false"/>
       <button id="sb">LOCATE</button>
     </div>
   </div>
@@ -215,24 +162,19 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   <!-- MAP AREA -->
   <div id="maparea">
 
-    <!-- SINGLE (no proxy) -->
-    <div class="view on" id="vS">
-      <div id="mS"></div>
-      <div id="noProxyBanner"><strong>Satellite Viewer</strong> — Connect ⚙ PROXY below for year-by-year historical comparison</div>
-    </div>
-
     <!-- SPLIT -->
-    <div class="view" id="vSplit">
+    <div class="view on" id="vSplit">
       <div class="half">
         <div id="mL"></div>
-        <div class="hlabel L" id="lblL">BEFORE · 2014</div>
-        <div class="yr-stamp cy" id="stL">2014</div>
+        <div class="hlabel L" id="lblL">BEFORE · 2012</div>
+        <div class="yr-stamp cy" id="stL">2012</div>
       </div>
       <div class="divbar"></div>
       <div class="half">
         <div id="mR"></div>
-        <div class="hlabel R" id="lblR">AFTER · 2024</div>
-        <div class="yr-stamp" id="stR">2024</div>
+        <div class="hlabel R" id="lblR">AFTER · 2023</div>
+        <div class="yr-stamp" id="stR">2023</div>
+        <div id="resBanner">NASA MODIS 250m · zoom 2–9</div>
       </div>
     </div>
 
@@ -241,33 +183,23 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div id="mSB"></div>
       <div id="mST"></div>
       <div class="swhandle" id="swH"><div class="swbtn">⇔</div></div>
-      <div class="swtag B" id="swB">BEFORE · 2014</div>
-      <div class="swtag A" id="swA">AFTER · 2024</div>
-      <div class="yr-stamp cy" style="bottom:44px;left:10px" id="stSB">2014</div>
-      <div class="yr-stamp" style="bottom:44px;right:10px;left:auto;border-left:none;border-right:3px solid var(--amber)" id="stST">2024</div>
+      <div class="swtag B" id="swB">BEFORE · 2012</div>
+      <div class="swtag A" id="swA">AFTER · 2023</div>
+      <div class="yr-stamp cy" style="bottom:44px;left:10px" id="stSB">2012</div>
+      <div class="yr-stamp" style="bottom:44px;right:10px;left:auto;border-left:none;border-right:3px solid var(--amber)" id="stST">2023</div>
     </div>
 
     <!-- ANIMATE -->
     <div class="view" id="vAnim">
       <div id="mA"></div>
-      <div class="animyr" id="animYr">2014</div>
-      <div class="animdot"><div class="dot"></div><span>PLAYING</span></div>
+      <div class="animyr" id="animYr">2012</div>
+      <div class="animdot"><div class="dot"></div><span>NASA MODIS · PLAYING</span></div>
     </div>
 
-    <!-- TIMELAPSE -->
+    <!-- GEE TIMELAPSE iframe -->
     <div class="view" id="vTL">
-      <div class="half">
-        <div id="mTL"></div>
-        <div class="hlabel L" id="tlLblL">2014</div>
-        <div class="yr-stamp cy" id="tlStL">2014</div>
-      </div>
-      <div class="divbar"></div>
-      <div class="half">
-        <div id="mTR"></div>
-        <div class="hlabel R" id="tlLblR">2015</div>
-        <div class="yr-stamp" id="tlStR">2015</div>
-      </div>
-      <div id="tlProgress"><div id="tlBar"></div></div>
+      <iframe id="geeFrame" src="about:blank" allowfullscreen></iframe>
+      <div id="tlBadge">🛰 Google Earth Engine Timelapse · Landsat 1984–2022 · Use viewer controls</div>
     </div>
 
   </div>
@@ -275,22 +207,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   <!-- BOTTOM BAR -->
   <div id="bot">
 
-    <!-- NO PROXY -->
-    <div id="botSimple">
-      <div class="simple-msg">
-        <strong>No proxy.</strong> Showing current Google satellite imagery.<br>
-        Connect proxy to unlock real year-by-year historical comparison.
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        <button class="outbtn" id="geeBtnS">🌍 TIMELAPSE</button>
-        <button class="amberbtn" id="connectBtn">⚙ CONNECT PROXY</button>
-      </div>
-    </div>
-
-    <!-- PROXY: normal modes -->
-    <div id="botProxy">
+    <!-- Main controls (split/swipe/anim) -->
+    <div id="botMain">
       <div class="btop">
-        <div><div class="ybig" id="ydsp">2014</div><div class="ylab">SELECTED YEAR</div></div>
+        <div><div class="ybig" id="ydsp">2012</div><div class="ylab">SELECTED YEAR · NASA MODIS</div></div>
         <div class="cmprow on" id="cmprow">
           <span class="cmplbl">COMPARE</span>
           <select class="ysel" id="selB"></select>
@@ -307,7 +227,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
             <option value="600">2×</option>
             <option value="300">4×</option>
           </select>
-          <button class="outbtn green" id="proxyBtn">✓ PROXY</button>
         </div>
       </div>
       <div class="tl">
@@ -316,25 +235,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       </div>
     </div>
 
-    <!-- PROXY: timelapse mode -->
+    <!-- Timelapse controls -->
     <div id="botTL">
       <div class="btop">
-        <div><div class="ybig" id="tlPairDisp">2014 → 2015</div><div class="ylab">CURRENT PAIR · 30s each</div></div>
+        <div>
+          <div class="ybig" style="font-size:14px;color:var(--cyan)">🌍 GEE TIMELAPSE · Landsat 1984–2022</div>
+          <div class="ylab">Showing your current map location · Use GEE controls to scrub years</div>
+        </div>
         <div class="ctrls">
-          <button class="cbtn" id="tlPrev">⏮</button>
-          <button class="cbtn" id="tlPlay">⏸</button>
-          <button class="cbtn" id="tlNext">⏭</button>
-          <select class="spsel" id="tlSpd">
-            <option value="30000" selected>30s</option>
-            <option value="15000">15s</option>
-            <option value="8000">8s</option>
-            <option value="4000">4s</option>
-            <option value="2000">2s</option>
-          </select>
-          <button class="outbtn green" id="tlProxyBtn">✓ PROXY</button>
+          <button class="outbtn" id="tlOpenNew">↗ OPEN IN NEW TAB</button>
+          <button class="outbtn amber" id="tlRefresh">↺ REFRESH LOCATION</button>
         </div>
       </div>
-      <div class="tl-tks" id="tlTks"></div>
     </div>
 
   </div>
@@ -343,223 +255,123 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <!-- SEARCH DROPDOWN -->
 <div id="sd"></div>
 
-<!-- PROXY MODAL -->
-<div id="proxyModal">
-  <div class="pbox">
-    <div class="ptitle">⚙ CONNECT HISTORICAL TILE PROXY</div>
-    <div class="psub">
-      Paste your <strong>Cloudflare Worker URL</strong> to unlock real ESRI Wayback
-      satellite imagery per year (2014–2024).
-    </div>
-    <div class="pinput-row">
-      <input id="purl" type="url" placeholder="https://geotime-tiles.yourname.workers.dev"/>
-      <button id="psave">SAVE</button>
-    </div>
-    <div id="pstatus"></div>
-    <div class="pnote">
-      <strong>Deploy in 2 min:</strong><br>
-      1. dash.cloudflare.com → Workers &amp; Pages → Create Worker → Deploy<br>
-      2. Edit code → Select All → paste wayback-worker.js → Save and Deploy<br>
-      3. Copy .workers.dev URL → paste above → SAVE
-    </div>
-    <div class="pfoot">
-      <button id="pclose">✕ Close</button>
-      <button id="pclear">Clear proxy</button>
-    </div>
-  </div>
-</div>
-
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
-const YEARS  = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
-const NY     = YEARS.length;
-const GHYBRID = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
+// ══════════════════════════════════════════════════════════════════
+//  TILE SOURCE: NASA GIBS (Global Imagery Browse Services)
+//  ✓ 100% free — operated by NASA Earthdata
+//  ✓ No API key required
+//  ✓ CORS-open — designed for browser access
+//  ✓ Real per-year satellite imagery (2012–2023)
+//  ✓ MODIS Terra True Color — 250m resolution
+//  ✓ Best at zoom levels 2–9 (regional/country/city scale)
+//
+//  URL format (confirmed from NASA GIBS API docs):
+//  https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/
+//    {layer}/default/{YYYY-MM-DD}/GoogleMapsCompatible/{z}/{y}/{x}.jpg
+// ══════════════════════════════════════════════════════════════════
 
-// Verified release numbers from ESRI's official waybackconfig.json
-// Each is the EARLIEST release of that calendar year
-// Confirmed from: https://github.com/Esri/wayback-core README
-// 2014-02-20 = 10, 2023-12-07 = 56102
-let WBIDS = {
-  2014: 10,
-  2015: 2735,
-  2016: 5771,
-  2017: 10001,
-  2018: 16201,
-  2019: 21891,
-  2020: 28461,
-  2021: 35001,
-  2022: 43001,
-  2023: 49001,
-  2024: 56503
+const YEARS  = [2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023];
+const NY     = YEARS.length;
+
+// Mid-August = best global cloud-free coverage
+const DATES  = {
+  2012:'2012-08-15',2013:'2013-08-15',2014:'2014-08-15',2015:'2015-08-15',
+  2016:'2016-08-15',2017:'2017-08-15',2018:'2018-08-15',2019:'2019-08-15',
+  2020:'2020-08-15',2021:'2021-08-15',2022:'2022-08-15',2023:'2023-08-15',
 };
 
-let PROXY = localStorage.getItem('gt_proxy') || '';
-
-// Try to load better IDs from worker /config — updates WBIDS if successful
-async function fetchWaybackIds() {
-  if (!PROXY) return;
-  try {
-    const r = await fetch(PROXY.replace(/\/$/,'') + '/config',
-      {signal: AbortSignal.timeout(10000)});
-    if (!r.ok) return;
-    const d = await r.json();
-    if (d.ok && d.yearIds && Object.keys(d.yearIds).length >= 5) {
-      const ids = {};
-      Object.entries(d.yearIds).forEach(([yr, id]) => { ids[+yr] = +id; });
-      WBIDS = ids;
-      console.log('✓ Wayback IDs from worker /config:', WBIDS);
-      loadProxyMaps();
-    }
-  } catch(e) {
-    console.warn('Using hardcoded Wayback IDs');
-  }
+function gibsUrl(yi) {
+  const date  = DATES[YEARS[yi]];
+  const layer = 'MODIS_Terra_CorrectedReflectance_TrueColor';
+  return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/GoogleMapsCompatible/{z}/{y}/{x}.jpg`;
 }
 
-function satUrl(yi) {
-  if (PROXY) {
-    const base = PROXY.replace(/\/$/,'');
-    const id   = WBIDS[YEARS[yi]];
-    return `${base}/tile/${id}/{z}/{y}/{x}`;
-  }
-  return GHYBRID;
-}
+// Labels overlay — CartoDB transparent labels only (place names on top of satellite)
+const LABELS = 'https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png';
 
-// ─── LAYERS ───────────────────────────────────────────────────────────────────
-const SAT = new Map();
-
-function addBase(map) {
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, zIndex:1}).addTo(map);
-}
-
-function setLayer(map, yi) {
-  // Always remove old satellite layer and add fresh one
-  // Never skip — different years must always get different tile URLs
-  const old = SAT.get(map);
-  if (old) { try { map.removeLayer(old); } catch(e){} }
-  const lay = L.tileLayer(satUrl(yi), {maxZoom:18, zIndex:2}).addTo(map);
-  SAT.set(map, lay);
-}
-
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let center = [17.4435, 78.3772];
-let zoom   = 12;
-let yIdx   = 0;
-let cmpB   = 0;
-let cmpA   = NY - 1;
-let mode   = 'single';
+// ─── STATE ────────────────────────────────────────────────────────
+let center  = [17.4435, 78.3772]; // Hyderabad HITEC City
+let zoom    = 7;
+let yIdx    = 0;
+let cmpB    = 0;
+let cmpA    = NY - 1;
+let mode    = 'split';
 let playing = false;
 let ptimer  = null;
-let tlPair  = 0;
-let tlGoing = false;
-let tlTimer = null;
 let syncing = false;
 
-// ─── MAPS ─────────────────────────────────────────────────────────────────────
-const MOPTS = {zoomControl:false, attributionControl:false, maxZoom:18, minZoom:2};
+// ─── LAYERS ───────────────────────────────────────────────────────
+const SAT = new Map();
 
 function mkMap(id) {
-  const m = L.map(id, MOPTS);
+  const m = L.map(id, {zoomControl:false, attributionControl:false, maxZoom:9, minZoom:2});
   m.setView(center, zoom);
-  addBase(m);
+  // Dark base so there's never a white flash
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+    {subdomains:'abcd', maxZoom:9, zIndex:1}).addTo(m);
   return m;
 }
 
-const mS  = mkMap('mS');
+function addSat(map, yi) {
+  const old = SAT.get(map);
+  if (old) { try { map.removeLayer(old); } catch(e){} }
+  const lay = L.tileLayer(gibsUrl(yi), {
+    maxZoom:9, zIndex:2,
+    errorTileUrl:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+  }).addTo(map);
+  SAT.set(map, lay);
+}
+
+function addLabels(map) {
+  L.tileLayer(LABELS,{subdomains:'abcd',maxZoom:9,zIndex:10}).addTo(map);
+}
+
+// ─── MAPS ─────────────────────────────────────────────────────────
 const mL  = mkMap('mL');
 const mR  = mkMap('mR');
 const mSB = mkMap('mSB');
 const mST = mkMap('mST');
 const mA  = mkMap('mA');
-const mTL = mkMap('mTL');
-const mTR = mkMap('mTR');
-const ALL = [mS, mL, mR, mSB, mST, mA, mTL, mTR];
+const ALL = [mL, mR, mSB, mST, mA];
 
+// Add labels to all maps
+ALL.forEach(m => addLabels(m));
 ALL.forEach(m => L.control.zoom({position:'bottomright'}).addTo(m));
 
-// Sync all maps together
+// ─── SYNC ─────────────────────────────────────────────────────────
 ALL.forEach((src, si) => {
   src.on('moveend', () => {
     if (syncing) return;
     syncing = true;
     center = [src.getCenter().lat, src.getCenter().lng];
     zoom   = src.getZoom();
-    ALL.forEach((t, ti) => { if (ti !== si) t.setView(center, zoom, {animate:false}); });
+    ALL.forEach((t,ti) => { if (ti!==si) t.setView(center, zoom, {animate:false}); });
     syncing = false;
   });
 });
 
-function invAll() { ALL.forEach(m => m.invalidateSize()); }
-window.addEventListener('resize', invAll);
+window.addEventListener('resize', () => ALL.forEach(m => m.invalidateSize()));
 
-// Init — load after layout is painted
+// Init — load tiles after layout painted
 requestAnimationFrame(() => {
-  invAll();
-  ALL.forEach(m => m.setView(center, zoom));
-  setLayer(mS, 0); // single map always loads
-  if (PROXY) loadProxyMaps();
+  ALL.forEach(m => { m.invalidateSize(); m.setView(center, zoom); });
+  loadMaps();
   initSwipe();
-  setTimeout(() => { invAll(); ALL.forEach(m => m.setView(center, zoom)); }, 500);
+  setTimeout(() => ALL.forEach(m => { m.invalidateSize(); m.setView(center, zoom); }), 500);
 });
 
-function loadProxyMaps() {
-  setLayer(mL,  cmpB); setLayer(mR,  cmpA);
-  setLayer(mSB, cmpB); setLayer(mST, cmpA);
-  setLayer(mA,  yIdx);
-  setLayer(mTL, tlPair); setLayer(mTR, Math.min(tlPair+1, NY-1));
+function loadMaps() {
+  addSat(mL,  cmpB);
+  addSat(mR,  cmpA);
+  addSat(mSB, cmpB);
+  addSat(mST, cmpA);
+  addSat(mA,  yIdx);
 }
 
-// ─── UI SWITCHER ──────────────────────────────────────────────────────────────
-function applyUI() {
-  const has = !!PROXY;
-  document.getElementById('botSimple').classList.toggle('hide', has);
-  document.getElementById('botProxy').style.display  = (has && mode !== 'tl') ? 'block' : 'none';
-  document.getElementById('botTL').style.display     = (has && mode === 'tl') ? 'block' : 'none';
-  document.getElementById('modeBar').style.display   = has ? 'flex' : 'none';
-
-  ['vS','vSplit','vSwipe','vAnim','vTL'].forEach(id =>
-    document.getElementById(id).classList.remove('on'));
-
-  if (!has) {
-    document.getElementById('vS').classList.add('on');
-    mode = 'single';
-    setTimeout(() => mS.invalidateSize(), 60);
-  } else if (mode === 'split' || mode === 'single') {
-    mode = 'split';
-    document.getElementById('vSplit').classList.add('on');
-    document.getElementById('cmprow').classList.add('on');
-    setTimeout(() => { mL.invalidateSize(); mR.invalidateSize(); }, 60);
-  } else if (mode === 'swipe') {
-    document.getElementById('vSwipe').classList.add('on');
-    document.getElementById('cmprow').classList.add('on');
-    setTimeout(() => { mSB.invalidateSize(); mST.invalidateSize(); initSwipe(); }, 60);
-  } else if (mode === 'anim') {
-    document.getElementById('vAnim').classList.add('on');
-    setTimeout(() => { mA.invalidateSize(); mA.setView(center, zoom); setLayer(mA, yIdx); }, 60);
-  } else if (mode === 'tl') {
-    document.getElementById('vTL').classList.add('on');
-    setTimeout(() => {
-      mTL.invalidateSize(); mTR.invalidateSize();
-      mTL.setView(center, zoom); mTR.setView(center, zoom);
-      tlStart();
-    }, 60);
-  }
-}
-
-// Mode buttons
-document.querySelectorAll('.mb').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.mb').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    stopPlay(); tlStop();
-    mode = btn.dataset.m;
-    applyUI();
-  };
-});
-
-// ─── YEAR SELECTS ─────────────────────────────────────────────────────────────
+// ─── YEAR SELECTS ─────────────────────────────────────────────────
 const selB = document.getElementById('selB');
 const selA = document.getElementById('selA');
-YEARS.forEach((y, i) => {
+YEARS.forEach((y,i) => {
   selB.innerHTML += `<option value="${i}">${y}</option>`;
   selA.innerHTML += `<option value="${i}">${y}</option>`;
 });
@@ -579,20 +391,20 @@ function updStamps() {
 
 function applyCmp() {
   updStamps();
-  setLayer(mL,  cmpB); setLayer(mR,  cmpA);
-  setLayer(mSB, cmpB); setLayer(mST, cmpA);
+  addSat(mL,  cmpB); addSat(mR,  cmpA);
+  addSat(mSB, cmpB); addSat(mST, cmpA);
 }
 
 updStamps();
 selB.onchange = () => { cmpB = +selB.value; applyCmp(); };
 selA.onchange = () => { cmpA = +selA.value; applyCmp(); };
 
-// ─── TIMELINE ─────────────────────────────────────────────────────────────────
+// ─── TIMELINE TICKS + SLIDER ──────────────────────────────────────
 const tksEl = document.getElementById('tks');
 const sldr  = document.getElementById('sldr');
 sldr.max = NY - 1;
 
-YEARS.forEach((y, i) => {
+YEARS.forEach((y,i) => {
   const t = document.createElement('div');
   t.className = 'tk' + (i===0?' on':'');
   t.innerHTML = `<div class="tkl"></div><div class="tkn">${y}</div>`;
@@ -606,14 +418,64 @@ function updYear() {
   document.getElementById('ydsp').textContent   = y;
   document.getElementById('animYr').textContent = y;
   tksEl.querySelectorAll('.tk').forEach((t,i) => t.classList.toggle('on', i===yIdx));
-  if (mode==='anim')  setLayer(mA, yIdx);
+  if (mode==='anim')  addSat(mA, yIdx);
   if (mode==='split') { cmpB=yIdx; selB.value=yIdx; applyCmp(); }
   if (mode==='swipe') { cmpB=yIdx; selB.value=yIdx; applyCmp(); }
 }
-function updTrack() { sldr.style.setProperty('--p', (yIdx/(NY-1)*100)+'%'); }
+function updTrack() { sldr.style.setProperty('--p',(yIdx/(NY-1)*100)+'%'); }
 updTrack();
 
-// ─── SWIPE ────────────────────────────────────────────────────────────────────
+// ─── MODE SWITCHING ───────────────────────────────────────────────
+document.querySelectorAll('.mb').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.mb').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    stopPlay();
+    gotoMode(btn.dataset.m);
+  };
+});
+
+function gotoMode(m) {
+  mode = m;
+  ['vSplit','vSwipe','vAnim','vTL'].forEach(id =>
+    document.getElementById(id).classList.remove('on'));
+  document.getElementById('cmprow').classList.remove('on');
+  document.getElementById('botMain').classList.remove('hide');
+  document.getElementById('botTL').classList.remove('on');
+
+  if (m==='split') {
+    document.getElementById('vSplit').classList.add('on');
+    document.getElementById('cmprow').classList.add('on');
+    setTimeout(() => { mL.invalidateSize(); mR.invalidateSize(); }, 60);
+  } else if (m==='swipe') {
+    document.getElementById('vSwipe').classList.add('on');
+    document.getElementById('cmprow').classList.add('on');
+    setTimeout(() => { mSB.invalidateSize(); mST.invalidateSize(); initSwipe(); }, 60);
+  } else if (m==='anim') {
+    document.getElementById('vAnim').classList.add('on');
+    setTimeout(() => { mA.invalidateSize(); mA.setView(center,zoom); addSat(mA,yIdx); }, 60);
+  } else if (m==='tl') {
+    document.getElementById('vTL').classList.add('on');
+    document.getElementById('botMain').classList.add('hide');
+    document.getElementById('botTL').classList.add('on');
+    loadGee();
+  }
+}
+
+// ─── GEE TIMELAPSE ────────────────────────────────────────────────
+function geeUrl() {
+  const lat = center[0].toFixed(4);
+  const lng = center[1].toFixed(4);
+  const z   = Math.min(zoom + 1, 13);
+  return `https://earthengine.google.com/timelapse/#v=${lat},${lng},${z},latLng&t=0.03&ps=50&bt=19840101&et=20231231&startDwell=0&endDwell=0`;
+}
+function loadGee() {
+  document.getElementById('geeFrame').src = geeUrl();
+}
+document.getElementById('tlOpenNew').onclick = () => window.open(geeUrl(), '_blank');
+document.getElementById('tlRefresh').onclick = loadGee;
+
+// ─── SWIPE ────────────────────────────────────────────────────────
 function initSwipe() {
   const H = document.getElementById('swH');
   const T = document.getElementById('mST');
@@ -624,132 +486,73 @@ function initSwipe() {
     const p = Math.max(5, Math.min(95, (x-r.left)/r.width*100));
     H.style.left = p+'%'; T.style.clipPath = `inset(0 ${100-p}% 0 0)`;
   }
-  const H2 = H.cloneNode(true); H.parentNode.replaceChild(H2, H);
-  H2.addEventListener('mousedown',  e=>{drag=true; e.preventDefault();});
-  H2.addEventListener('touchstart', ()=>drag=true, {passive:true});
-  document.addEventListener('mousemove',  e=>{if(drag) mv(e.clientX);});
-  document.addEventListener('touchmove',  e=>{if(drag) mv(e.touches[0].clientX);}, {passive:true});
+  const H2 = H.cloneNode(true); H.parentNode.replaceChild(H2,H);
+  H2.addEventListener('mousedown',  e=>{drag=true;e.preventDefault();});
+  H2.addEventListener('touchstart', ()=>drag=true,{passive:true});
+  document.addEventListener('mousemove',  e=>{if(drag)mv(e.clientX);});
+  document.addEventListener('touchmove',  e=>{if(drag)mv(e.touches[0].clientX);},{passive:true});
   document.addEventListener('mouseup',  ()=>drag=false);
   document.addEventListener('touchend', ()=>drag=false);
   const r = W.getBoundingClientRect();
   mv(r.left + r.width/2);
 }
 
-// ─── PLAYBACK ─────────────────────────────────────────────────────────────────
+// ─── PLAYBACK ─────────────────────────────────────────────────────
 document.getElementById('cPl').onclick = () => playing ? stopPlay() : startPlay();
 document.getElementById('cBk').onclick = () => { stopPlay(); yIdx=0; sldr.value=0; updYear(); updTrack(); };
 document.getElementById('cFw').onclick = () => { stopPlay(); yIdx=NY-1; sldr.value=NY-1; updYear(); updTrack(); };
 
 function startPlay() {
-  if (mode!=='anim') { mode='anim'; applyUI(); document.querySelectorAll('.mb').forEach(b=>b.classList.toggle('on',b.dataset.m==='anim')); }
+  if (mode!=='anim') {
+    gotoMode('anim');
+    document.querySelectorAll('.mb').forEach(b=>b.classList.toggle('on',b.dataset.m==='anim'));
+  }
   playing=true; document.getElementById('cPl').textContent='⏸'; document.getElementById('cPl').classList.add('pl');
   if (yIdx>=NY-1) yIdx=0;
-  const ms = +document.getElementById('spd').value;
-  ptimer = setInterval(()=>{
-    yIdx++; if(yIdx>=NY){yIdx=NY-1; stopPlay(); return;}
+  const ms=+document.getElementById('spd').value;
+  ptimer=setInterval(()=>{
+    yIdx++; if(yIdx>=NY){yIdx=NY-1;stopPlay();return;}
     updYear(); sldr.value=yIdx; updTrack();
-  }, ms);
+  },ms);
 }
 function stopPlay() {
   playing=false; clearInterval(ptimer);
   document.getElementById('cPl').textContent='▶'; document.getElementById('cPl').classList.remove('pl');
 }
 
-// ─── TIMELAPSE ────────────────────────────────────────────────────────────────
-// Build pair tick row
-const tlTks = document.getElementById('tlTks');
-for (let i = 0; i < NY-1; i++) {
-  const t = document.createElement('span');
-  t.className = 'tl-tk' + (i===0?' on':'');
-  t.textContent = `${YEARS[i]}→${YEARS[i+1]}`;
-  t.dataset.i = i;
-  t.onclick = () => { tlJump(+t.dataset.i); };
-  tlTks.appendChild(t);
+// ─── SEARCH ───────────────────────────────────────────────────────
+const siEl=document.getElementById('si'),sbEl=document.getElementById('sb'),sdEl=document.getElementById('sd');
+let sres=[],hiI=-1,sdt=null;
+function sdPos(){
+  const r=siEl.getBoundingClientRect(),r2=sbEl.getBoundingClientRect();
+  sdEl.style.top=r.bottom+'px';sdEl.style.left=r.left+'px';sdEl.style.width=(r2.right-r.left)+'px';
 }
-
-function tlSetPair(i) {
-  tlPair = Math.max(0, Math.min(i, NY-2));
-  const ya = YEARS[tlPair], yb = YEARS[tlPair+1];
-  setLayer(mTL, tlPair); setLayer(mTR, tlPair+1);
-  document.getElementById('tlLblL').textContent   = `${ya}`;
-  document.getElementById('tlLblR').textContent   = `${yb}`;
-  document.getElementById('tlStL').textContent    = ya;
-  document.getElementById('tlStR').textContent    = yb;
-  document.getElementById('tlPairDisp').textContent = `${ya} → ${yb}`;
-  tlTks.querySelectorAll('.tl-tk').forEach((t,i) => t.classList.toggle('on', i===tlPair));
-}
-
-function tlSchedule() {
-  clearTimeout(tlTimer);
-  const ms = +document.getElementById('tlSpd').value;
-  const bar = document.getElementById('tlBar');
-  // Animate progress bar
-  bar.style.transition = 'none'; bar.style.width = '0%';
-  requestAnimationFrame(() => {
-    bar.style.transition = `width ${ms}ms linear`; bar.style.width = '100%';
-  });
-  tlTimer = setTimeout(() => {
-    if (!tlGoing) return;
-    tlSetPair(tlPair >= NY-2 ? 0 : tlPair+1);
-    tlSchedule();
-  }, ms);
-}
-
-function tlStart() {
-  tlSetPair(tlPair);
-  tlGoing = true;
-  document.getElementById('tlPlay').textContent = '⏸';
-  tlSchedule();
-}
-
-function tlStop() {
-  tlGoing = false; clearTimeout(tlTimer);
-  const bar = document.getElementById('tlBar');
-  if (bar) { bar.style.transition='none'; bar.style.width='0%'; }
-  const btn = document.getElementById('tlPlay');
-  if (btn) btn.textContent = '▶';
-}
-
-function tlJump(i) { clearTimeout(tlTimer); tlSetPair(i); if (tlGoing) tlSchedule(); }
-
-document.getElementById('tlPlay').onclick = () => {
-  if (tlGoing) { tlStop(); } else { tlGoing=true; document.getElementById('tlPlay').textContent='⏸'; tlSchedule(); }
-};
-document.getElementById('tlPrev').onclick = () => tlJump(tlPair-1);
-document.getElementById('tlNext').onclick = () => tlJump(tlPair+1);
-document.getElementById('tlSpd').onchange = () => { if (tlGoing) { clearTimeout(tlTimer); tlSchedule(); } };
-
-// ─── SEARCH ───────────────────────────────────────────────────────────────────
-const siEl=document.getElementById('si'), sbEl=document.getElementById('sb'), sdEl=document.getElementById('sd');
-let sres=[], hiI=-1, sdt=null;
-function sdPos() {
-  const r=siEl.getBoundingClientRect(), r2=sbEl.getBoundingClientRect();
-  sdEl.style.top=r.bottom+'px'; sdEl.style.left=r.left+'px'; sdEl.style.width=(r2.right-r.left)+'px';
-}
-function bname(p) { return [p.name,p.city!==p.name&&p.city,p.state,p.country].filter(Boolean).join(', '); }
-function renderSD(items) {
-  sres=items; hiI=-1; sdEl.innerHTML='';
+function bname(p){return[p.name,p.city!==p.name&&p.city,p.state,p.country].filter(Boolean).join(', ');}
+function renderSD(items){
+  sres=items;hiI=-1;sdEl.innerHTML='';
   if(!items.length){sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">No results</div>';return;}
   items.forEach((it,i)=>{
-    const d=document.createElement('div'); d.className='sitem';
+    const d=document.createElement('div');d.className='sitem';
     d.innerHTML=bname(it.properties);
-    d.onmousedown=e=>e.preventDefault(); d.onclick=()=>pick(i);
+    d.onmousedown=e=>e.preventDefault();d.onclick=()=>pick(i);
     sdEl.appendChild(d);
   });
 }
-function pick(i) {
-  const f=sres[i]; if(!f) return;
-  const [lng,lat]=f.geometry.coordinates;
-  ALL.forEach(m=>m.setView([lat,lng],13,{animate:true}));
-  center=[lat,lng]; zoom=13; siEl.value=bname(f.properties).split(',')[0]; sdEl.classList.remove('on');
+function pick(i){
+  const f=sres[i];if(!f)return;
+  const[lng,lat]=f.geometry.coordinates;
+  ALL.forEach(m=>m.setView([lat,lng],7,{animate:true}));
+  center=[lat,lng];zoom=7;
+  siEl.value=bname(f.properties).split(',')[0];sdEl.classList.remove('on');
+  if(mode==='tl') loadGee();
 }
-async function doSearch(q) {
+async function doSearch(q){
   if(q.length<2){sdEl.classList.remove('on');return;}
-  sdPos(); sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">Searching…</div>'; sdEl.classList.add('on');
-  try {
+  sdPos();sdEl.innerHTML='<div class="sitem" style="color:var(--dim);pointer-events:none">Searching…</div>';sdEl.classList.add('on');
+  try{
     const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=7&lang=en`);
-    const d=await r.json(); renderSD(d.features||[]);
-  } catch { sdEl.innerHTML='<div class="sitem" style="color:var(--red);pointer-events:none">Search unavailable</div>'; }
+    const d=await r.json();renderSD(d.features||[]);
+  }catch{sdEl.innerHTML='<div class="sitem" style="color:var(--red);pointer-events:none">Search unavailable</div>';}
 }
 siEl.addEventListener('input',()=>{clearTimeout(sdt);sdt=setTimeout(()=>doSearch(siEl.value.trim()),300);});
 siEl.addEventListener('focus',sdPos);
@@ -761,60 +564,9 @@ siEl.addEventListener('keydown',e=>{
   else if(e.key==='Escape')sdEl.classList.remove('on');
 });
 sbEl.onclick=()=>doSearch(siEl.value.trim());
-document.addEventListener('click',e=>{if(!e.target.closest('#si')&&!e.target.closest('#sb')&&!e.target.closest('#sd'))sdEl.classList.remove('on');});
-
-// ─── PROXY MODAL ──────────────────────────────────────────────────────────────
-const modal   = document.getElementById('proxyModal');
-const purlEl  = document.getElementById('purl');
-const pstatEl = document.getElementById('pstatus');
-
-function openProxy() { purlEl.value=PROXY||''; pstatEl.textContent=''; pstatEl.style.color=''; modal.classList.add('on'); setTimeout(()=>purlEl.focus(),100); }
-function closeProxy() { modal.classList.remove('on'); }
-
-document.getElementById('connectBtn').onclick  = openProxy;
-document.getElementById('proxyBtn').onclick    = openProxy;
-document.getElementById('tlProxyBtn').onclick  = openProxy;
-document.getElementById('geeBtnS').onclick     = () => window.open(`https://earthengine.google.com/timelapse/#v=${center[0].toFixed(4)},${center[1].toFixed(4)},${Math.min(zoom+1,13)},latLng&t=1.03&ps=50&bt=19840101&et=20231231`,'_blank');
-document.getElementById('pclose').onclick      = closeProxy;
-modal.addEventListener('click', e=>{ if(e.target===modal) closeProxy(); });
-
-document.getElementById('pclear').onclick = () => {
-  PROXY=''; localStorage.removeItem('gt_proxy');
-  purlEl.value=''; pstatEl.style.color='var(--dim)'; pstatEl.textContent='Proxy cleared.';
-  mode='single'; applyUI();
-};
-
-document.getElementById('psave').onclick = async () => {
-  const val = purlEl.value.trim().replace(/\/$/,'');
-  if(!val){pstatEl.style.color='var(--red)';pstatEl.textContent='Please enter a URL.';return;}
-  pstatEl.style.color='var(--dim)'; pstatEl.textContent='Testing worker…';
-  const doSave = () => {
-    PROXY=val; localStorage.setItem('gt_proxy',val);
-    pstatEl.style.color='var(--green)'; pstatEl.textContent='✓ Connected! Loading historical tiles…';
-    mode='split';
-    setTimeout(()=>{ closeProxy(); loadProxyMaps(); applyUI(); }, 1000);
-  };
-  try {
-    const r = await fetch(val+'/', {signal:AbortSignal.timeout(10000)});
-    if(r.ok) { doSave(); }
-    else {
-      pstatEl.style.color='var(--amber)'; pstatEl.textContent=`Worker responded ${r.status}. `;
-      const b=document.createElement('button');
-      b.textContent='Save anyway'; b.style.cssText='font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px';
-      b.onclick=doSave; pstatEl.appendChild(b);
-    }
-  } catch {
-    pstatEl.style.color='var(--amber)'; pstatEl.textContent='Could not verify. ';
-    const b=document.createElement('button');
-    b.textContent='Save anyway'; b.style.cssText='font-family:var(--mono);font-size:10px;cursor:pointer;background:transparent;border:1px solid var(--amber);color:var(--amber);padding:2px 8px;margin-left:6px';
-    b.onclick=doSave; pstatEl.appendChild(b);
-  }
-};
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-applyUI();
-// Fetch real Wayback release IDs in background
-fetchWaybackIds();
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#si')&&!e.target.closest('#sb')&&!e.target.closest('#sd'))sdEl.classList.remove('on');
+});
 </script>
 </body>
 </html>
