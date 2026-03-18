@@ -117,16 +117,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .cmprow{display:none;align-items:center;gap:5px;flex-wrap:wrap}
 .cmprow.on{display:flex}
 .cmplbl{font-family:var(--mono);font-size:10px;color:var(--dim)}
-.ysel{background:var(--bg);border:1px solid var(--border);color:var(--cyan);
+.ysel{background:#1a2e45;border:1px solid var(--border);color:#fff;
   font-family:var(--mono);font-size:12px;padding:3px 6px;outline:none;cursor:pointer}
+.ysel option{background:#1a2e45;color:#fff}
 .sep{color:var(--dim)}
 .ctrls{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .cbtn{width:30px;height:30px;background:transparent;border:1px solid var(--border);
   color:var(--dim);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .cbtn:hover{border-color:var(--amber);color:var(--amber)}
 .cbtn.pl{border-color:var(--green);color:var(--green)}
-.spsel{background:var(--bg);border:1px solid var(--border);color:var(--dim);
+.spsel{background:#1a2e45;border:1px solid var(--border);color:#cde;
   font-family:var(--mono);font-size:10px;padding:3px 5px;outline:none;cursor:pointer}
+.spsel option{background:#1a2e45;color:#cde}
 .tl{position:relative;height:34px;margin-top:2px}
 .tks{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;pointer-events:none}
 .tk{display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:all;cursor:pointer}
@@ -389,10 +391,14 @@ function addBase(map) {
 }
 
 function setLayer(map, yi) {
+  const url = satUrl(yi);
   const old = SAT.get(map);
-  if (old) { try { map.removeLayer(old); } catch(e){} }
-  const lay = L.tileLayer(satUrl(yi), {maxZoom:18, zIndex:2}).addTo(map);
+  // If same URL already loaded (no proxy, same Google tile), just keep it
+  if (old && old._url === url) return;
+  // Add new layer first, then remove old after brief delay to avoid flash
+  const lay = L.tileLayer(url, {maxZoom:18, zIndex:2, crossOrigin: true}).addTo(map);
   SAT.set(map, lay);
+  if (old) setTimeout(() => { try { map.removeLayer(old); } catch(e){} }, 300);
 }
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
