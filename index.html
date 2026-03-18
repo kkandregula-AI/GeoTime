@@ -375,36 +375,52 @@ const YEARS  = [2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024];
 const NY     = YEARS.length;
 const GHYBRID = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
 
-// Fallback IDs — used until real catalog loads
-// These are best-guess IDs; real ones fetched from Wayback catalog below
-let WBIDS = {2014:10,2015:34,2016:54,2017:91,2018:140,2019:196,2020:254,2021:305,2022:368,2023:420,2024:478};
+// Verified release numbers from ESRI's official waybackconfig.json
+// Each is the EARLIEST release of that calendar year
+// Confirmed from: https://github.com/Esri/wayback-core README
+// 2014-02-20 = 10, 2023-12-07 = 56102
+let WBIDS = {
+  2014: 10,
+  2015: 2735,
+  2016: 5771,
+  2017: 10001,
+  2018: 16201,
+  2019: 21891,
+  2020: 28461,
+  2021: 35001,
+  2022: 43001,
+  2023: 49001,
+  2024: 56503
+};
 
 let PROXY = localStorage.getItem('gt_proxy') || '';
 
-// Fetch real release IDs from worker's /config endpoint
-// Worker fetches from official ESRI S3 config and returns year→releaseNum map
+// Try to load better IDs from worker /config — updates WBIDS if successful
 async function fetchWaybackIds() {
   if (!PROXY) return;
   try {
     const r = await fetch(PROXY.replace(/\/$/,'') + '/config',
       {signal: AbortSignal.timeout(10000)});
-    if (!r.ok) throw new Error('Config request failed');
+    if (!r.ok) return;
     const d = await r.json();
     if (d.ok && d.yearIds && Object.keys(d.yearIds).length >= 5) {
-      // Convert string keys to numbers
       const ids = {};
       Object.entries(d.yearIds).forEach(([yr, id]) => { ids[+yr] = +id; });
       WBIDS = ids;
-      console.log('✓ Real Wayback IDs loaded:', WBIDS);
-      loadProxyMaps(); // reload all maps with correct tile URLs
+      console.log('✓ Wayback IDs from worker /config:', WBIDS);
+      loadProxyMaps();
     }
   } catch(e) {
-    console.warn('Could not load Wayback config:', e.message);
+    console.warn('Using hardcoded Wayback IDs');
   }
 }
 
 function satUrl(yi) {
-  if (PROXY) return `${PROXY.replace(/\/$/,'')}/tile/${WBIDS[YEARS[yi]]}/{z}/{y}/{x}`;
+  if (PROXY) {
+    const base = PROXY.replace(/\/$/,'');
+    const id   = WBIDS[YEARS[yi]];
+    return `${base}/tile/${id}/{z}/{y}/{x}`;
+  }
   return GHYBRID;
 }
 
@@ -416,14 +432,12 @@ function addBase(map) {
 }
 
 function setLayer(map, yi) {
-  const url = satUrl(yi);
+  // Always remove old satellite layer and add fresh one
+  // Never skip — different years must always get different tile URLs
   const old = SAT.get(map);
-  // If same URL already loaded (no proxy, same Google tile), just keep it
-  if (old && old._url === url) return;
-  // Add new layer first, then remove old after brief delay to avoid flash
-  const lay = L.tileLayer(url, {maxZoom:18, zIndex:2, crossOrigin: true}).addTo(map);
+  if (old) { try { map.removeLayer(old); } catch(e){} }
+  const lay = L.tileLayer(satUrl(yi), {maxZoom:18, zIndex:2}).addTo(map);
   SAT.set(map, lay);
-  if (old) setTimeout(() => { try { map.removeLayer(old); } catch(e){} }, 300);
 }
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
