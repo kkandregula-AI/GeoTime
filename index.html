@@ -174,9 +174,12 @@ function getDate(yr) {
   return `${yr}-${MONTH_DATES[monthIdx]}`;
 }
 
-function gibsUrl(yi) {
+function gibsUrl(yi, satellite) {
   const date  = getDate(YEARS[yi]);
-  const layer = 'MODIS_Terra_CorrectedReflectance_TrueColor';
+  // Use BOTH Terra and Aqua — different orbits fill each other's gaps
+  const layer = satellite === 'aqua'
+    ? 'MODIS_Aqua_CorrectedReflectance_TrueColor'
+    : 'MODIS_Terra_CorrectedReflectance_TrueColor';
   return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
 }
 
@@ -204,15 +207,17 @@ L.control.zoom({position:'bottomright'}).addTo(map);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
   {subdomains:'abcd', maxZoom:9, zIndex:1}).addTo(map);
 
-// Satellite layer (swappable)
-let satLayer = null;
+// Satellite layers (swappable) — Terra + Aqua stacked to fill swath gaps
+let satTerra = null;
+let satAqua  = null;
 
 function setSatLayer(yi) {
-  if (satLayer) { try { map.removeLayer(satLayer); } catch(e){} }
-  satLayer = L.tileLayer(gibsUrl(yi), {
-    maxZoom:9, zIndex:2,
-    errorTileUrl:'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-  }).addTo(map);
+  if (satTerra) { try { map.removeLayer(satTerra); } catch(e){} }
+  if (satAqua)  { try { map.removeLayer(satAqua);  } catch(e){} }
+  const errTile = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  // Aqua first (zIndex 2) — Terra on top (zIndex 3) where available
+  satAqua  = L.tileLayer(gibsUrl(yi,'aqua'),  {maxZoom:9,zIndex:2,errorTileUrl:errTile}).addTo(map);
+  satTerra = L.tileLayer(gibsUrl(yi,'terra'), {maxZoom:9,zIndex:3,errorTileUrl:errTile,opacity:0.99}).addTo(map);
 }
 
 // Labels on top
@@ -357,8 +362,9 @@ function renderSD(items) {
     d.className = 'si';
     d.innerHTML = `<span style="color:var(--text)">${name}</span>`
       + (type ? `<span style="color:var(--dim);font-size:9px;margin-left:8px;text-transform:uppercase">${type}</span>` : '');
-    d.onmousedown = e => e.preventDefault();
-    d.onclick = () => pick(i);
+    // Both click (desktop) and touchend (mobile) — most reliable cross-platform
+    d.addEventListener('touchend', e => { e.preventDefault(); pick(i); });
+    d.addEventListener('click',    () => pick(i));
     sdEl.appendChild(d);
   });
 }
@@ -366,13 +372,15 @@ function renderSD(items) {
 function pick(i) {
   const f = sres[i]; if (!f) return;
   const [lng, lat] = f.geometry.coordinates;
-  map.setView([lat, lng], 7, {animate: true});
-  center = [lat, lng]; zoom = 7;
-  siEl.value = bname(f.properties).split(',')[0];
-  sdEl.classList.remove('on');
-  // Restart playback from current year at new location
-  showYear(yIdx);
-  if (!playing) play();
+  sdEl.classList.remove('on');  // close dropdown FIRST
+  siEl.blur();                  // dismiss keyboard on mobile
+  setTimeout(() => {
+    map.setView([lat, lng], 7, {animate: true});
+    center = [lat, lng]; zoom = 7;
+    siEl.value = bname(f.properties).split(',')[0];
+    showYear(yIdx);
+    if (!playing) play();
+  }, 100);
 }
 
 async function doSearch(q) {
